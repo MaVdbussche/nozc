@@ -103,7 +103,7 @@ term ::= [LNOT] variable | int | float | character | atom | string | UNIT | TRUE
       | LBRACK {expression}+ RBRACK
 
 pattern ::= [LNOT] variable | int | float | character | atom | string | UNIT | FALSE | TRUE | UNDERSCORE //TODO UNDERSCORE : seems to me but not in the book ?!
-          | label LPAREN {[feature COLON] pattern} [DOTDOTDOT] RPAREN
+          | label LPAREN {[feature COLON] pattern} [ELLIPSIS] RPAREN
           | pattern consBinOp pattern
           | LBRACK {pattern}+ RBRACK
           | LPAREN pattern RPAREN
@@ -145,7 +145,7 @@ classDescriptor ::= FROM {expression}+
 attrOrFeat ::= ([LNOT] variable | atom | int | UNIT | TRUE | FALSE) [COLON expression]
 
 methodHead ::= ([LNOT] variable | atom | UNIT | TRUE | FALSE)
-                  [LPAREN {methodFormal} [DOTDOTDOT] RPAREN] [ASSIGN variable]
+                  [LPAREN {methodFormal} [ELLIPSIS] RPAREN] [ASSIGN variable]
 
 methodFormal ::= [feature COLON] (variable | UNDERSCORE | DOLLAR) [LBARROW expression]
 

@@ -7,33 +7,36 @@ package com.barassolutions;
  * When you add a new token to the scanner and lexical grammar, you must also add
  * an entry to this enum specifying the kind and image of the new token.
  */
-
+//TODO keep this up-to-date with lexical grammar
 enum TokenKind {
-  EOF("<EOF>"), AT("at"), ATTR("attr"), BREAK("break"), CASE("case"),
+  EOF("<EOF>"), AT("at"), ATTR("attr"), BREAK("break"),
       CATCH("catch"), CHOICE("choice"), CLASS("class"), COLLECT("collect"),
       COND("cond"), CONTINUE("continue"), DECLARE("declare"), DEF("def"),
       DEFPROC("defproc"), DEFAULT("default"), DIS("dis"), DO("do"),
-      ELSE("else"), ELSECASE("elsecase"), EXPORT("export"), EXTENDS("extends"),
-      FAIL("fail"), FALSE("false"), FINALLY("finally"), FOR("for"),
-      FUNCTOR("functor"), IF("if"), IMPORT("import"), IN("in"),
-      LAZY("lazy"), LOCK("lock"), MATCH("match"), METH("meth"), MOD("mod"),
-      NOT("not"), OF("of"), PREPARE("prepare"), PROP("prop"),
-      RAISE("raise"), REQUIRE("require"), RETURN("return"), THIS("this"),
-      SKIP("skip"), THREAD("thread"), TRUE("true"), TRY("try"), UNIT("unit"),
+      ELSE("else"), ELSECASE("elsecase"), EXPORT("export"),
+      FAIL("fail"), FALSE("false"), FEAT("feat"), FINALLY("finally"), FOR("for"),
+      FROM("from"), FUNCTOR("functor"), IF("if"), IMPORT("import"), IN("in"),
+      LOCK("lock"), MATCH("match"), METH("meth"), MOD("mod"),
+      NOT("not"), OF("of"), OR("or"), PREPARE("prepare"), PROP("prop"),
+      RAISE("raise"), REQUIRE("require"), RETURN("return"), SKIP("skip"), THIS("this"),
+      THREAD("thread"), TRUE("true"), TRY("try"), UNIT("unit"),
       VAL("val"), VAR("var"),
-      ASSIGN("="), DEFINE(":="), EQUAL("=="), LT("<"), GT(">"),
-      IMPL("=>"), AND("&"), LAND("&&"), OR("|"), LOR("||"), LE("<="),
-      GE(">="), LNOT("!"), MINUS("-"), PLUS("+"), STAR("*"), SLASH("/"),
-      MODULO("%"), HASHTAG("#"), UNDERSCORE("_"), DOLLAR("$"), APOSTrOPHE("'"),
-      QUOTE("\""),
+      COMMENTCHAR("/"),
+      ASSIGN("="), DEFINE(":="), EQUAL("=="), NE("!="), LT("<"), GT(">"),
+      LE("<="), GE(">="), LBARROW("<="), IMPL("=>"), AND("&"), LAND("&&"),
+      PIPE("|"), LOR("||"), LNOT("!"), LNOTNOT("!!"), MINUS("-"), PLUS("+"),
+      STAR("*"), SLASH("/"), BACKSLASH("\\"), MODULO("%"), HASHTAG("#"),
+      UNDERSCORE("_"), DOLLAR("$"), APOSTROPHE("'"), QUOTE("\""), LACCENT("`"),
+      RACCENT("´"), HAT("^"), BOX("[]"), WAVE("~"), COMMERCAT("@"), LARROW("<-"),
+      RARROW("->"), COLCOL("::"), COLCOLCOL(":::"),
       COMMA(","), DOT("."), LPAREN("("), RPAREN(")"), LCURLY("{"), RCURLY("}"),
       LBRACK("["), RBRACK("]"), SEMI(";"), COLON(":"), DOTDOT(".."),
-      DOTDOTDOT("..."),
+      ELLIPSIS("..."),
       IDENTIFIER("<IDENTIFIER>"), INT_LITERAL("<INT_LITERAL>"), CHAR_LITERAL("<CHAR_LITERAL>"), STRING_LITERAL(
       "<STRING_LITERAL>");
 
   /** The token's string representation. */
-  private String image;
+  private final String image;
 
   /**
    * Construct an instance TokenKind given its string representation.
@@ -41,7 +44,6 @@ enum TokenKind {
    * @param image
    *            string representation of the token.
    */
-
   private TokenKind(String image) {
     this.image = image;
   }
@@ -51,7 +53,6 @@ enum TokenKind {
    *
    * @return the token's image.
    */
-
   public String image() {
     return image;
   }
@@ -61,7 +62,6 @@ enum TokenKind {
    *
    * @return the token's string representation.
    */
-
   public String toString() {
     return image;
   }
@@ -74,11 +74,10 @@ enum TokenKind {
  * image for providing any semantic text, and the line in which it occurred in
  * the source file.
  */
-
 class TokenInfo {
 
   /** Token kind. */
-  private TokenKind kind;
+  private final TokenKind kind;
 
   /**
    * Semantic text (if any). For example, the identifier name when the token
@@ -86,10 +85,10 @@ class TokenInfo {
    * string representation. For example, "+=" when the token kind is
    * PLUS_ASSIGN.
    */
-  private String image;
+  private final String image;
 
   /** Line in which the token occurs in the source file. */
-  private int line;
+  private final int line;
 
   /**
    * Construct a TokenInfo from its kind, the semantic text forming the token,
@@ -102,7 +101,6 @@ class TokenInfo {
    * @param line
    *            the line in which the token occurs in the source file.
    */
-
   public TokenInfo(TokenKind kind, String image, int line) {
     this.kind = kind;
     this.image = image;
@@ -118,7 +116,6 @@ class TokenInfo {
    * @param line
    *            identifying the line on which the token was found.
    */
-
   public TokenInfo(TokenKind kind, int line) {
     this(kind, kind.toString(), line);
   }
@@ -128,7 +125,6 @@ class TokenInfo {
    *
    * @return the string representation.
    */
-
   public String tokenRep() {
     return kind.toString();
   }
@@ -138,7 +134,6 @@ class TokenInfo {
    *
    * @return the semantic text.
    */
-
   public String image() {
     return image;
   }
@@ -148,7 +143,6 @@ class TokenInfo {
    *
    * @return the line number.
    */
-
   public int line() {
     return line;
   }
@@ -158,7 +152,6 @@ class TokenInfo {
    *
    * @return the kind.
    */
-
   public TokenKind kind() {
     return kind;
   }
@@ -168,7 +161,6 @@ class TokenInfo {
    *
    * @return the image.
    */
-
   public String toString() {
     return image;
   }

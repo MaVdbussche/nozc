@@ -127,7 +127,7 @@ RCURLY      ::= "}"
 RPAREN      ::= ")"
 COLON       ::= ":"
 DOTDOT      ::= ".."
-DOTDOTDOT   ::= "..." // TODO awesome naming you got right there
+ELLIPSIS    ::= "..."
 
 // Other symbols
 

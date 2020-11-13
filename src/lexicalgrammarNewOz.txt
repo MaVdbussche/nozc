@@ -18,7 +18,7 @@ WHITESPACE ::= (" "|"\t"|"\n"|"\r"|"\f")
 // Comments - ignored
 ("//" {~("\n"|"\r")} ("\n"|"\r"["\n"])) | "?"
 
-// Multi-line comments - ignored TODO these comments should be nestable -> wrong definition here
+// Multi-line comments - ignored
 "/*" {CHAR - "*/"} "*/"
 
 // Reserved keywords
@@ -44,7 +44,7 @@ DO      ::= "do"
 ELSE    ::= "else"
 ELSECASE  ::= "elsecase"
 //ELSEIF  ::= "elseif"
-ELSEOF  ::= "elseof"
+//ELSEOF  ::= "elseof"
 //END     ::= "end"
 EXPORT  ::= "export"
 FAIL    ::= "fail"
@@ -58,6 +58,7 @@ FUNCTOR ::= "functor"
 IF      ::= "if"
 IMPORT  ::= "import"
 IN      ::= "in"
+//LAZY    ::= "lazy" //TODO quid ?
 //LOCAL   ::= "local"
 LOCK    ::= "lock"
 MATCH   ::= "match"
@@ -66,7 +67,7 @@ MOD     ::= "mod"
 NOT     ::= "not"
 OF      ::= "of"
 OR      ::= "or"
-ORELSE  ::= "orelse"
+//ORELSE  ::= "orelse"
 PREPARE ::= "prepare"
 //PROC    ::= "proc"
 PROP    ::= "prop"
@@ -95,7 +96,9 @@ GE          ::= ">="
 LBARROW     ::= "<="
 RBARROW     ::= "=>"
 AND         ::= "&"
+LAND        ::= "&&"
 PIPE        ::= "|"
+LOR         ::= "||"
 LNOT        ::= "!"
 LNOTNOT     ::= "!!"
 MINUS       ::= "-"
@@ -103,6 +106,7 @@ PLUS        ::= "+"
 STAR        ::= "*"
 SLASH       ::= "/"
 BACKSLASH   ::= "\"
+MODULO      ::= "%"
 HASHTAG     ::= "#"
 UNDERSCORE  ::= "_"
 DOLLAR      ::= "$"
@@ -113,17 +117,19 @@ RACCENT     ::= "´"
 HAT         ::= "^"
 BOX         ::= "[]"
 WAVE        ::= "~"
-AT          ::= "@"
+COMMERC     ::= "@"
 LARROW      ::= "<-"
-FDASSIGN    ::= "=:"
-FDNE        ::= "\=:"
-FDLT        ::= "<:"
-FDLE        ::= "=<:"
-FDGT        ::= ">:"
-FDGE        ::= ">=:"
+RARROW      ::= "->"
+FDASSIGN    ::= "=:" //skipped
+FDNE        ::= "\=:" //skipped
+FDLT        ::= "<:" //skipped
+FDLE        ::= "=<:" //skipped
+FDGT        ::= ">:" //skipped
+FDGE        ::= ">=:" //skipped
 COLCOL      ::= "::"
 COLCOLCOL   ::= ":::"
 
+COMMENTCHAR ::= "/"
 COMMA       ::= ","
 DOT         ::= "."
 LBRACK      ::= "["
@@ -135,7 +141,7 @@ RPAREN      ::= ")"
 SEMI        ::= ";"
 COLON       ::= ":"
 DOTDOT      ::= ".."
-DOTDOTDOT   ::= "..." // TODO awesome naming you got right there
+ELLIPSIS    ::= "..."
 
 // Literals
 UPPERCASE      ::= "A"|...|"Z"

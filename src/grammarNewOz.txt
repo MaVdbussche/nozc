@@ -65,7 +65,7 @@ nestCon(<T>) ::= expression (ASSIGN | DEFINE) expression
 //Here, <T> is always DOLLAR or a variable
 nestDec(T) ::= DEFPROC <T> LPAREN {pattern COMMA} RPAREN blockIn(statement)
             | DEF [LAZY] <T> LPAREN {pattern COMMA} RPAREN blockIn(expression)
-            //TODO the following lines are a mess -> rewrite from thesis' text
+            //TODO the following lines are a mess -> rewrite from the thesis' text
             | FUNCTOR [<T>] {
                 [IMPORT ({variable [AT atom]
                           | variable LPAREN {(atom | int) [COLON variable] COMMA}+ RPAREN) COMMA
@@ -83,7 +83,7 @@ term ::= [LNOT] variable | int | float | character | atom | string | UNIT | TRUE
       | LBRACK {expression COMMA}+ RBRACK
 
 pattern ::= [LNOT] variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE //TODO UNDERSCORE : seems to me but not in the book ?!
-      | label LPAREN {[feature COLON] pattern COMMA} [COMMA DOTDOTDOT] RPAREN
+      | label LPAREN {[feature COLON] pattern COMMA} [COMMA ELLIPSIS] RPAREN
       | pattern consBinOp pattern
       | LBRACK {pattern}+ RBRACK
 
@@ -116,7 +116,7 @@ classDescription ::= EXTENDS {expression}+
 attrInit ::= ([LNOT] variable | atom | UNIT | TRUE | FALSE) [COLON expression]
 
 methHead ::= ([LNOT] variableStrict | atomLisp | UNIT | TRUE | FALSE)
-              [LPAREN {methArg COMMA} [COMMA DOTDOTDOT] RPAREN]
+              [LPAREN {methArg COMMA} [COMMA ELLIPSIS] RPAREN]
               [ASSIGN variable]
 
 methArg ::= [feature COLON] (variable | UNDERSCORE | DOLLAR) [ASSIGN expression]

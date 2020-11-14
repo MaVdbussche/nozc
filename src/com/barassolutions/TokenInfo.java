@@ -22,13 +22,13 @@ enum TokenKind {
       THREAD("thread"), TRUE("true"), TRY("try"), UNIT("unit"),
       VAL("val"), VAR("var"),
       COMMENTCHAR("/"),
-      ASSIGN("="), DEFINE(":="), EQUAL("=="), NE("!="), LT("<"), GT(">"),
-      LE("<="), GE(">="), LBARROW("<="), IMPL("=>"), AND("&"), LAND("&&"),
-      PIPE("|"), LOR("||"), LNOT("!"), LNOTNOT("!!"), MINUS("-"), PLUS("+"),
+      ASSIGN("="), DEFINE(":="), EQUAL("=="), NE("\\="), LT("<"), GT(">"),
+      LE("=<"), GE(">="), LBARROW("<="), IMPL("=>"), AND("&"), LAND("&&"),
+      PIPE("|"), LOR("||"), LNOT("!"), MINUS("-"), PLUS("+"),
       STAR("*"), SLASH("/"), BACKSLASH("\\"), MODULO("%"), HASHTAG("#"),
       UNDERSCORE("_"), DOLLAR("$"), APOSTROPHE("'"), QUOTE("\""), LACCENT("`"),
-      RACCENT("´"), HAT("^"), BOX("[]"), WAVE("~"), COMMERCAT("@"), LARROW("<-"),
-      RARROW("->"), COLCOL("::"), COLCOLCOL(":::"),
+      RACCENT("´"), CIRCUMFLEX("^"), BOX("[]"), TILDE("~"), DEGREE("°"), COMMERCAT("@"),
+      LARROW("<-"), RARROW("->"), COLCOL("::"), COLCOLCOL(":::"),
       COMMA(","), DOT("."), LPAREN("("), RPAREN(")"), LCURLY("{"), RCURLY("}"),
       LBRACK("["), RBRACK("]"), SEMI(";"), COLON(":"), DOTDOT(".."),
       ELLIPSIS("..."),
@@ -57,6 +57,13 @@ enum TokenKind {
     return image;
   }
 
+  /**
+   * Return the char image of the token.
+   * No guarantee made if the image is multiple chars long ! You should check before calling this.
+   */
+  public char img() {
+    return image.charAt(0);
+  }
   /**
    * Return the string representation of the token.
    *

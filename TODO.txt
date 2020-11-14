@@ -1,0 +1,9 @@
+TODO list
+
+[OK] handle strings
+[OK] handle char literals
+[] handle strings represented as [46,32,2]
+[] handle chars represented as °P
+[] handle strings represented as [°P,°K,°b]
+[] handle newOz atoms
+[] handle octal/hexa numbers

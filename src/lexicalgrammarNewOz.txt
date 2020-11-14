@@ -85,63 +85,64 @@ UNIT    ::= "unit"
 VAL     ::= "val"
 VAR     ::= "var"
 
-ASSIGN      ::= "="
-DEFINE      ::= ":="
-EQUAL       ::= "=="
-NE          ::= "\="
-LT          ::= "<"
-GT          ::= ">"
-LE          ::= "=<"
-GE          ::= ">="
-LBARROW     ::= "<="
-RBARROW     ::= "=>"
-AND         ::= "&"
-LAND        ::= "&&"
-PIPE        ::= "|"
-LOR         ::= "||"
-LNOT        ::= "!"
-LNOTNOT     ::= "!!"
-MINUS       ::= "-"
-PLUS        ::= "+"
-STAR        ::= "*"
-SLASH       ::= "/"
-BACKSLASH   ::= "\"
-MODULO      ::= "%"
-HASHTAG     ::= "#"
-UNDERSCORE  ::= "_"
-DOLLAR      ::= "$"
-APOSTROPHE  ::= "'"
-QUOTE       ::= """
-LACCENT     ::= "`"
-RACCENT     ::= "´"
-HAT         ::= "^"
-BOX         ::= "[]"
-WAVE        ::= "~"
-COMMERC     ::= "@"
-LARROW      ::= "<-"
-RARROW      ::= "->"
+ASSIGN      ::= "=" ok
+DEFINE      ::= ":=" ok
+EQUAL       ::= "==" ok
+NE          ::= "\=" ok
+LT          ::= "<" ok
+GT          ::= ">" ok
+LE          ::= "=<" ok
+GE          ::= ">=" ok
+LBARROW     ::= "<=" ok
+IMPL        ::= "=>" ok
+AND         ::= "&" ok
+LAND        ::= "&&" ok
+PIPE        ::= "|" ok
+LOR         ::= "||" ok
+LNOT        ::= "!" ok
+//LNOTNOT     ::= "!!" skipped
+MINUS       ::= "-" ok
+PLUS        ::= "+" ok
+STAR        ::= "*" ok
+SLASH       ::= "/" ok
+BACKSLASH   ::= "\" ok
+MODULO      ::= "%" ok
+HASHTAG     ::= "#" ok
+UNDERSCORE  ::= "_" ok
+DOLLAR      ::= "$" ok
+APOSTROPHE  ::= "'" ok
+QUOTE       ::= """ ok
+LACCENT     ::= "`" ok
+RACCENT     ::= "´" ok
+HAT         ::= "^" ok
+BOX         ::= "[]" ok
+TILDE       ::= "~" ok
+DEGREE      ::= "°"
+COMMERCAT   ::= "@" ok
+LARROW      ::= "<-" ok
+RARROW      ::= "->" ok
 FDASSIGN    ::= "=:" //skipped
 FDNE        ::= "\=:" //skipped
 FDLT        ::= "<:" //skipped
 FDLE        ::= "=<:" //skipped
 FDGT        ::= ">:" //skipped
 FDGE        ::= ">=:" //skipped
-COLCOL      ::= "::"
-COLCOLCOL   ::= ":::"
+COLCOL      ::= "::" ok
+COLCOLCOL   ::= ":::" ok
 
-COMMENTCHAR ::= "/"
-COMMA       ::= ","
-DOT         ::= "."
-LBRACK      ::= "["
-LCURLY      ::= "{"
-LPAREN      ::= "("
-RBRACK      ::= "]"
-RCURLY      ::= "}"
-RPAREN      ::= ")"
-SEMI        ::= ";"
-COLON       ::= ":"
-DOTDOT      ::= ".."
-ELLIPSIS    ::= "..."
+COMMENTCHAR ::= "/" ok
+COMMA       ::= "," ok
+DOT         ::= "." ok
+LBRACK      ::= "[" ok
+LCURLY      ::= "{" ok
+LPAREN      ::= "(" ok
+RBRACK      ::= "]" ok
+RCURLY      ::= "}" ok
+RPAREN      ::= ")" ok
+SEMI        ::= ";" ok
+COLON       ::= ":" ok
+DOTDOT      ::= ".." ok
+ELLIPSIS    ::= "..." ok
 
 // Literals
 UPPERCASE      ::= "A"|...|"Z"

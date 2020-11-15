@@ -1,0 +1,18 @@
+- Discussion des résultats de Jean-Pacifique : problèmes ?
+- Faire marcher le Parser
+- Faire un nouveau compilateur newOz -> Oz
+
+Points de réflexion :
+Oz très dynamique : quid de ça pour newOz ? Poseront pe plus de problèmes
+Écrire des programmes en newOz pour tester, sentir les problèmes, exemples variés sur concepts différents (ex des cours mais pas seulement)
+(Lift control, monitors, bounded buffers, gate makers, locks et transaction managers, ...) Récupérer des notes de cours de plusieurs sources
+
+Next week :
+[OK] Parser à faire run
+- Comment traduction de grands programmes en newOz fonctionne ? (Guetter les problèmes, penser meta)
+Mardi 17/11 à 16h
+
+
+- Avoir un ";" à la fin d'une ligne de déclaration de variable est autorisé, mais pas ailleurs. Pas très justifiable à mon sens, si l'intention était d'avoir un sentiment familier pour les users de Java/Scala
+- Le caractère ' devant certains appels de fonctions et pas d'autres n'est pas très intuitif, et surtout TRES mal géré par le parser (OutOfMemoryError). Private methods=Uppercase, public=atomLisp. Car le Parser est stateless => ça pourra être corrigé avec le nouveau compilateur
+

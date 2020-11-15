@@ -1,2 +1,5 @@
 .idea/
 *.iml
+
+# Latex compilation files
+report/build_latex

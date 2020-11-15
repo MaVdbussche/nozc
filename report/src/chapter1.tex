@@ -1,0 +1,17 @@
+%! Author = barasingha
+
+In this chapter, we will provide an overview of what has been done in previous works regarding newOz, which will serve as a starting point for our reflexions.\newline
+Last year's work of Jean-Pacifique Mbonyincungu used a very systematic approach consisting of reviewing a lot of languages features and syntax elements of Oz.
+For each of these, code snippets in both Oz and Scala/Ozma\footnote{TODO describe briefly} were provided and compared.
+The code served as a basis for the following discussion, comparing pros and cons both syntaxes, and motivating the final choice being made.
+The process was rationalized by using a set of objective factors, allowing to rate each choice on a numeric scale in an attempt to provide the best syntax for each language feature.
+\newline
+The two main results of this work were the definition of a new syntax, described in~\ref{sec:appendix-a} as an EBNF grammar, as well as the writing of a Parser, which is able to convert any code written in newOz to the equivalent Oz code.
+
+\section{Limitations}\label{sec:limitations}
+We need an equivalent to Scala "currying", where dots are facultative
+ex: ex1(7).ex2().browse()
+\newline
+\newline
+The idea of a built-in function list must be complete, completely coherent, and explicit to the user.
+Is it the case today ?

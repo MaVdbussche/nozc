@@ -9,7 +9,7 @@ package com.barassolutions;
  */
 //TODO keep this up-to-date with lexical grammar
 enum TokenKind {
-  EOF("<EOF>"), AT("at"), ATTR("attr"), BREAK("break"),
+  EOF("<EOF>"), AT("at"), ATTR("attr"), BREAK("break"), CASE("case"),
       CATCH("catch"), CHOICE("choice"), CLASS("class"), COLLECT("collect"),
       COND("cond"), CONTINUE("continue"), DECLARE("declare"), DEF("def"),
       DEFPROC("defproc"), DEFAULT("default"), DIS("dis"), DO("do"),

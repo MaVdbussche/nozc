@@ -7,3 +7,4 @@ TODO list
 [] handle strings represented as [°P,°K,°b]
 [] handle newOz atoms
 [] handle octal/hexa numbers
+[] !! operator is actually used ! see Oz doc online

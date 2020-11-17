@@ -95,9 +95,9 @@ LE          ::= "=<" ok
 GE          ::= ">=" ok
 LBARROW     ::= "<=" ok
 IMPL        ::= "=>" ok
-AND         ::= "&" ok
+AND         ::= "&" ok TODO DELETED
 LAND        ::= "&&" ok
-PIPE        ::= "|" ok
+PIPE        ::= "|" ok TODO DELETED
 LOR         ::= "||" ok
 LNOT        ::= "!" ok
 //LNOTNOT     ::= "!!" skipped

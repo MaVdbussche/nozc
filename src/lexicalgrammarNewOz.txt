@@ -145,24 +145,24 @@ DOTDOT      ::= ".." ok
 ELLIPSIS    ::= "..." ok
 
 // Literals
-UPPERCASE      ::= "A"|...|"Z"
-LOWERCASE      ::= "a"|...|"z"
-DIGIT          ::= "0"|...|"9"
-NONZERODIGIT   ::= "1"|...|"9"
-CHARINT        ::= "0"|...|"255"
-ALPHANUM       ::= UPPERCASE | LOWERCASE | DIGIT | "_"
-ATOMCHAR       ::= CHAR - ("'"|"\"|NUL)
-STRINGCHAR     ::= CHAR - ("""|"\"|NUL)
-VARIABLECHAR   ::= CHAR - ("`"|"\"|NUL)
-CHARCHAR       ::= CHAR - ("\"|NUL)
-ESCCHAR        ::= "a"|"b"|"f"|"n"|"r"|"t"|"v"|"\"|"'"|"""|"`"|"&"
-OCTDIGIT       ::= "0"|...|"7"
-HEXDIGIT       ::= "0"|...|"9"|"A"|...|"F"|"a"|...|"f"
-BINDIGIT       ::= "0"|"1"
-NONZERODIGIT   ::= "1"|...|"9"
-PSEUDOCHAR     ::= "\" OCTDIGIT OCTDIGIT OCTDIGIT
-                | "\" ("x" | "X") HEXDIGIT HEXDIGIT
-                | "\" ESCCHAR
+UPPERCASE      ::= "A"|...|"Z" ok
+LOWERCASE      ::= "a"|...|"z" ok
+DIGIT          ::= "0"|...|"9" ok
+NONZERODIGIT   ::= "1"|...|"9" ok
+CHARINT        ::= "0"|...|"255" ok
+ALPHANUM       ::= UPPERCASE | LOWERCASE | DIGIT | "_" ok
+ATOMCHAR       ::= CHAR - ("'"|"\"|NUL) TODO
+STRINGCHAR     ::= CHAR - ("""|"\"|NUL) TODO
+VARIABLECHAR   ::= CHAR - ("`"|"\"|NUL) TODO
+CHARCHAR       ::= CHAR - ("\"|NUL) TODO
+ESCCHAR        ::= "a"|"b"|"f"|"n"|"r"|"t"|"v"|"\"|"'"|"""|"`"|"°"
+OCTDIGIT       ::= "0"|...|"7" ok
+HEXDIGIT       ::= "0"|...|"9"|"A"|...|"F"|"a"|...|"f" ok
+BINDIGIT       ::= "0"|"1" ok
+NONZERODIGIT   ::= "1"|...|"9" ok
+PSEUDOCHAR     ::= "\" OCTDIGIT OCTDIGIT OCTDIGIT ok
+                | "\" ("x" | "X") HEXDIGIT HEXDIGIT ok
+                | "\" ESCCHAR ok
 
 // End of file
 EOF            ::= "<end of file>"

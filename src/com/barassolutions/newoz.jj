@@ -126,7 +126,7 @@ PARSER_END( JavaCCParser )
 /////////////////////////////////////////////////////////
 
 // Whitespace -- ignored
-SKIP: {" "|"\t"|"\n"|"\r"|"\f"}
+SKIP: {" "|"\t"|"\v"|"\n"|"\r"|"\f"}
 
 // Single-line comment -- ignored
 SKIP: {<SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>}
@@ -256,26 +256,40 @@ TOKEN : {
 
 // Identifiers & litterals
 TOKEN : {
-  < IDENTIFIER: (<LETTER>|"_") (<ALPHANUM>)* >
-| < INT: (<DECINT> | <HEXINT> | <OCTINT>) >
-| < FLOAT: ("~")? <DIGIT> "." (<DIGIT>)* (("e"|"E") <DECINT>)? >
+  < VARIABLE: ((<UPPERCASE>(<ALPHANUM>)*) | <LACCENT>(<VARIABLE_CHAR>|<PSEUDO_CHAR>)<LACCENT>) >
+| < ATOM: (<LOWERCASE>(<ALPHANUM>)* | <APOSTROPHE>(<ATOM_CHAR>|<PSEUDO_CHAR>)<APOSTROPHE>) >
+| < LABEL: (<VARIABLE>|<ATOM>|<BOOLEAN>|<UNIT>)<LPAREN> >
+| < IDENTIFIER: (<LETTER>|"_") (<ALPHANUM>)* >
+| < INT_LITERAL: (<DECINT> | <HEXINT> | <OCTINT> | <BININT>) >
+| < FLOAT: ("~")? (<DIGIT>)+ <DOT> (<DIGIT>)* (("e"|"E")("~")?(<DIGIT>)+)? >
+| < STRING: <QUOTE>(<STRING_CHAR> | <PSEUDO_CHAR>)<QUOTE> >
+| < CHAR: <DEGREE> (~["\\"] | <PSEUDO_CHAR>)>
 | < BOOLEAN: (<TRUE> | <FALSE>) >
-| < DECINT: ("~")? <NON_ZERO_DIGIT> (<DIGIT>)* >
-| < HEXINT: ("~")? "0" ("x"|"X") (<HEXDIGIT>)* >
-| < OCTINT: ("~")? "0" (<OCTDIGIT>)* >
-| < BININT: ("~")? "0" ("b"|"B") (<BINDIGIT>)* >
+| < DECINT: ("~")? ("0" | <NON_ZERO_DIGIT>(<DIGIT>)*) >
+| < HEXINT: ("~")? "0" ("x"|"X") (<HEXDIGIT>)+ >
+| < OCTINT: ("~")? "0" (<OCTDIGIT>)+ >
+| < BININT: ("~")? "0" ("b"|"B") (<BINDIGIT>)+ >
 | < #LETTER: (<UPPERCASE> | <LOWERCASE>) >
 | < #DIGIT: ["0"-"9"] >
 | < #OCTDIGIT: ["0"-"7"] >
 | < #HEXDIGIT: (<DIGIT> | ["A"-"F"] | ["a"-"f"]) >
 | < #BINDIGIT: ["0"-"1"] >
 | < #NON_ZERO_DIGIT: ["1"-"9"] >
+//| < CHAR_LITERAL : "'" (<ESC> | ~["'","\\","\n","\r"]) "'" >
+//| < STRING_LITERAL : "\"" (<ESC> | ~["\"","\\","\n","\r"])* "\"" >
 | < #UPPERCASE: ["A"-"Z"] >
 | < #LOWERCASE: ["a"-"z"] >
 | < #CHARINT: (["0"-"9"]|["1"-"9"]["0"-"9"]|"1"["0"-"9"]["0"-"9"]|"2"["0"-"4"]["0"-"9"]|"25"["0"-"5"])> // [0-255]
-| < #ALPHANUM: (<LETTER> | <DIGIT> | "_") >
-| < #ESC: <BACKSLASH> ("f"|"n"|"r"|"t"|"v"|"240"|"\\"|"'"|"`"|"\""|"°") >
-| < #CHARESC: <DEGREE> <BACKSLASH> ("f"|"n"|"r"|"t"|"v"|"240") >
+| < #ALPHANUM: (<LETTER> | <DIGIT> | <UNDERSCORE>) >
+| < #ATOM_CHAR: ~["'","\\"] > //TODO also NUL char (=ISO char 0)
+| < #STRING_CHAR: ~["\"","\\"] > // TODO also NUL char
+| < #VARIABLE_CHAR: ~["`","\\"] > //TODO also NUL char
+| < #ESCAPE_CHAR: ("a"|"b"|"f"|"n"|"r"|"t"|"v"|<BACKSLASH>|<APOSTROPHE>|<QUOTE>|<LACCENT>|<DEGREE>) >
+//| < #ESC: <BACKSLASH> <ESCAPE_CHAR> >
+//| < #CHARESC: <DEGREE> <BACKSLASH> ("f"|"n"|"r"|"t"|"v"|"240") >
+// In the classes of words <variable>, <atom>, <string>, and <character> we use pseudo-characters,
+// which represent single characters in different notations.
+| < #PSEUDO_CHAR: (<BACKSLASH><OCTDIGIT><OCTDIGIT><OCTDIGIT>) | (<BACKSLASH>("x"|"X")<HEXDIGIT><HEXDIGIT>) | (<BACKSLASH><ESCAPE_CHAR>) >
 } //TODO more work here
 
 // For anything else, we return an ERROR token. Without this
@@ -285,4 +299,70 @@ TOKEN : {
 TOKEN:
 {
  < ERROR: ~[] >
+}
+
+/////////////////////////////////////////////////////////
+//       The newOz syntactic grammar starts here         //
+/////////////////////////////////////////////////////////
+// Construct this from http://mozart2.org/mozart-v1/doc-1.4.0/notation/node3.html#chapter.context-free
+
+/**
+ * Parse a compilation block (a program file) and construct an AST
+ * for it. After constructing the Parser, this is its entry point.
+ *
+ * <pre>
+ *   compilationUnit ::= FUNCTOR [expression]
+ *                       {IMPORT  qualifiedIdentifier}
+                         {EXPORT  qualifiedIdentifier}
+ *                       {typeDeclaration}
+ *                       EOF
+ * </pre>
+ *
+ * @return an AST for a compilationBlock.
+ */
+public CompilationBlock compilationBlock(): {
+    int line = 0;
+    TypeName functorName = null; // Default
+    TypeName anImport = null;
+    TypeName anExport = null;
+    ArrayList<TypeName> imports =
+        new ArrayList<TypeName>();
+    ArrayList<TypeName> exports =
+        new ArrayList<TypeName>();
+    JAST aTypeDeclaration = null;
+    //ArrayList<AST> typeDeclarations = new ArrayList<AST>();
+}
+{
+    try {
+        <FUNCTOR> { line = token.beginLine; }
+        functorName = expression()
+        (
+            <IMPORT> { line = line == 0 ? token.beginLine : line; }
+            anImport = importClause()
+            { imports.add( anImport ); }
+        )*
+        (
+            <EXPORT> { line = line == 0 ? token.beginLine : line; }
+            anExport = exportClause()
+            {exports.add( anExport ); }
+        )*
+        <DEFINE> { line = line == 0 ? token.beginLine : line; }
+        aDeclaration = declarationPart()
+        {
+            line = line == 0 ? aDeclaration.line() : line;
+            //typeDeclarations.add( aDeclaration );
+        }
+        [
+            <IN> { line = line == 0 ? token.beginLine : line; }
+            aStatement = statement()
+        ]
+        <EOF> { line = line == 0 ? token.beginLine : line; }
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[] { EOF }, e );
+    }
+    {
+        return new CompilationBlock( fileName, line,
+            functorName, imports, exports );
+    }
 }

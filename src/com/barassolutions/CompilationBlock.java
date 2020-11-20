@@ -4,19 +4,21 @@ import java.util.ArrayList;
 
 public class CompilationBlock extends AST {
 
-  private String fileName;
+  private final String fileName;
 
   //TODO modelize this
-  private ArrayList<Object> imports;
-  private ArrayList<Object> exports;
+  private final TypeName functorName;
+  private final ArrayList<TypeName> imports;
+  private final ArrayList<TypeName> exports;
 
   private CompilationBlockContext context;
 
   private boolean errorState;
 
-  public CompilationBlock(String filename, int line, ArrayList imports, ArrayList exports) {
+  public CompilationBlock(String filename, int line, TypeName functorName, ArrayList<TypeName> imports, ArrayList<TypeName> exports) {
     super(line);
     this.fileName = filename;
+    this.functorName = functorName;
     this.imports = imports;
     this.exports = exports;
     compilationBlock = this;
@@ -28,7 +30,7 @@ public class CompilationBlock extends AST {
 
   public void reportSemanticError(int line, String message, Object... args) {
     errorState = true;
-    System.err.printf("%s:%d: ", this.filename, line);
+    System.err.printf("%s:%d: ", this.fileName, line);
     System.err.printf(message, args);
     System.err.println();
   }
@@ -46,6 +48,5 @@ public class CompilationBlock extends AST {
    * Launch the analysis on the AST in the given Context
    */
   public AST analyze(Context context) {
-    for (AST )
   }
 }

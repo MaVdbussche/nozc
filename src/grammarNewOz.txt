@@ -14,8 +14,9 @@
 //w_1 - w_2     difference of w_1 and w_2
 
 // Interactive statements
-interStatement ::= statement
-                  | DECLARE LCURLY {declarationPart}+ [interStatement] RCURLY
+interStatement ::= statement | interDeclareStatement
+
+interDeclareStatement ::= DECLARE LCURLY {declarationPart}+ [interStatement] RCURLY
 
 statement ::= nestCon(statement)
             | nestDec(variable)

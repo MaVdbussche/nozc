@@ -149,6 +149,7 @@ TOKEN : {
 | < COND: "cond" > //TODO What's this ?
 | < CONTINUE: "continue" >
 | < DECLARE: "declare" >
+| < DEFINE: "define" >
 | < DEF: "def" >
 | < DEFPROC: "defproc" >
 | < DEFLT: "default" >
@@ -193,7 +194,7 @@ TOKEN : {
 // Operators
 TOKEN : {
   <ASSIGN: "=">
-| <DEFINE: ":=">
+| <COLASSIGN: ":=">
 | <EQUAL: "==">
 | <NE: "\\=">
 | <LT: "<">
@@ -307,62 +308,304 @@ TOKEN:
 // Construct this from http://mozart2.org/mozart-v1/doc-1.4.0/notation/node3.html#chapter.context-free
 
 /**
- * Parse a compilation block (a program file) and construct an AST
- * for it. After constructing the Parser, this is its entry point.
+ * Parse a block.
  *
  * <pre>
- *   compilationUnit ::= FUNCTOR [expression]
- *                       {IMPORT  qualifiedIdentifier}
-                         {EXPORT  qualifiedIdentifier}
- *                       {typeDeclaration}
- *                       EOF
+ *   block ::= LCURLY {blockStatement} RCURLY
  * </pre>
  *
- * @return an AST for a compilationBlock.
+ * @return an AST for a block.
  */
-public CompilationBlock compilationBlock(): {
+private Block block(): {
     int line = 0;
-    TypeName functorName = null; // Default
-    TypeName anImport = null;
-    TypeName anExport = null;
-    ArrayList<TypeName> imports =
-        new ArrayList<TypeName>();
-    ArrayList<TypeName> exports =
-        new ArrayList<TypeName>();
-    JAST aTypeDeclaration = null;
-    //ArrayList<AST> typeDeclarations = new ArrayList<AST>();
+    Statement aStatement = null;
+    ArrayList<Statement> statements = new ArrayList<>();
 }
 {
     try {
-        <FUNCTOR> { line = token.beginLine; }
-        functorName = expression()
+        <LCURLY> { line = token.beginLine; }
         (
-            <IMPORT> { line = line == 0 ? token.beginLine : line; }
-            anImport = importClause()
-            { imports.add( anImport ); }
+            aStatement = blockStatement()
+            { statements.add( aStatement ); }
         )*
-        (
-            <EXPORT> { line = line == 0 ? token.beginLine : line; }
-            anExport = exportClause()
-            {exports.add( anExport ); }
-        )*
-        <DEFINE> { line = line == 0 ? token.beginLine : line; }
-        aDeclaration = declarationPart()
-        {
-            line = line == 0 ? aDeclaration.line() : line;
-            //typeDeclarations.add( aDeclaration );
-        }
-        [
-            <IN> { line = line == 0 ? token.beginLine : line; }
-            aStatement = statement()
-        ]
-        <EOF> { line = line == 0 ? token.beginLine : line; }
+        <RCURLY>
     }
     catch ( ParseException e ) {
-        recoverFromError( new int[] { EOF }, e );
+        recoverFromError( new int[] { RCURLY, EOF }, e );
     }
-    {
-        return new CompilationBlock( fileName, line,
-            functorName, imports, exports );
+    { return new Block( line, statements ); }
+}
+
+/**
+ * Parse a block statement, that is a statement allowed to appear in a block.
+ *
+ * <pre>
+ *   blockStatement ::= localVariableDeclarationStatement
+ *                    | statement
+ * </pre>
+ *
+ * @return an AST for a blockStatement.
+ */
+private Statement blockStatement(): {
+    Statement statement = null;
+}
+{
+    try {
+        LOOKAHEAD( type() <IDENTIFIER> ) //TODO type in newOz = var or val (to discuss)
+        statement = localVariableDeclarationStatement()
+        |
+        statement = statement()
     }
+    catch ( ParseException e ) {
+        recoverFromError( new int[] { RCURLY, EOF }, e );
+    }
+    { return statement; }
+}
+
+/**
+ * Parse a local variable declaration statement.
+ *
+ * <pre>
+ *   localVariableDeclarationStatement ::= type variableDeclarators
+ * </pre>
+ *
+ * @return an AST for a variableDeclaration.
+ */
+private VariableDeclaration localVariableDeclarationStatement(): {
+    int line = 0;
+    Type type = null;
+    ArrayList<VariableDeclarator> vdecls = null;
+    ArrayList<String> mods = new ArrayList<>();
+}
+{
+    try {
+        type = type() { line = token.beginLine; }
+        vdecls = variableDeclarators( type )
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[] { RCURLY, EOF }, e );
+    }
+    { return new VariableDeclaration( line, mods, vdecls ); }
+}
+
+/**
+ * Parse variable declarators.
+ *
+ * <pre>
+ *   variableDeclarators ::= variableDeclarator
+ *                             {COMMA variableDeclarator}
+ * </pre>
+ *
+ * @param type type of the variables. //TODO so val or var
+ * @return a list of variable declarators.
+ */
+private ArrayList<VariableDeclarator> variableDeclarators( Type type ): {
+    VariableDeclarator aVariableDeclarator = null;
+    ArrayList<VariableDeclarator> variableDeclarators = new ArrayList<>();
+}
+{
+    try {
+        aVariableDeclarator = variableDeclarator( type )
+        { variableDeclarators.add( aVariableDeclarator ); }
+        (
+            <COMMA> aVariableDeclarator = variableDeclarator( type )
+            { variableDeclarators.add( aVariableDeclarator ); }
+        )*
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[] { RCURLY, EOF }, e );
+    }
+    { return variableDeclarators; }
+}
+
+/**
+ * Parse a variable declarator.
+ *
+ * <pre>
+ *   variableDeclarator ::= IDENTIFIER
+ *                          [ASSIGN variableInitializer]
+ * </pre>
+ *
+ * @param type type of the variable.
+ * @return an AST for a variableDeclarator.
+ */
+private VariableDeclarator variableDeclarator( Type type ): {
+    int line = 0;
+    Expression initial = null;
+    String name = "";
+}
+{
+    try {
+        <IDENTIFIER> { line = token.beginLine; name = token.image; }
+        [
+            <ASSIGN> initial = variableInitializer( type )
+        ]
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[] { RCURLY, EOF }, e );
+    }
+    { return new VariableDeclarator( line, name, type, initial ); }
+}
+
+/**
+ * Parse a variable initializer.
+ *
+ * <pre>
+ *   variableInitializer ::= expression
+ * </pre>
+ *
+ * @param type type of the variable.
+ * @return an AST for a variableInitializer.
+ */
+private Expression variableInitializer( Type expected ): {
+    Expression initializer = null;
+}
+{
+    try {
+        initializer = expression()
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[] { SEMI, EOF }, e );
+    }
+    { return initializer; }
+}
+
+/**
+ * Parse a type.
+ *
+ * <pre>
+ *   type ::= VAL | VAR
+ * </pre>
+ *
+ * @return an instance of Type.
+ */
+private Type type(): {
+    Type type = null;
+}
+{
+    try {
+        <VAL> { type = Type.VAL; } |
+        <VAR> { type = Type.VAR; }
+    }
+    catch ( ParseException e ) {
+       recoverFromError( new int[] { RCURLY, EOF }, e );
+    }
+    { return type; }
+}
+
+/**
+ * Parse a statement.
+ *
+ * <pre>
+ *   statement ::= block
+ *               | SKP
+ *               | IF parExpression block [ELSE statement]
+ *               | FOR loopDeclaration block
+ *               | TRY block [CATCH patternMatchBlock] [FINALLY block]
+ *               | MATCH patternMatchBlock
+ *               | THREAD block
+ *               | LOCK LPAREN expression RPAREN block
+ *               | RAISE blockExpression //TODO
+ *               | RETURN [expression] //TODO
+ *               | statementExpression
+ * </pre>
+ *
+ * @return an AST for a statement.
+ */
+private Statement statement(): {
+    int line = 0;
+    Statement statement = null;
+    Object loopDec = null; //TODO object type ?
+    Expression test = null;
+    Statement consequent = null;
+    Statement alternate = null;
+    Statement body = null;
+    Expression expr = null;
+}
+{
+    try {
+        statement = block() |
+        <SKP>
+        { statement = new EmptyStatement( line ); } |
+        <IF> { line = token.beginLine; }
+        test = parExpression()
+        consequent = block()
+
+        // Even without the lookahead below, which is added to
+        // suppress JavaCC warnings, dangling if-else problem is
+        // resolved by binding the alternate to the closest
+        // consequent.
+        [
+            LOOKAHEAD( <ELSE> )
+            <ELSE> alternate = statement()
+        ]
+        { statement = new IfStatement(line, test, consequent, alternate); } |
+        <FOR> { line = token.beginLine; }
+        loopDec = loopDeclaration()
+        body = block()
+        { statement = new ForStatement(line, loopDec, body); } |
+        <TRY> { line = token.beginLine; }
+        body = block()
+        [
+            LOOKAHEAD( <CATCH> )
+            <CATCH>
+            consequent = patternMatchBlock()
+        ]
+        [
+            LOOKAHEAD( <FINALLY> )
+            <FINALLY>
+            alternate = block()
+        ]
+        { statement = new TryStatement(line, body, consequent, alternate); } |
+        <MATCH> { line = token.beginLine; }
+        expr = expression()
+        body = patternMatchBlock()
+        { statement = new MatchStatement(line, expression, body); } |
+        <THREAD> { line = token.beginLine; }
+        body = block()
+        { statement = new ThreadStatement(line, body); } |
+        <LOCK> { line = token.beginLine; }
+        <LPAREN>
+        expr = expression()
+        <RPAREN>
+        body = block()
+        { statement = new LockStatement(line, expr, body); } |
+        <RAISE> { line = token.beginLine; }
+        expr = blockExpression()
+        { statement = new RaiseStatement( line, expr ); } |
+        <RETURN> { line = token.beginLine; }
+        [
+            expr = expression()
+        ]
+        { statement = new ReturnStatement(line, expr); } |
+        // Must be a statementExpression
+        statement = statementExpression()
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[] { RCURLY, EOF }, e );
+    }
+    { return statement; }
+}
+
+/**
+ * Parse a parenthesized expression.
+ *
+ * <pre>
+ *   parExpression ::= LPAREN expression RPAREN
+ * </pre>
+ *
+ * @return an AST for a parExpression.
+ */
+private Expression parExpression(): {
+    Expression expr = null;
+
+}
+{
+    try {
+        <LPAREN> expr = expression() <RPAREN>
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[] { RCURLY, EOF }, e );
+    }
+    { return expr; }
 }

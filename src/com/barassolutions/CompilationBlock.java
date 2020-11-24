@@ -1,5 +1,7 @@
 package com.barassolutions;
 
+import jminusminus.TypeName;
+
 import java.util.ArrayList;
 
 public class CompilationBlock extends AST {

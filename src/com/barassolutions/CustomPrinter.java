@@ -3,7 +3,7 @@ package com.barassolutions;
 /**
  * A utility class that allows pretty (indented) printing to STDOUT.
  */
-class CustomPrinter {
+public class CustomPrinter {
 
   /** Width of an indentation. */
   private final int indentWidth;

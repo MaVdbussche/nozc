@@ -1,10 +1,12 @@
-package com.barassolutions;
+package jminusminus;
+
+import com.barassolutions.Context;
 
 /**
  * Any reference that can be denoted as a (possibly qualified) identifier.
  */
 
-class TypeName {
+public class TypeName {
 
     /**
      * The line in which the identifier occurs in the source file.

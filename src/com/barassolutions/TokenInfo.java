@@ -13,7 +13,7 @@ enum TokenKind {
       CATCH("catch"), CHOICE("choice"), CLASS("class"), COLLECT("collect"),
       COND("cond"), CONTINUE("continue"), DECLARE("declare"), DEF("def"),
       DEFPROC("defproc"), DEFAULT("default"), DIS("dis"), DO("do"),
-      ELSE("else"), ELSECASE("elsecase"), EXPORT("export"),
+      ELSE("else"), ELSECASE("elsecase"), EXPORT("export"), EXTENDS("extends"),
       FAIL("fail"), FALSE("false"), FEAT("feat"), FINALLY("finally"), FOR("for"),
       FROM("from"), FUNCTOR("functor"), IF("if"), IMPORT("import"), IN("in"),
       LOCK("lock"), MATCH("match"), METH("meth"), MOD("mod"),

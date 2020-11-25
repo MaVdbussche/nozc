@@ -1,5 +1,6 @@
 package jminusminus;
 
+import com.barassolutions.AST;
 import com.barassolutions.Context;
 
 /**
@@ -102,13 +103,13 @@ public class TypeName {
                 // resolvedType.toString(),
                 // new TypeNameDefn(resolvedType));
             } catch (Exception e) {
-                JAST.compilationUnit.reportSemanticError(line,
+                AST.compilationBlock.reportSemanticError(line,
                         "Unable to locate a type named %s", name);
                 resolvedType = Type.ANY;
             }
         }
         if (resolvedType != Type.ANY) {
-            Type referencingType = ((JTypeDecl) (context.classContext
+            Type referencingType = ((TypeDecl) (context.classContext
                     .definition())).thisType();
             Type.checkAccess(line, referencingType.classRep(), resolvedType
                     .classRep());

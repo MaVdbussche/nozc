@@ -104,7 +104,7 @@ class CompilationBlockContext extends Context {
 /**
  * Context in which local variables can be declared
  */
-class LocalContext extends Context {
+public class LocalContext extends Context {
 
   public LocalContext(Context surrounding) {
     super(surrounding, surrounding.compilationBlockContext());

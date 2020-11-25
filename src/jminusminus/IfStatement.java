@@ -67,7 +67,7 @@ class IfStatement extends Statement {
      *
      * @param output
      *            the code emitter (basically an abstraction for producing the
-     *            .class file).
+     *            .oz file).
      */
     public void codegen(Emitter output) {
         //TODO

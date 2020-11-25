@@ -757,7 +757,6 @@ private Statement statementExpression(): {
               || expr instanceof MessageExpression
               || expr instanceof SuperConstruction
               || expr instanceof ThisConstruction
-              || expr instanceof NewOp
               || expr instanceof NewArrayOp ) { //TODO others. This might be the fix for the last 2 warning in javacc
                 // So as not to save on stack
                 expr.isStatementExpression = true;

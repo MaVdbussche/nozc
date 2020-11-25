@@ -576,8 +576,7 @@ class JavaCCParser implements JavaCCParserConstants {
               || expr instanceof MessageExpression
               || expr instanceof SuperConstruction
               || expr instanceof ThisConstruction
-              || expr instanceof NewOp
-              || expr instanceof NewArrayOp ) { //TODO others
+              || expr instanceof NewArrayOp ) { //TODO others. This might be the fix for the last 2 warning in javacc
                 // So as not to save on stack
                 expr.isStatementExpression = true;
             }
@@ -1238,6 +1237,17 @@ class JavaCCParser implements JavaCCParserConstants {
     finally { jj_save(5, xla); }
   }
 
+  static private boolean jj_3R_21() {
+    if (jj_scan_token(LOR)) return true;
+    if (jj_3R_20()) return true;
+    return false;
+  }
+
+  static private boolean jj_3R_39() {
+    if (jj_3R_42()) return true;
+    return false;
+  }
+
   static private boolean jj_3R_32() {
     if (jj_scan_token(LT)) return true;
     if (jj_3R_26()) return true;
@@ -1260,6 +1270,12 @@ class JavaCCParser implements JavaCCParserConstants {
     return false;
   }
 
+  static private boolean jj_3_1() {
+    if (jj_3R_12()) return true;
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
   static private boolean jj_3R_61() {
     if (jj_scan_token(UNIT)) return true;
     return false;
@@ -1271,19 +1287,13 @@ class JavaCCParser implements JavaCCParserConstants {
     return false;
   }
 
-  static private boolean jj_3_1() {
-    if (jj_3R_12()) return true;
-    if (jj_scan_token(IDENTIFIER)) return true;
+  static private boolean jj_3_2() {
+    if (jj_scan_token(ELSE)) return true;
     return false;
   }
 
   static private boolean jj_3R_60() {
     if (jj_scan_token(FALSE)) return true;
-    return false;
-  }
-
-  static private boolean jj_3_2() {
-    if (jj_scan_token(ELSE)) return true;
     return false;
   }
 
@@ -1661,30 +1671,19 @@ class JavaCCParser implements JavaCCParserConstants {
     return false;
   }
 
-  static private boolean jj_3R_13() {
-    if (jj_3R_16()) return true;
+  static private boolean jj_3_3() {
+    if (jj_scan_token(CATCH)) return true;
     return false;
   }
 
-  static private boolean jj_3_3() {
-    if (jj_scan_token(CATCH)) return true;
+  static private boolean jj_3R_13() {
+    if (jj_3R_16()) return true;
     return false;
   }
 
   static private boolean jj_3R_33() {
     if (jj_scan_token(GE)) return true;
     if (jj_3R_26()) return true;
-    return false;
-  }
-
-  static private boolean jj_3R_21() {
-    if (jj_scan_token(LOR)) return true;
-    if (jj_3R_20()) return true;
-    return false;
-  }
-
-  static private boolean jj_3R_39() {
-    if (jj_3R_42()) return true;
     return false;
   }
 

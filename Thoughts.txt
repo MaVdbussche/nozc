@@ -19,7 +19,7 @@ Mardi 17/11 à 16h
 
 
 Réunion du 17/11 :
-Lundi 03/11 14h : compilateur qui fonctionne
+Lundi 30/11 14h : compilateur qui fonctionne
 
 Unit : equivalent de true|false quand la valeur n'a aucune importance
 On attend une tâche en concurrence
@@ -27,3 +27,13 @@ On attend une tâche en concurrence
 Prepare : quand on fait un calcul pour créer un functor - lié à require
 -> voir computed functors dans docu de Oz
 
+
+Réunion du 30/11 :
+Nouveau pan du mémoire : utiliser newOz dans LINFO1104 -> les étudiants feraient un travail en newOz et évalueraient la syntaxe
+[] - Faire un compilateur complet et fonctionnel
+[] - Faire un tutoriel de la syntaxe pour les TPs
+
+Une réunion sera organisée avec Martin Henz (qui a conçu la syntaxe)
+
+Utiliser l'article sur l'histoire de Oz comme base pour le poster de la présentation du 4/12
+See Poster.txt

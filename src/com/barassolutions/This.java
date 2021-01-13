@@ -1,4 +1,4 @@
-package jminusminus;
+package com.barassolutions;
 
 import com.barassolutions.Context;
 import com.barassolutions.CustomPrinter;

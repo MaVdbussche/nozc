@@ -1,6 +1,6 @@
 // Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
 
-package jminusminus;
+package com.barassolutions;
 
 import com.barassolutions.AST;
 

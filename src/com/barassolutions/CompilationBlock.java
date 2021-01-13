@@ -1,7 +1,5 @@
 package com.barassolutions;
 
-import jminusminus.TypeName;
-
 import java.util.ArrayList;
 
 public class CompilationBlock extends AST {
@@ -50,5 +48,15 @@ public class CompilationBlock extends AST {
    * Launch the analysis on the AST in the given Context
    */
   public AST analyze(Context context) {
+  }
+
+  @Override
+  public void codegen(Emitter output) {
+
+  }
+
+  @Override
+  public void writeOut(CustomPrinter p) {
+
   }
 }

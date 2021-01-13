@@ -1,16 +1,12 @@
 // Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
 
-package jminusminus;
-
-import com.barassolutions.Context;
-import com.barassolutions.CustomPrinter;
-import com.barassolutions.Emitter;
+package com.barassolutions;
 
 /**
  * The AST node for an if-statement.
  */
 
-class IfStatement extends Statement {
+class ConditionalStatement extends Statement {
 
     /** Test expression. */
     private Expression condition;
@@ -34,8 +30,8 @@ class IfStatement extends Statement {
      * @param elsePart
      *            else clause.
      */
-    public IfStatement(int line, Expression condition, Statement thenPart,
-                        Statement elsePart) {
+    public ConditionalStatement(int line, Expression condition, Statement thenPart,
+                                Statement elsePart) {
         super(line);
         this.condition = condition;
         this.thenPart = thenPart;

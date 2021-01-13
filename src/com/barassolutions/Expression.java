@@ -1,7 +1,4 @@
-package jminusminus;
-
-import com.barassolutions.Context;
-import com.barassolutions.Emitter;
+package com.barassolutions;
 
 /**
  * The AST node for an expression. The syntax says all expressions are

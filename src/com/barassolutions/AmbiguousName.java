@@ -1,8 +1,5 @@
-package jminusminus;
+package com.barassolutions;
 
-import com.barassolutions.AST;
-import com.barassolutions.Context;
-import com.barassolutions.Definition;
 import java.util.StringTokenizer;
 
 /**

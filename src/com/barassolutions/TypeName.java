@@ -1,4 +1,4 @@
-package jminusminus;
+package com.barassolutions;
 
 import com.barassolutions.AST;
 import com.barassolutions.Context;

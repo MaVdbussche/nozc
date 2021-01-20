@@ -15,11 +15,13 @@ public class Context {
 
   protected Context surroundingContext;
 
+  protected ClassContext classContext;
+
   protected CompilationBlockContext compilationBlockContext;
 
   protected Map<String, Definition> entries;
 
-  protected Context(Context surrounding, CompilationBlockContext compilationBlockContext) {
+  protected Context(Context surrounding, ClassContext classContext, CompilationBlockContext compilationBlockContext) {
     this.surroundingContext = surrounding;
     this.compilationBlockContext = compilationBlockContext;
     this.entries = new HashMap<>();
@@ -41,6 +43,19 @@ public class Context {
     return def != null ? def
         : surroundingContext != null ? surroundingContext.lookup(name)
             :null;
+  }
+
+  /**
+   * Return the definition for a type name in the environment. For now, we
+   * look for types only in the CompilationUnitContext.
+   *
+   * @param name
+   *            the name of the type whose definition we're looking for.
+   * @return the definition (or null, if not found).
+   */
+  public Type lookupType(String name) {
+    TypeNameDefn defn = (TypeNameDefn) compilationBlockContext.lookup(name);
+    return defn == null ? null : defn.type();
   }
 
   public Context surroundingContext() {
@@ -74,10 +89,14 @@ public class Context {
   }
 }
 
+/**
+ * The compilation block context is always the outermost context, and is where
+ * imported types and locally defined types (classes) are declared.
+ */
 class CompilationBlockContext extends Context {
 
   public CompilationBlockContext() {
-    super(null, null);
+    super(null, null,null);
     compilationBlockContext = this;
   }
 
@@ -102,12 +121,48 @@ class CompilationBlockContext extends Context {
 }
 
 /**
+ * Represents the context (scope, environment, symbol table) for a type, eg a
+ * class, in j--. It also keeps track of its surrounding context(s), and the
+ * type whose context it represents.
+ */
+class ClassContext extends Context {
+
+  /** AST node of the type that this class represents. */
+  private final AST definition;
+
+  /**
+   * Construct a class context.
+   *
+   * @param definition
+   *            the AST node of the type that this class represents.
+   * @param surrounding
+   *            the surrounding context(s).
+   */
+
+  public ClassContext(AST definition, Context surrounding) {
+    super(surrounding, null, surrounding.compilationBlockContext);
+    classContext = this;
+    this.definition = definition;
+  }
+
+  /**
+   * Return the AST node of the type defined by this class.
+   *
+   * @return the AST of the type defined by this class.
+   */
+  public AST definition() {
+    return definition;
+  }
+
+}
+
+/**
  * Context in which local variables can be declared
  */
 class LocalContext extends Context {
 
   public LocalContext(Context surrounding) {
-    super(surrounding, surrounding.compilationBlockContext());
+    super(surrounding, surrounding.classContext surrounding.compilationBlockContext());
   }
 
   /**
@@ -141,7 +196,7 @@ class MethodContext extends LocalContext {
   /**
    * Used to differentiate methods in object classes from "normal" ones
    */
-  private boolean isStatic;
+  private final boolean isStatic;
 
   /**
    * We only ask this question for functions, not procedures ofc.

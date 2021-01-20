@@ -70,8 +70,7 @@ abstract class Expression extends Statement {
    */
   public void codegen(Emitter output, String targetLabel, boolean onTrue) {
     // We should never reach here, i.e., all boolean
-    // (including
-    // identifier) expressions must override this method.
+    // (including identifier) expressions must override this method.
     System.err.println("Error in code generation");
   }
 }

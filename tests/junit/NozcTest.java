@@ -43,7 +43,7 @@ public class NozcTest extends TestCase {
                 System.out.printf("\n\n");
 
                 // true even if a single test fails
-                errorHasOccurred |= Main.errorHasOccurred();
+                errorHasOccurred |= Main.isInErrorState();
             }
         }
 
@@ -74,7 +74,7 @@ public class NozcTest extends TestCase {
                 System.out.printf("\n\n");
 
                 // true only if all tests fail
-                errorHasOccurred &= Main.errorHasOccurred();
+                errorHasOccurred &= Main.isInErrorState();
             }
         }
 

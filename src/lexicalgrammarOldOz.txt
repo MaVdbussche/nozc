@@ -61,6 +61,7 @@ LOCAL   ::= "local"
 LOCK    ::= "lock"
 METH    ::= "meth"
 MOD     ::= "mod"
+NIL     ::= "nil"
 NOT     ::= "not"
 OF      ::= "of"
 OR      ::= "or"
@@ -95,6 +96,7 @@ LNOTNOT     ::= "!!"
 MINUS       ::= "-"
 PLUS        ::= "+"
 STAR        ::= "*"
+STARSTAR    ::= "**"
 SLASH       ::= "/"
 BACKSLASH   ::= "\"
 HASHTAG     ::= "#"
@@ -132,24 +134,20 @@ ELLIPSIS    ::= "..."
 // Other symbols
 
 // Literals
+SPECIALCHAR    ::= "_"|"+"|"-"|"*"|"/"|"="|":"|"\"|">"|"<"|"."|","|"!"|"?"|"#"|"@"|"é"|"è"|"à"|"&"|" "
 UPPERCASE      ::= "A"|...|"Z"
 LOWERCASE      ::= "a"|...|"z"
 DIGIT          ::= "0"|...|"9"
 NONZERODIGIT   ::= "1"|...|"9"
-CHARINT        ::= "0"|...|"255"
-ALPHANUM       ::= UPPERCASE | LOWERCASE | DIGIT | "_"
+OCTDIGIT       ::= "0"|...|"7"
+HEXDIGIT       ::= "0"|...|"9"|"A"|...|"F"|"a"|...|"f"
+BINDIGIT       ::= "0"|"1"
+ALPHANUM       ::= UPPERCASE | LOWERCASE | DIGIT
 ATOMCHAR       ::= CHAR - ("'"|"\"|NUL)
 STRINGCHAR     ::= CHAR - ("""|"\"|NUL)
 VARIABLECHAR   ::= CHAR - ("`"|"\"|NUL)
 CHARCHAR       ::= CHAR - ("\"|NUL)
 ESCCHAR        ::= "a"|"b"|"f"|"n"|"r"|"t"|"v"|"\"|"'"|"""|"`"|"&"
-OCTDIGIT       ::= "0"|...|"7"
-HEXDIGIT       ::= "0"|...|"9"|"A"|...|"F"|"a"|...|"f"
-BINDIGIT       ::= "0"|"1"
-NONZERODIGIT   ::= "1"|...|"9"
-PSEUDOCHAR     ::= "\" OCTDIGIT OCTDIGIT OCTDIGIT
-                | "\" ("x" | "X") HEXDIGIT HEXDIGIT
-                | "\" ESCCHAR
 
 // End of file
 EOF            ::= "<end of file>"

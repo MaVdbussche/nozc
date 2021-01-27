@@ -310,6 +310,23 @@ TOKEN:
 // Construct this from http://mozart2.org/mozart-v1/doc-1.4.0/notation/node3.html#chapter.context-free
 
 /**
+ * Parse a compilation block (a program file) and construct an AST
+ * for it. After constructing the Parser, this is its entry point.
+ *
+ * <pre>
+ *   compilationBlock ::= FUNCTOR
+ *                        {importExportStatement}
+ *
+ *
+ {typeDeclaration}
+ *                       EOF
+ * </pre>
+ *
+ * @return an AST for a compilationUnit.
+ */
+
+
+/**
  * Parse a block.
  *
  * <pre>

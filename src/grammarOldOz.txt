@@ -28,7 +28,7 @@ statement ::= nestConStatement
             | SKIP
             | SEMI
             | statement statement
-            | DECALRE statement
+            | DECLARE statement
             *****
             | fdCompare
             | fdIn
@@ -74,7 +74,9 @@ inStatement ::= [{declarationPart}+ IN] statement
 inExpression ::= [{declarationPart}+ IN] [statement] expression
             | [{declarationPart}+ IN] statement
 
-nestConStatement ::= LOCAL {declarationPart}+ [IN] {statement} [END]
+nestConStatement ::= expression (ASSIGN|DEFINE|COMMA) expression
+              | LOCAL {declarationPart}+ [IN] {statement} [END]
+              | {LCURLY}+ expression {expression} {RCURLY}+
               | LPAREN inStatement RPAREN
               | IF expression [THEN] inStatement
                 {ELSEIF expression [THEN] inStatement}
@@ -88,10 +90,8 @@ nestConStatement ::= LOCAL {declarationPart}+ [IN] {statement} [END]
                   {BOX caseStatementClause}]
                 [FINALLY inStatement] END
               | RAISE inExpression END
-              | THREAD in(<T>) END
+              | THREAD inStatement END
               | LOCK [expression THEN] inStatement END
-              | {LCURLY}+ expression {expression} {RCURLY}+
-              | expression (ASSIGN|DEFINE|COMMA) expression
 
 nestConExpression ::= LOCAL {declarationPart}+ [IN] [statement] expression [END]
               | LPAREN expression RPAREN
@@ -100,7 +100,7 @@ nestConExpression ::= LOCAL {declarationPart}+ [IN] [statement] expression [END]
                 {ELSE inExpression} [END]
               | CASE expression OF caseExpressionClause
                 {BOX caseExpressionClause}
-                [ELSE expression] [END]
+                [ELSE inExpression] [END]
               | FOR {loopDec}+ [DO] inExpression [END]
               | TRY inExpression
                 [CATCH caseExpressionClause
@@ -113,7 +113,7 @@ nestConExpression ::= LOCAL {declarationPart}+ [IN] [statement] expression [END]
 nestDecVariable ::= PROC [LCURLY] (variable|atom) {pattern} [RCURLY] inStatement [END]
               | FUN [LAZY] [LCURLY] (variable|atom) {pattern} [RCURLY] inExpression [END]
               | FUN [LAZY] LPAREN (variable|atom) {pattern} RPAREN inExpression [END]
-              | FUNCTOR variable
+              | FUNCTOR [variable]
                 [IMPORT {variable [AT atom]
                           | variable LPAREN {(atom|int) [COLON variable]}+ RPAREN
                         }+
@@ -127,7 +127,7 @@ nestDecVariable ::= PROC [LCURLY] (variable|atom) {pattern} [RCURLY] inStatement
 nestDecAnonym ::= PROC [LCURLY] DOLLAR {pattern} [RCURLY] inStatement [END]
               | FUN [LAZY] [LCURLY] DOLLAR {pattern} [RCURLY] inExpression [END]
               | FUN [LAZY] LPAREN DOLLAR {pattern} RPAREN inExpression [END]
-              | FUNCTOR variable
+              | FUNCTOR [variable]
                 [IMPORT {variable [AT atom]
                             | variable LPAREN {(atom|int) [COLON variable]}+ RPAREN)
                         }+
@@ -150,7 +150,7 @@ pattern ::= [LNOT] variable | int | float | character | atom | string | UNIT | F
           | label LPAREN {[feature COLON] pattern} [ELLIPSIS] RPAREN
           | pattern consBinOp pattern
           | LBRACK {pattern} RBRACK
-          | {LPAREN pattern RPAREN}
+          | {LPAREN pattern RPAREN}+
 
 declarationPart ::= variable | pattern ASSIGN expression | statement | atom
 
@@ -168,14 +168,13 @@ monOp ::= WAVE | LNOTNOT | AT | RETURN
 
 consBinOp ::= HASHTAG | PIPE
 
+evalBinOp ::= ANDTHEN | ORELSE | DEFINE | ASSIGN | COMMA | COLCOL | FDASSIGN | FDNE | FDLE
+
 arithOpFirst ::= STAR | DIV | SLASH | MOD | HAT | STARSTAR
 
 arithOpSecond ::= PLUS | MINUS
 
 arithOpThird ::= EQUAL | NE | LT | LE | GT | GE
-
-evalBinOp ::= DOT | ANDTHEN | ORELSE | DEFINE | ASSIGN | COMMA | COLCOL | FDASSIGN | FDNE | FDLE
-
 
 label ::= UNIT | TRUE | FALSE | variable | atom
 //A label must always be followed by a LPAREN
@@ -226,5 +225,5 @@ float ::= [WAVE] {DIGIT}+ DOT {DIGIT} [("e" | "E")[~]{DIGIT}+]
 
 string ::= QUOTE {ALPHANUM | SPECIALCHAR} QUOTE
 
-character ::= AND ALPHANUM | AND SPECIALCHAR
+character ::= AND ALPHANUM | AND SPECIALCHAR | CHARINT
 

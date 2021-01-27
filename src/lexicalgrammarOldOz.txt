@@ -142,6 +142,7 @@ NONZERODIGIT   ::= "1"|...|"9"
 OCTDIGIT       ::= "0"|...|"7"
 HEXDIGIT       ::= "0"|...|"9"|"A"|...|"F"|"a"|...|"f"
 BINDIGIT       ::= "0"|"1"
+CHARINT        ::= "0"|...|"255"
 ALPHANUM       ::= UPPERCASE | LOWERCASE | DIGIT
 ATOMCHAR       ::= CHAR - ("'"|"\"|NUL)
 STRINGCHAR     ::= CHAR - ("""|"\"|NUL)

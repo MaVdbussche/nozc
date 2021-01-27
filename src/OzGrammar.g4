@@ -133,7 +133,7 @@ nestDecVariable
   : 'proc' '{'? (Variable | Atom) pattern* '}'? inStatement 'end'?
   | 'fun' 'lazy'? '{'? (Variable | Atom) pattern* '}'? inExpression 'end'?
   | 'fun' 'lazy'? '(' (Variable | Atom) pattern* ')' inExpression 'end'?
-  | 'functor' Variable
+  | 'functor' Variable?
     ('import' (Variable ('at' Atom)?
               | Variable '(' (Atom | Int (':' Variable)?)+ ')'
               )+
@@ -265,9 +265,8 @@ arithOpThird
   ;
 
 evalBinOp
-  : '.'
-	| 'andthen'
-	| 'orelse'
+  : 'andthen'
+  | 'orelse'
   | 'and'
   | 'And'
   | 'or'

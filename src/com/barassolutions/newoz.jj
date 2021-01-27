@@ -127,7 +127,7 @@ PARSER_END( JavaCCParser )
 /////////////////////////////////////////////////////////
 
 // Whitespace -- ignored
-SKIP: {" "|"\t"|"\n"|"\r"|"\f"} //TODO missing \v
+SKIP: {" "|"\b"|"\t"|"\n"|"\r"|"\f"|"\v"}
 
 // Single-line comment -- ignored
 SKIP: {<SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>}
@@ -144,26 +144,26 @@ TOKEN : {
 | < BREAK: "break" >
 | < CASE: "case" >
 | < CATCH: "catch" >
-| < CHOICE: "choice" > //TODO What's this ?
+//| < CHOICE: "choice" > //TODO What's this ?
 | < CLASS: "class" >
-| < COLLECT: "collect" > //TODO What's this ?
-| < COND: "cond" > //TODO What's this ?
+//| < COLLECT: "collect" > //TODO What's this ?
+//| < COND: "cond" > //TODO What's this ?
 | < CONTINUE: "continue" >
 | < DECLARE: "declare" >
-| < DEFINE: "define" >
 | < DEF: "def" >
 | < DEFPROC: "defproc" >
 | < DEFLT: "default" >
-| < DIS: "dis" > //TODO What's this ?
+//| < DEFINE: "define" >
+//| < DIS: "dis" > //TODO What's dis ?
 | < DO: "do" >
 | < ELSE: "else" >
-//| < ELSECASE: "elsecase" > TODO ?
-//| < ELSEOF: "elseof" > TODO ?
+//| < ELSECASE: "elsecase" >
+//| < ELSEOF: "elseof" >
 | < EXPORT: "export" >
 | < EXTENDS: "extends" >
-| < FAIL: "fail" > //TODO What's this ?
+//| < FAIL: "fail" > //TODO What's this ?
 | < FALSE: "false" >
-| < FEAT: "feat" > //TODO What's this ?
+//| < FEAT: "feat" > //TODO What's this ?
 | < FINALLY: "finally" >
 | < FOR: "for" >
 | < FROM: "from" >
@@ -175,13 +175,13 @@ TOKEN : {
 | < LOCK: "lock" >
 | < MATCH: "match" >
 | < METH: "meth" >
-| < NOT: "not" > //TODO What's this ?
-| < OF: "of" >
+//| < NOT: "not" > //TODO What's this ?
+//| < OF: "of" >
 | < OR: "or" >
-| < PREPARE: "prepare" > //TODO What's this ?
-| < PROP: "prop" > //TODO What's this ?
+//| < PREPARE: "prepare" > //TODO What's this ?
+| < PROP: "prop" >
 | < RAISE: "raise" >
-| < REQUIRE: "require" > //TODO What's this ?
+//| < REQUIRE: "require" > //TODO What's this ?
 | < RETURN: "return" >
 | < SKP: "skip" >
 | < THIS: "this" >
@@ -196,7 +196,7 @@ TOKEN : {
 // Operators
 TOKEN : {
   <ASSIGN: "=">
-| <COLASSIGN: ":=">
+| <DEFINE: ":=">
 | <EQUAL: "==">
 | <NE: "\\=">
 | <LT: "<">
@@ -226,19 +226,19 @@ TOKEN : {
 | <RACCENT: "´">
 | <HAT: "^">
 | <BOX: "[]">
-| <TILDE: "~">
+//| <TILDE: "~">
 | <DEGREE: "°">
-| <COMMERCAT: "@">
-| <LARROW: "<-">
-| <RARROW: "->">
-| <FDASSIGN: "=:">
-| <FDNE: "\\=:">
-| <FDLT: "<:">
-| <FDLE: "=<:">
-| <FDGT: ">:">
-| <FDGE: ">=:">
+//| <COMMERCAT: "@">
+//| <LARROW: "<-">
+//| <RARROW: "->">
+//| <FDASSIGN: "=:">
+//| <FDNE: "\\=:">
+//| <FDLT: "<:">
+//| <FDLE: "=<:">
+//| <FDGT: ">:">
+//| <FDGE: ">=:">
 | <COLCOL: "::">
-| <COLCOLCOL: ":::">
+//| <COLCOLCOL: ":::">
 }
 
 // Separators
@@ -259,41 +259,38 @@ TOKEN : {
 
 // Identifiers & litterals
 TOKEN : {
-  < VARIABLE: ((<UPPERCASE>(<ALPHANUM>)*) | <LACCENT>(<VARIABLE_CHAR>|<PSEUDO_CHAR>)<LACCENT>) >
-| < ATOM: (<LOWERCASE>(<ALPHANUM>)* | <APOSTROPHE>(<ATOM_CHAR>|<PSEUDO_CHAR>)<APOSTROPHE>) >
-| < LABEL: (<VARIABLE>|<ATOM>|<BOOLEAN>|<UNIT>)<LPAREN> >
-| < IDENTIFIER: (<LETTER>|"_") (<ALPHANUM>)* >
-| < INT_LITERAL: (<DECINT> | <HEXINT> | <OCTINT> | <BININT>) >
-| < FLOAT: ("~")? (<DIGIT>)+ <DOT> (<DIGIT>)* (("e"|"E")("~")?(<DIGIT>)+)? >
-| < STRING: <QUOTE>(<STRING_CHAR> | <PSEUDO_CHAR>)<QUOTE> >
-| < CHAR: <DEGREE> (~["\\"] | <PSEUDO_CHAR>)>
-| < #BOOLEAN: (<TRUE> | <FALSE>) >
-| < DECINT: ("~")? ("0" | <NON_ZERO_DIGIT>(<DIGIT>)*) >
-| < HEXINT: ("~")? "0" ("x"|"X") (<HEXDIGIT>)+ >
-| < OCTINT: ("~")? "0" (<OCTDIGIT>)+ >
-| < BININT: ("~")? "0" ("b"|"B") (<BINDIGIT>)+ >
-| < #LETTER: (<UPPERCASE> | <LOWERCASE>) >
+  < VARIABLESTRICT: ((<UPPERCASE>(<ALPHANUM>)*) | "`"(<ESC> | <PSEUDO_CHAR> | ~["`","\\","\n","\r"])"`") >
+| < VARIABLE: <LOWERCASE>(<ALPHANUM>)* >
+| < ATOM: (<ATOMLISP> | "´" (<ESC>| <PSEUDO_CHAR> | ~["´","\\","\n","\r"]) "´") >
+| < ATOMLISP: <APOSTROPHE> (<LOWERCASE>|<UPPERCASE>) (<ALPHANUM>)* >
+| < LABEL: (<VARIABLE>|<ATOM>|<BOOLEAN>|<UNIT>) >
+| < STRING: "\"" (<ESC>| <PSEUDO_CHAR> | ~["\"","\\","\n","\r"]) "\"" >
+| < CHARACTER: (<DEGREE>(<CHARCHAR> | <PSEUDO_CHAR>) | <CHARINT>) >
+| < INT: (<DECINT> | <HEXINT> | <OCTINT> | <BININT>) >
+| < FLOAT: (<MINUS>)? (<DIGIT>)+ <DOT> (<DIGIT>)* (("e"|"E")("~")?(<DIGIT>)+)? >
+| < BOOLEAN: (<TRUE> | <FALSE>) >
+
+| < #UPPERCASE: ["A"-"Z"] >
+| < #LOWERCASE: ["a"-"z"] >
 | < #DIGIT: ["0"-"9"] >
+| < #NON_ZERO_DIGIT: ["1"-"9"] >
+| < #CHARINT: (["0"-"9"]|["1"-"9"]["0"-"9"]|"1"["0"-"9"]["0"-"9"]|"2"["0"-"4"]["0"-"9"]|"25"["0"-"5"])> // [0-255]
+| < #ALPHANUM: (<UPPERCASE> | <LOWERCASE> | <DIGIT> | <UNDERSCORE>) >
+| < #DECINT: (<MINUS>)? (<DIGIT> | <NON_ZERO_DIGIT>(<DIGIT>)*) >
+| < #HEXINT: (<MINUS>)? "0" ("x"|"X") (<HEXDIGIT>)+ >
+| < #OCTINT: (<MINUS>)? "0" (<OCTDIGIT>)+ >
+| < #BININT: (<MINUS>)? "0" ("b"|"B") (<BINDIGIT>)+ >
 | < #OCTDIGIT: ["0"-"7"] >
 | < #HEXDIGIT: (<DIGIT> | ["A"-"F"] | ["a"-"f"]) >
 | < #BINDIGIT: ["0"-"1"] >
-| < #NON_ZERO_DIGIT: ["1"-"9"] >
-//| < CHAR_LITERAL : "'" (<ESC> | ~["'","\\","\n","\r"]) "'" >
-//| < STRING_LITERAL : "\"" (<ESC> | ~["\"","\\","\n","\r"])* "\"" >
-| < #UPPERCASE: ["A"-"Z"] >
-| < #LOWERCASE: ["a"-"z"] >
-| < #CHARINT: (["0"-"9"]|["1"-"9"]["0"-"9"]|"1"["0"-"9"]["0"-"9"]|"2"["0"-"4"]["0"-"9"]|"25"["0"-"5"])> // [0-255]
-| < #ALPHANUM: (<LETTER> | <DIGIT> | <UNDERSCORE>) >
-| < #ATOM_CHAR: ~["'","\\"] > //TODO also NUL char (=ISO char 0)
-| < #STRING_CHAR: ~["\"","\\"] > // TODO also NUL char
-| < #VARIABLE_CHAR: ~["`","\\"] > //TODO also NUL char
-| < #ESCAPE_CHAR: ("a"|"b"|"f"|"n"|"r"|"t"|"v"|<BACKSLASH>|<APOSTROPHE>|<QUOTE>|<LACCENT>|<DEGREE>) >
-//| < #ESC: <BACKSLASH> <ESCAPE_CHAR> >
-//| < #CHARESC: <DEGREE> <BACKSLASH> ("f"|"n"|"r"|"t"|"v"|"240") >
+
+| < #ESCAPE_CHAR: ("a"|"b"|"f"|"n"|"r"|"t"|"v"|<BACKSLASH>|<APOSTROPHE>|<QUOTE>|<DEGREE>) > //TODO <LACCENT> here iff it is present in <VARIABLESTRICT definition
+| < #ESC: <BACKSLASH> <ESCAPE_CHAR> >
+| < #CHARCHAR: ~["\\"] >
 // In the classes of words <variable>, <atom>, <string>, and <character> we use pseudo-characters,
 // which represent single characters in different notations.
-| < #PSEUDO_CHAR: (<BACKSLASH><OCTDIGIT><OCTDIGIT><OCTDIGIT>) | (<BACKSLASH>("x"|"X")<HEXDIGIT><HEXDIGIT>) | (<BACKSLASH><ESCAPE_CHAR>) >
-} //TODO more work here
+| < #PSEUDO_CHAR: (<BACKSLASH><OCTDIGIT><OCTDIGIT><OCTDIGIT>) | (<BACKSLASH>("x"|"X")<HEXDIGIT><HEXDIGIT>) >
+}
 
 // For anything else, we return an ERROR token. Without this
 // definition the TokenManager will throw an Error when a lexical

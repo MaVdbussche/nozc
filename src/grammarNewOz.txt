@@ -13,7 +13,7 @@
 //w_1 | w_2     logical union of w_1 and w_2 (OR)
 //w_1 - w_2     difference of w_1 and w_2
 
-// Interactive statements
+// Interactive statements [ENTRYPOINT]
 interStatement ::= statement
                   | DECLARE LCURLY {declarationPart}+ [interStatement] RCURLY
 
@@ -41,7 +41,7 @@ expression ::= {LPAREN}+ expression {RPAREN}+
             | THIS
             | {LCURLY}+ expression {expression} {RCURLY}+
 
-inStatement ::= LCURLY {declarationPart} statement RCURLY
+inStatement ::= LCURLY {declarationPart} {statement} RCURLY //TODO added possibility for multiple chained statements
             | LCURLY {declarationPart} expression RCURLY
 
 inExpression ::= LCURLY {declarationPart} [statement] expression RCURLY
@@ -92,17 +92,16 @@ nestDecVariable ::= DEFPROC variable LPAREN {pattern {COMMA pattern}} RPAREN inS
             | FUNCTOR [variable] {
                 [IMPORT {variable [AT atom]
                           | variable LPAREN {(atom|int)[COLON variable] {COMMA (atom|int)[COLON variable]}}+ RPAREN
-                          }+]
+                        }+]
                 [EXPORT {[(atom|int)COLON]variable {COMMA [(atom|int)COLON]variable}}+]
               }
               inStatement
             | CLASS variable {classDescriptor} LCURLY
               {DEF methHead [ASSIGN variable] (inExpression|inStatement)} RCURLY
 
-//Here, <T> is always DOLLAR
 nestDecAnonym ::= DEFPROC DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inStatement
             | DEF [LAZY] DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inExpression
-            | FUNCTOR [DOLLAR] {
+            | FUNCTOR [variable] {
                 [IMPORT {variable [AT atom]
                           | variable LPAREN {(atom|int)[COLON variable] {COMMA (atom|int)[COLON variable]}}+ RPAREN
                           }+]
@@ -118,16 +117,17 @@ caseExpressionClause ::= pattern {logicOp expression IMPL inExpression
 
 // Terms and patterns
 term ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL //TODO we can remove character bcs of int representation ?
-      | label LPAREN {[feature COLON]expression {COMMA [feature COLON]expression}} RPAREN
-      | LBRACK {expression {COMMA expression}} RBRACK
+      | atomLisp LPAREN [[feature COLON]expression {COMMA [feature COLON]expression}] RPAREN
+      | variable LPAREN [expression {COMMA expression}] RPAREN
+      | LBRACK [expression {COMMA expression}] RBRACK
 
 pattern ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL //TODO we can remove character bcs of int representation ?
-      | label LPAREN {[feature COLON]pattern {COMMA [feature COLON]pattern}} [COMMA ELLIPSIS] RPAREN
-      | pattern consBinOp pattern
-      | LBRACK {pattern} RBRACK
-      | {LPAREN pattern RPAREN}+
+      | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN
+      | LPAREN pattern consBinOp pattern RPAREN
+      | LBRACK [pattern {COMMA pattern}] RBRACK
+      | LPAREN pattern RPAREN
 
-declarationPart ::= {(VAL|VAR) {(variable|pattern) ASSIGN (expression|statement) {COMMA (variable|pattern) ASSIGN (expression|statement)}}+} //TODO semicolon ?
+declarationPart ::= (VAL|VAR) (variable|pattern) ASSIGN (expression|statement) {COMMA (variable|pattern) ASSIGN (expression|statement)} //TODO why statement ?
 
 loopDec ::= variable IN expression [DOTDOT expression] [SEMI expression]
         | variable IN expression SEMI expression SEMI expression
@@ -160,7 +160,7 @@ feature ::= UNIT | TRUE | FALSE | variable | atom | int | NIL
 
 classDescription ::= EXTENDS {expression}+
                   | PROP {expression}+
-                  | ATTR {attrInit}+ //TODO what is this ?
+                  | ATTR {attrInit}+ //TODO what is the diff between properties & attributes ?
 
 attrInit ::= ([LNOT] variable | atom | UNIT | TRUE | FALSE) [COLON expression]
 

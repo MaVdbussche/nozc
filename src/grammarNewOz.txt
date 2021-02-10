@@ -24,8 +24,7 @@ statement ::= nestConStatement
             | statement SEMI statement
             | DECLARE statement
 
-expression ::= {LPAREN}+ expression {RPAREN}+
-            | nestConExpression
+expression ::= nestConExpression
             | nestDecAnonym
             | monOp expression
             | expression POSTINC
@@ -35,11 +34,11 @@ expression ::= {LPAREN}+ expression {RPAREN}+
             | expression arithOpSecond expression
             | expression arithOpThird expression
             | expression consBinOp expression
-            | expressions evalBinOp expression
+            | expression evalBinOp expression
             | DOLLAR
             | term
             | THIS
-            | {LCURLY}+ expression {expression} {RCURLY}+
+            | LCURLY expression {expression} RCURLY //TODO not implemented like this
 
 inStatement ::= LCURLY {declarationPart} {statement} RCURLY //TODO added possibility for multiple chained statements
             | LCURLY {declarationPart} expression RCURLY
@@ -96,8 +95,8 @@ nestDecVariable ::= DEFPROC variable LPAREN {pattern {COMMA pattern}} RPAREN inS
                 [EXPORT {[(atom|int)COLON]variable {COMMA [(atom|int)COLON]variable}}+]
               }
               inStatement
-            | CLASS variable {classDescriptor} LCURLY
-              {DEF methHead [ASSIGN variable] (inExpression|inStatement)} RCURLY
+            | CLASS variableStrict [classDescriptor] LCURLY
+              {classElementDef} RCURLY
 
 nestDecAnonym ::= DEFPROC DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inStatement
             | DEF [LAZY] DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inExpression
@@ -108,8 +107,11 @@ nestDecAnonym ::= DEFPROC DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inState
                 [EXPORT {[(atom|int)COLON]variable {COMMA [(atom|int)COLON]variable}}+]
               }
               inStatement
-            | CLASS DOLLAR {classDescriptor} LCURLY
-              {DEF methHead [ASSIGN variable] (inExpression|inStatement)} RCURLY
+            | CLASS DOLLAR [classDescriptor] LCURLY
+              {classElementDef} RCURLY
+
+classElementDef ::= DEF methHead [ASSIGN variable] (inExpression|inStatement)
+                  | classDescriptor
 
 caseStatementClause ::= pattern {logicOp expression} IMPL inStatement
 
@@ -139,12 +141,12 @@ loopDec ::= variable IN expression [DOTDOT expression] [SEMI expression]
 
 pointOp ::= DOT
 
-monOp ::= LNOTNOT | RETURN
+monOp ::= LNOTNOT | RETURN | MINUS
 
 consBinOp ::= HASHTAG | COLCOL
 //COLCOL replaces PIPE from OldOz
 
-evalBinOp ::= LAND | LOR | DEFINE | COMMA | ASSIGN
+evalBinOp ::= LAND | LOR | DEFINE | ASSIGN //| COMMA //TODO comma ?!
 
 logicOp ::= LAND | LOR
 
@@ -154,26 +156,25 @@ arithOpSecond ::= PLUS | MINUS
 
 arithOpThird ::= EQUAL | NE | LT | LE | GT | GE
 
-label ::= UNIT | TRUE | FALSE | variable | atom
+//label ::= UNIT | TRUE | FALSE | variable | atom //TODO actually not used anywhere
 
-feature ::= UNIT | TRUE | FALSE | variable | atom | int | NIL
+feature ::= UNIT | TRUE | FALSE | atom | int | NIL //TODO not implemented like this
 
-classDescription ::= EXTENDS {expression}+
-                  | PROP {expression}+
-                  | ATTR {attrInit}+ //TODO what is the diff between properties & attributes ?
+classDescription ::= EXTENDS variableStrict {COMMA variableStrict}+
+                    | ATTR variable [ASSIGN expression]
+                    | PROP variable
 
-attrInit ::= ([LNOT] variable | atom | UNIT | TRUE | FALSE) [COLON expression]
+//attrInit ::= ([LNOT] variable | atom | UNIT | TRUE | FALSE) [COLON expression] //TODO not implemented
 
-methHead ::= ([LNOT] variableStrict | atomLisp | UNIT | TRUE | FALSE)
-              [LPAREN {methArg {COMMA methArg}} [COMMA ELLIPSIS] RPAREN]
-              [ASSIGN variable]
+methHead ::= ([LNOT] variableStrict | atomLisp | UNIT | TRUE | FALSE) //TODO not implemented like this
+              [LPAREN methArg {COMMA methArg} [COMMA ELLIPSIS] [DOLLAR] RPAREN]
 
-methArg ::= [feature COLON] (variable | UNDERSCORE | DOLLAR) [ASSIGN expression]
+methArg ::= [feature COLON] (variable | UNDERSCORE) [LE expression]
 
 variableStrict ::= UPPERCASE {ALPHANUM}
               | LACCENT {VARIABLECHAR | PSEUDOCHAR} LACCENT
 
-variable ::= LOWERCASE{ALPHANUM}
+variable ::= LOWERCASE {ALPHANUM}
           | APOSTROPHE {VARIABLECHAR | PSEUDOCHAR} APOSTROPHE //TODO really ?
 
 atom ::= atomLisp
@@ -195,3 +196,5 @@ int ::= [MINUS] DIGIT
         | [MINUS] ("0b"|"0B") {BINDIGIT}+
 
 float ::= [MINUS] {DIGIT}+ DOT {DIGIT} [("e" | "E")[~]{DIGIT}+]
+
+boolean ::= TRUE | FALSE

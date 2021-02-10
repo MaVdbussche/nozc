@@ -99,7 +99,7 @@ nestConStatement
     ('finally' inStatement)?
     'end'
   | 'raise' inExpression 'end'
-  | 'thread' inStatement 'end'? //TODO why is end facultative here ?
+  | 'thread' inStatement 'end'? //TODO why is 'end' facultative here ?
   | 'lock' (expression 'then')? inStatement 'end'
   | '{'+ expression expression* '}'+
   | expression ('='|':='|',') expression

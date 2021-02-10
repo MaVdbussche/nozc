@@ -1,4 +1,4 @@
-package com.barassolutions;
+package com.barassolutions.toCleanUp;
 
 /**
  * An enum of token kinds. Each entry in this enum represents the kind of a

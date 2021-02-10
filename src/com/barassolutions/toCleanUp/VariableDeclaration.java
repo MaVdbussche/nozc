@@ -1,4 +1,4 @@
-package com.barassolutions;
+package com.barassolutions.toCleanUp;
 
 public class VariableDeclaration extends Statement {
     @Override

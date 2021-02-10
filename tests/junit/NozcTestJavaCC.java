@@ -2,7 +2,7 @@
 
 package junit;
 
-import com.barassolutions.JavaCCMain;
+import com.barassolutions.NewOzToOzMain;
 import junit.framework.TestCase;
 
 import java.io.File;
@@ -41,11 +41,11 @@ public class NozcTestJavaCC extends TestCase {
                                 .toString());
                 args = new String[] { "-d", genClassDir.getAbsolutePath(),
                         files[i].toString() };
-                JavaCCMain.main(args);
+                NewOzToOzMain.main(args);
                 System.out.printf("\n\n");
 
                 // true even if a single test fails
-                errorHasOccurred |= JavaCCMain.errorHasOccurred();
+                errorHasOccurred |= NewOzToOzMain.errorHasOccurred();
             }
         }
 
@@ -72,11 +72,11 @@ public class NozcTestJavaCC extends TestCase {
                                 .toString());
                 args = new String[] { "-d", genClassDir.getAbsolutePath(),
                         files[i].toString() };
-                JavaCCMain.main(args);
+                NewOzToOzMain.main(args);
                 System.out.printf("\n\n");
 
                 // true only if all tests fail
-                errorHasOccurred &= JavaCCMain.errorHasOccurred();
+                errorHasOccurred &= NewOzToOzMain.errorHasOccurred();
             }
         }
 

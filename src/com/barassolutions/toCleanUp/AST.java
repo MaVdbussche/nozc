@@ -1,4 +1,4 @@
-package com.barassolutions;
+package com.barassolutions.toCleanUp;
 
 /**
  * Superclass of all nodes in the Abstract Syntax Tree

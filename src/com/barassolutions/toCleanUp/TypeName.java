@@ -1,7 +1,4 @@
-package com.barassolutions;
-
-import com.barassolutions.AST;
-import com.barassolutions.Context;
+package com.barassolutions.toCleanUp;
 
 /**
  * Any reference that can be denoted as a (possibly qualified) identifier.

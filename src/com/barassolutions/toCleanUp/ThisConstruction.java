@@ -1,9 +1,5 @@
-package com.barassolutions;
+package com.barassolutions.toCleanUp;
 
-import com.barassolutions.AST;
-import com.barassolutions.Context;
-import com.barassolutions.CustomPrinter;
-import com.barassolutions.Emitter;
 import java.util.ArrayList;
 
 /**

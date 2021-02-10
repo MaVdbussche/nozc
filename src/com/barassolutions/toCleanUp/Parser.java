@@ -1,8 +1,8 @@
-package com.barassolutions;
+package com.barassolutions.toCleanUp;
 
-import static com.barassolutions.TokenKind.EOF;
-import static com.barassolutions.TokenKind.IDENTIFIER;
-import static com.barassolutions.TokenKind.LPAREN;
+import static com.barassolutions.toCleanUp.TokenKind.EOF;
+import static com.barassolutions.toCleanUp.TokenKind.IDENTIFIER;
+import static com.barassolutions.toCleanUp.TokenKind.LPAREN;
 
 /**
  * Recursive descent parser. Using a LookaheadLexer, reads the tokens and produces an AST.

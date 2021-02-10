@@ -1,8 +1,6 @@
 // Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
 
-package com.barassolutions;
-
-import com.barassolutions.AST;
+package com.barassolutions.toCleanUp;
 
 /**
  * The AST node for a statement (includes expressions). The mother of all

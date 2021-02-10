@@ -89,10 +89,8 @@ nestConExpression ::= expression LPAREN {expression {COMMA expression}} RPAREN
 nestDecVariable ::= DEFPROC variable LPAREN {pattern {COMMA pattern}} RPAREN inStatement
             | DEF [LAZY] variable LPAREN {pattern {COMMA pattern}} RPAREN inExpression
             | FUNCTOR [variable] {
-                [IMPORT {variable [AT atom]
-                          | variable LPAREN {(atom|int)[COLON variable] {COMMA (atom|int)[COLON variable]}}+ RPAREN
-                        }+]
-                [EXPORT {[(atom|int)COLON]variable {COMMA [(atom|int)COLON]variable}}+]
+                (IMPORT importClause {COMMA importClause}+)
+                | (EXPORT exportClause {COMMA exportClause}+)
               }
               inStatement
             | CLASS variableStrict [classDescriptor] LCURLY
@@ -100,15 +98,19 @@ nestDecVariable ::= DEFPROC variable LPAREN {pattern {COMMA pattern}} RPAREN inS
 
 nestDecAnonym ::= DEFPROC DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inStatement
             | DEF [LAZY] DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inExpression
-            | FUNCTOR [variable] {
-                [IMPORT {variable [AT atom]
-                          | variable LPAREN {(atom|int)[COLON variable] {COMMA (atom|int)[COLON variable]}}+ RPAREN
-                          }+]
-                [EXPORT {[(atom|int)COLON]variable {COMMA [(atom|int)COLON]variable}}+]
+            | FUNCTOR [DOLLAR] {
+                (IMPORT importClause {COMMA importClause}+)
+                | (EXPORT exportClause {COMMA exportClause}+)
               }
               inStatement
             | CLASS DOLLAR [classDescriptor] LCURLY
               {classElementDef} RCURLY
+
+importClause ::=  variable
+                    [LPAREN (atom|int)[COLON variable] {COMMA (atom|int)[COLON variable]} RPAREN]
+                    [FROM atom]
+
+exportClause ::= [(atom|int) COLON] variable
 
 classElementDef ::= DEF methHead [ASSIGN variable] (inExpression|inStatement)
                   | classDescriptor

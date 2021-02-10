@@ -13,7 +13,8 @@ PARSER_BEGIN( JavaCCParser )
 
 package com.barassolutions;
 
-import java.lang.reflect.Array;import java.util.ArrayList;
+import com.barassolutions.core.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -132,9 +133,9 @@ SKIP: {" "|"\b"|"\t"|"\n"|"\r"|"\f"|"\v"}
 SKIP: {<SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>}
 
 // Multi-line comment -- ignored
-SKIP: {<"/*"> : MULTI_COMMENT}
+SKIP: {"/*" : MULTI_COMMENT}
 <MULTI_COMMENT>
-SKIP : {<"*/"> : DEFAULT | < ~[] >}
+SKIP : {"*/" : DEFAULT | < ~[] >}
 
 // Reserved words
 TOKEN : {
@@ -307,9 +308,7 @@ TOKEN:
 /////////////////////////////////////////////////////////
 //       The newOz syntactic grammar starts here         //
 /////////////////////////////////////////////////////////
-// Construct this from http://mozart2.org/mozart-v1/doc-1.4.0/notation/node3.html#chapter.context-free
-
-//TODO still nedds an entry point (filename, functor or not, etc.)
+// Constructed from http://mozart2.org/mozart-v1/doc-1.4.0/notation/node3.html#chapter.context-free
 
 /**
  * Parse an interactive statement and construct an AST
@@ -772,10 +771,8 @@ private Expression nestConExpression(): {
  *   nestDecVariable ::= DEFPROC variable LPAREN {pattern {COMMA pattern}} RPAREN inStatement
  *                 | DEF [LAZY] variable LPAREN {pattern {COMMA pattern}} RPAREN inExpression
  *                 | FUNCTOR [variable] {
- *                     [IMPORT {variable [AT atom]
- *                             | variable LPAREN {(atom|int)[COLON variable] {COMMA (atom|int)[COLON variable]}}+ RPAREN
- *                           }+]
- *                     [EXPORT {[(atom|int)COLON]variable {COMMA [(atom|int)COLON]variable}}+]
+ *                     (IMPORT importClause {COMMA importClause}+)
+ *                     | (EXPORT exportClause {COMMA exportClause}+)
  *                   }
  *                   inStatement
  *                 | CLASS variableStrict [classDescriptor] LCURLY
@@ -794,8 +791,10 @@ private Statement nestDecVariable(): {
     boolean lazy = false;
     Pattern aPattern = null;
     ArrayList<Pattern> args = new ArrayList<>();
-    ArrayList<> imports = new ArrayList<>();
-    ArrayList<> exports = new ArrayList<>();
+    ImportClause importClause = null;
+    ArrayList<ImportClause> imports = new ArrayList<>();
+    ExportClause exportClause = null;
+    ArrayList<ExportClause> exports = new ArrayList<>();
     ClassDescriptor aDescriptor = null;
     ArrayList<ClassDescriptor> descriptors = new ArrayList<>();
     ClassElement classElement = null;
@@ -827,16 +826,17 @@ private Statement nestDecVariable(): {
         | <FUNCTOR> { line = token.beginLine; }
           [ <VARIABLE> { name = token.image; } ]
           (
-            [ <IMPORT>
+            ( <IMPORT> importClause = importClause() { importClauses.add(importClause); }
               (
-                  //TODO create an new object for this ?
-                  //TODO add it to list imports
-              )* ]
-            [ <EXPORT>
+                <COMMA> importClause = importClause() { importClauses.add(importClause); }
+              )*
+            )
+            |
+            ( <EXPORT> exportClause = exportClause() { exportClauses.add(exportClause); }
               (
-                  //TODO create an new object for this ?
-                  //TODO add it to list exports
-              )* ]
+                <COMMA> exportClause = exportClause() { exportClauses.add(exportClause); }
+              )*
+            )
           )*
           statement = inStatement()
           { out = new Functor(line, name, imports, exports, statement); }
@@ -868,11 +868,9 @@ private Statement nestDecVariable(): {
  * <pre>
  *   nestDecAnonym ::= DEFPROC DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inStatement
  *                 | DEF [LAZY] DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inExpression
- *                 | FUNCTOR [variable] {
- *                     [IMPORT {variable [AT atom]
- *                             | variable LPAREN {(atom|int)[COLON variable] {COMMA (atom|int)[COLON variable]}}+ RPAREN
- *                           }+]
- *                     [EXPORT {[(atom|int)COLON]variable {COMMA [(atom|int)COLON]variable}}+]
+ *                 | FUNCTOR [DOLLAR] {
+ *                     (IMPORT importClause {COMMA importClause}+)
+ *                     | (EXPORT exportClause {COMMA exportClause}+)
  *                   }
  *                   inStatement
  *                 | CLASS DOLLAR [classDescriptor] LCURLY
@@ -891,8 +889,10 @@ private Statement nestDecAnonym(): {
     boolean lazy = false;
     Pattern aPattern = null;
     ArrayList<Pattern> args = new ArrayList<>();
-    ArrayList<> imports = new ArrayList<>();
-    ArrayList<> exports = new ArrayList<>();
+    ImportClause importClause = null;
+    ArrayList<ImportClause> imports = new ArrayList<>();
+    ExportClause exportClause = null;
+    ArrayList<ExportClause> exports = new ArrayList<>();
     ClassDescriptor aDescriptor = null;
     ArrayList<ClassDescriptor> descriptors = new ArrayList<>();
     ClassElement classElement = null;
@@ -919,18 +919,19 @@ private Statement nestDecAnonym(): {
           { out = new FunctionDef(
           line, null, args, expression, lazy); }
         | <FUNCTOR> { line = token.beginLine; }
-          [ <VARIABLE> { name = token.image; } ]
+          [ <DOLLAR> ]
           (
-            [ <IMPORT>
+            ( <IMPORT> importClause = importClause() { importClauses.add(importClause); }
               (
-                  //TODO create an new object for this ?
-                  //TODO add it to list imports
-              )* ]
-            [ <EXPORT>
+                <COMMA> importClause = importClause() { importClauses.add(importClause); }
+              )*
+            )
+            |
+            ( <EXPORT> exportClause = exportClause() { exportClauses.add(exportClause); }
               (
-                  //TODO create an new object for this ?
-                  //TODO add it to list exports
-              )* ]
+                <COMMA> exportClause = exportClause() { exportClauses.add(exportClause); }
+              )*
+            )
           )*
           statement = inStatement()
           { out = new Functor(line, name, imports, exports, statement); }
@@ -954,6 +955,79 @@ private Statement nestDecAnonym(): {
        recoverFromError(new int[]{RCURLY}, e);
     }
     { return out; }
+}
+
+/**
+ * Parse an import clause of a functor. There can be multiple of them in an import statement,
+ * separated by commas.
+ *
+ * <pre>
+ *   importClause ::= variable
+ *                    [LPAREN (atom|int)[COLON variable] {COMMA (atom|int)[COLON variable]} RPAREN]
+ *                    [FROM atom]
+ * </pre>
+
+ * @return an AST for an ImportClause.
+ */
+ private ImportClause importClause(): {
+    int line = 0;
+    String name = null;
+    String label = null;
+    Variable var = null;
+    Map<String, Variable> map = new HashMap<>();
+    String source = null;
+}
+{
+    try {
+        <VARIABLE> { line = token.beginLine; name = token.image; }
+        [
+          <LPAREN> (<ATOM>|<INT>) { label = token.image; }
+            [<COLON> <VARIABLE> { var = new Variable(token.beginLine, token.image); }]
+            { map.put(label, var); } //var will be null most of the time
+          (
+            <COMMA> (<ATOM>|<INT>) { label = token.image; var = null; } //reset the previous values !
+            [<COLON> <VARIABLE> { var = new Variable(token.beginLine, token.image); }]
+            { map.put(label, var); } //var will be null most of the time
+          )*
+        ]
+        [
+          <FROM> <ATOM> { source = token.image; }
+        ]
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return new ImportClause(line, name, map, source); }
+}
+
+/**
+ * Parse an export clause of a functor. There can be multiple of them in an export statement,
+ * separated by commas.
+ *
+ * <pre>
+ *   exportClause ::= [(atom|int) COLON] variable
+ * </pre>
+
+ * @return an AST for an ExportClause.
+ */
+ private ExportClause exportClause(): {
+    int line = 0;
+    String label = null;
+    Variable var = null;
+}
+{
+    try {
+        [
+          (<ATOM>|<INT>) { line = token.beginLine; label = token.image; }
+        ]
+        <VARIABLE>
+        { line = (line!=0 ? line : token.beginLine);
+          var = new Variable(token.beginLine, token.image); }
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return new ExportClause(line, label, var); }
 }
 
 /**

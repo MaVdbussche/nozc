@@ -13,129 +13,190 @@
 //w_1 | w_2     logical union of w_1 and w_2 (OR)
 //w_1 - w_2     difference of w_1 and w_2
 
-// Interactive statements
-interStatement ::= statement | interDeclareStatement
+// Interactive statements [ENTRYPOINT]
+interStatement ::= statement
+                  | DECLARE LCURLY {declarationPart}+ [interStatement] RCURLY
 
-interDeclareStatement ::= DECLARE LCURLY {declarationPart}+ [interStatement] RCURLY
-
-statement ::= nestCon(statement)
-            | nestDec(variable)
+statement ::= nestConStatement
+            | nestDecVariable
             | SKIP
-            | statement statement //TODO left recursive !
+            | SEMI
+            | statement SEMI statement
+            | DECLARE statement
 
-expression ::= nestCon(expression)
-            | nestDec(DOLLAR)
-            | expressions evalBinOp expression
+expression ::= nestConExpression
+            | nestDecAnonym
+            | monOp expression
+            | expression POSTINC
+            | expression POSTDEC
+            | expression pointOp expression
+            | expression arithOpFirst expression
+            | expression arithOpSecond expression
+            | expression arithOpThird expression
+            | expression consBinOp expression
+            | expression evalBinOp expression
             | DOLLAR
             | term
-            | monOp expression
             | THIS
-            | UNDERSCORE
+            | LCURLY expression {expression} RCURLY //TODO not implemented like this
 
-inStatement ::= {declarationPart} {statement}+
+inStatement ::= LCURLY {declarationPart} {statement} RCURLY //TODO added possibility for multiple chained statements
+            | LCURLY {declarationPart} expression RCURLY
 
-inExpression ::= {declarationPart} {statement} expression
+inExpression ::= LCURLY {declarationPart} [statement] expression RCURLY
+            | LCURLY {declarationPart} statement RCURLY
 
-in(statement) ::= inStatement
+nestConStatement ::= expression (ASSIGN|DEFINE) expression
+            | expression LPAREN {expression {COMMA expression}} RPAREN
+            | {LCURLY}+ expression {expression} {RCURLY}+
+            | LPAREN inStatement RPAREN
+            | IF LPAREN expression RPAREN inStatement
+              {ELSE IF LPAREN expression RPAREN inStatement}
+              [ELSE inStatement]
+            | MATCH expression LCURLY
+                {CASE caseStatementClause}+
+                [ELSE inStatement]
+              RCURLY
+            | FOR LPAREN {loopDec}+ RPAREN inStatement
+            | TRY inStatement
+              [CATCH LCURLY
+                {CASE caseStatementClause}+
+              RCURLY]
+              [FINALLY inStatement]
+            | RAISE inExpression
+            | THREAD inStatement
+            | LOCK [LPAREN expression RPAREN] inStatement
 
-in(expression) ::= inExpression
+nestConExpression ::= expression LPAREN {expression {COMMA expression}} RPAREN
+            | LPAREN expression RPAREN
+            | IF LPAREN expression RPAREN inExpression
+                {ELSE IF LPAREN expression RPAREN inExpression}
+                [ELSE inExpression]
+            | MATCH expression LCURLY
+               {CASE caseExpressionClause}+
+               [ELSE inExpression]
+              RCURLY
+            | FOR LPAREN {loopDec}+ RPAREN inExpression
+            | TRY inExpression
+              [CATCH LCURLY
+                {CASE caseExpressionClause}+
+              RCURLY]
+              [FINALLY inStatement]
+            | RAISE inExpression
+            | THREAD inExpression
+            | LOCK [LPAREN expression RPAREN] inExpression
 
-// This is in the sense of the old Oz "in" keyword
-blockIn(<T>) ::= LCURLY [(in(<T>)] RCURLY
-
-//Here, <T> is statement or expression
-nestCon(<T>) ::= expression (ASSIGN | DEFINE) expression
-            | expression LPAREN {expression COMMA} RPAREN
-            | blockIn(<T>)
-            | LPAREN in(<T>) RPAREN //TODO not sure about this one
-            | IF LPAREN expression RPAREN blockIn(<T>)
-              {ELSE IF LPAREN expression RPAREN blockIn(<T>)}
-              [ELSE blockIn(<T>)]
-            | MATCH expression LCURLY {CASE pattern {logicOp expression} IMPL (blockIn(<T>) | in(<T>))}+
-              [ELSE (blockIn(<T>) | in(<T>))] RCURLY
-            | FOR LPAREN {loopDec}+ RPAREN blockIn(<T>)
-            | TRY blockIn(<T>)
-              [CATCH LCURLY {CASE pattern IMPL (blockIn(<T>) | in(<T>))}+ RCURLY]
-              [FINALLY blockIn(<T>)]
-            | RAISE blockIn(expression)
-            | THREAD blockIn(<T>)
-            | LOCK [LPAREN expression RPAREN] blockIn(<T>)
-
-//Here, <T> is always DOLLAR or a variable
-nestDec(T) ::= DEFPROC <T> LPAREN {pattern COMMA} RPAREN blockIn(statement)
-            | DEF [LAZY] <T> LPAREN {pattern COMMA} RPAREN blockIn(expression)
-            | FUNCTOR [<T>] {
-                [IMPORT ({variable [AT atom]
-                          | variable LPAREN {(atom | int) [COLON variable] COMMA}+ RPAREN) COMMA
-                          }+]
-                [EXPORT {[(atom | int) COLON] variable COMMA}+]
+nestDecVariable ::= DEFPROC variable LPAREN {pattern {COMMA pattern}} RPAREN inStatement
+            | DEF [LAZY] variable LPAREN {pattern {COMMA pattern}} RPAREN inExpression
+            | FUNCTOR [variable] {
+                (IMPORT importClause {COMMA importClause}+)
+                | (EXPORT exportClause {COMMA exportClause}+)
               }
-              blockIn(statement)
-            | CLASS <T> {classDescriptor} LCURLY
-              {DEF methHead [ASSIGN variable] (blockIn(expression) | blockIn(statement))} RCURLY
+              inStatement
+            | CLASS variableStrict [classDescriptor] LCURLY
+              {classElementDef} RCURLY
+
+nestDecAnonym ::= DEFPROC DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inStatement
+            | DEF [LAZY] DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inExpression
+            | FUNCTOR [DOLLAR] {
+                (IMPORT importClause {COMMA importClause}+)
+                | (EXPORT exportClause {COMMA exportClause}+)
+              }
+              inStatement
+            | CLASS DOLLAR [classDescriptor] LCURLY
+              {classElementDef} RCURLY
+
+importClause ::=  variable
+                    [LPAREN (atom|int)[COLON variable] {COMMA (atom|int)[COLON variable]} RPAREN]
+                    [FROM atom]
+
+exportClause ::= [(atom|int) COLON] variable
+
+classElementDef ::= DEF methHead [ASSIGN variable] (inExpression|inStatement)
+                  | classDescriptor
+
+caseStatementClause ::= pattern {logicOp expression} IMPL inStatement
+
+caseExpressionClause ::= pattern {logicOp expression IMPL inExpression
 
 // Terms and patterns
-term ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE //TODO unit ??
-      | label LPAREN {[feature COLON] expression COMMA} RPAREN
-      | expression consBinOp expression //TODO left recursion
-      | LBRACK {expression COMMA}+ RBRACK
+term ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL //TODO we can remove character bcs of int representation ?
+      | atomLisp LPAREN [[feature COLON]expression {COMMA [feature COLON]expression}] RPAREN
+      | variable LPAREN [expression {COMMA expression}] RPAREN
+      | LBRACK [expression {COMMA expression}] RBRACK
 
-pattern ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE //TODO unit ??
-      | label LPAREN {[feature COLON] pattern COMMA} [COMMA ELLIPSIS] RPAREN
-      | pattern consBinOp pattern //TODO left recursion
-      | LBRACK {pattern}+ RBRACK
+pattern ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL //TODO we can remove character bcs of int representation ?
+      | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN
+      | LPAREN pattern consBinOp pattern RPAREN
+      | LBRACK [pattern {COMMA pattern}] RBRACK
+      | LPAREN pattern RPAREN
 
-declarationPart ::= {(VAL | VAR) {(variable | pattern) ASSIGN (expression | statement) COMMA}+ [SEMI]}
+declarationPart ::= (VAL|VAR) (variable|pattern) ASSIGN (expression|statement) {COMMA (variable|pattern) ASSIGN (expression|statement)} //TODO why statement ?
 
 loopDec ::= variable IN expression [DOTDOT expression] [SEMI expression]
         | variable IN expression SEMI expression SEMI expression
         | BREAK COLON variable
         | CONTINUE COLON variable
         | RETURN COLON variable
-        | DEFAULT COLON expression
+        | DEFLT COLON expression
         | COLLECT COLON variable
 
-binaryOp ::= evalBinOp | consBinOp
+pointOp ::= DOT
+
+monOp ::= LNOTNOT | RETURN | MINUS
 
 consBinOp ::= HASHTAG | COLCOL
+//COLCOL replaces PIPE from OldOz
 
-evalBinOp ::= PLUS | MINUS | STAR | SLASH | MODULO | DOT
-          | LAND | LOR | DEFINE | COMMA | ASSIGN | EQUAL
-          | NE | LT | LE | GT | GE
-
-monOp ::= PLUS | MINUS
+evalBinOp ::= LAND | LOR | DEFINE | ASSIGN //| COMMA //TODO comma ?!
 
 logicOp ::= LAND | LOR
 
-label ::= UNIT | TRUE | FALSE | variable | atom
+arithOpFirst ::= STAR | SLASH | MODULO | HAT | STARSTAR //TODO what is it ? Do we keep it in newOz ?
 
-feature ::= UNIT | TRUE | FALSE | variable | atom | int
+arithOpSecond ::= PLUS | MINUS
 
-classDescription ::= EXTENDS {expression}+
-                  | PROP {expression}+
-                  | ATTR {attrInit}+ //TODO what is this ?
+arithOpThird ::= EQUAL | NE | LT | LE | GT | GE
 
-attrInit ::= ([LNOT] variable | atom | UNIT | TRUE | FALSE) [COLON expression]
+//label ::= UNIT | TRUE | FALSE | variable | atom //TODO actually not used anywhere
 
-methHead ::= ([LNOT] variableStrict | atomLisp | UNIT | TRUE | FALSE)
-              [LPAREN {methArg COMMA} [COMMA ELLIPSIS] RPAREN]
-              [ASSIGN variable]
+feature ::= UNIT | TRUE | FALSE | atom | int | NIL //TODO not implemented like this
 
-methArg ::= [feature COLON] (variable | UNDERSCORE | DOLLAR) [ASSIGN expression]
+classDescription ::= EXTENDS variableStrict {COMMA variableStrict}+
+                    | ATTR variable [ASSIGN expression]
+                    | PROP variable
+
+//attrInit ::= ([LNOT] variable | atom | UNIT | TRUE | FALSE) [COLON expression] //TODO not implemented
+
+methHead ::= ([LNOT] variableStrict | atomLisp | UNIT | TRUE | FALSE) //TODO not implemented like this
+              [LPAREN methArg {COMMA methArg} [COMMA ELLIPSIS] [DOLLAR] RPAREN]
+
+methArg ::= [feature COLON] (variable | UNDERSCORE) [LE expression]
 
 variableStrict ::= UPPERCASE {ALPHANUM}
-              | APOSTROPHE {VARIABLECHAR | PSEUDOCHAR} APOSTROPHE
+              | LACCENT {VARIABLECHAR | PSEUDOCHAR} LACCENT
 
-variable ::= (UPPERCASE | LOWERCASE) {ALPHANUM}
-          | APOSTROPHE {VARIABLECHAR | PSEUDOCHAR} APOSTROPHE
+variable ::= LOWERCASE {ALPHANUM}
+          | APOSTROPHE {VARIABLECHAR | PSEUDOCHAR} APOSTROPHE //TODO really ?
 
 atom ::= atomLisp
         | RACCENT {ATOMCHAR | PSEUDOCHAR} RACCENT
+
+atomLisp ::= APOSTROPHE (LOWERCASE | UPPERCASE) {ALPHANUM}
 
 string ::= QUOTE {STRINGCHAR | PSEUDOCHAR} QUOTE
 
 character ::= CHARINT
             | DEGREE CHARCHAR
             | DEGREE PSEUDOCHAR
+            | CHAR // TODO in this case we should send a warning during analysis that it is not supported in underlying oldOz
 
-atomLisp ::= APOSTROPHE (LOWERCASE | UPPERCASE) {alphanumericChar} - keywords //TODO
+int ::= [MINUS] DIGIT
+        | [MINUS] NONZERODIGIT {DIGIT}
+        | [MINUS] "0" {OCTDIGIT}+
+        | [MINUS] ("0x"|"0X") {HEXDIGIT}+
+        | [MINUS] ("0b"|"0B") {BINDIGIT}+
+
+float ::= [MINUS] {DIGIT}+ DOT {DIGIT} [("e" | "E")[~]{DIGIT}+]
+
+boolean ::= TRUE | FALSE

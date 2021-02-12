@@ -28,29 +28,29 @@ ATTR    ::= "attr"
 BREAK   ::= "break"
 CASE    ::= "case"
 CATCH   ::= "catch"
-CHOICE  ::= "choice"
+//CHOICE  ::= "choice"
 CLASS   ::= "class"
-COLLECT ::= "collect"
-COND    ::= "cond"
+//COLLECT ::= "collect"
+//COND    ::= "cond"
 CONTINUE  ::= "continue"
 DECLARE ::= "declare"
 DEF     ::= "def"
 DEFPROC ::= "defproc"
 DEFAULT ::= "default"
 //DEFINE  ::= "define"
-DIS     ::= "dis"
+//DIS     ::= "dis"
 //DIV     ::= "div"
 DO      ::= "do"
 ELSE    ::= "else"
-ELSECASE  ::= "elsecase"
+//ELSECASE  ::= "elsecase"
 //ELSEIF  ::= "elseif"
 //ELSEOF  ::= "elseof"
 //END     ::= "end"
 EXPORT  ::= "export"
 EXTENDS ::= "extends"
-FAIL    ::= "fail"
+//FAIL    ::= "fail"
 FALSE   ::= "false"
-FEAT    ::= "feat"
+//FEAT    ::= "feat"
 FINALLY ::= "finally"
 FOR     ::= "for"
 FROM    ::= "from"
@@ -59,21 +59,22 @@ FUNCTOR ::= "functor"
 IF      ::= "if"
 IMPORT  ::= "import"
 IN      ::= "in"
-//LAZY    ::= "lazy" //TODO quid ?
+LAZY    ::= "lazy"
 //LOCAL   ::= "local"
 LOCK    ::= "lock"
 MATCH   ::= "match"
 METH    ::= "meth"
-MOD     ::= "mod"
-NOT     ::= "not"
-OF      ::= "of"
+//MOD     ::= "mod"
+NIL     ::= "nil"
+//NOT     ::= "not"
+//OF      ::= "of"
 OR      ::= "or"
 //ORELSE  ::= "orelse"
-PREPARE ::= "prepare"
+//PREPARE ::= "prepare"
 //PROC    ::= "proc"
 PROP    ::= "prop"
 RAISE   ::= "raise"
-REQUIRE ::= "require"
+//REQUIRE ::= "require"
 RETURN  ::= "return"
 //SELF    ::= "self"
 SKIP    ::= "skip"
@@ -101,7 +102,7 @@ LAND        ::= "&&" ok
 PIPE        ::= "|" ok TODO DELETED
 LOR         ::= "||" ok
 LNOT        ::= "!" ok
-//LNOTNOT     ::= "!!" skipped
+LNOTNOT     ::= "!!" ok
 MINUS       ::= "-" ok
 PLUS        ::= "+" ok
 STAR        ::= "*" ok
@@ -117,21 +118,20 @@ LACCENT     ::= "`" ok
 RACCENT     ::= "´" ok
 HAT         ::= "^" ok
 BOX         ::= "[]" ok
-TILDE       ::= "~" ok
-DEGREE      ::= "°"
-COMMERCAT   ::= "@" ok
-LARROW      ::= "<-" ok
-RARROW      ::= "->" ok
-FDASSIGN    ::= "=:" //skipped
-FDNE        ::= "\=:" //skipped
-FDLT        ::= "<:" //skipped
-FDLE        ::= "=<:" //skipped
-FDGT        ::= ">:" //skipped
-FDGE        ::= ">=:" //skipped
+//TILDE       ::= "~" ok
+DEGREE      ::= "°" ok
+//COMMERCAT   ::= "@" ok
+//LARROW      ::= "<-" ok
+//RARROW      ::= "->" ok
+//FDASSIGN    ::= "=:" //skipped
+//FDNE        ::= "\=:" //skipped
+//FDLT        ::= "<:" //skipped
+//FDLE        ::= "=<:" //skipped
+//FDGT        ::= ">:" //skipped
+//FDGE        ::= ">=:" //skipped
 COLCOL      ::= "::" ok
-COLCOLCOL   ::= ":::" ok
+//COLCOLCOL   ::= ":::" ok
 
-COMMENTCHAR ::= "/" ok
 COMMA       ::= "," ok
 DOT         ::= "." ok
 LBRACK      ::= "[" ok
@@ -152,10 +152,10 @@ DIGIT          ::= "0"|...|"9" ok
 NONZERODIGIT   ::= "1"|...|"9" ok
 CHARINT        ::= "0"|...|"255" ok
 ALPHANUM       ::= UPPERCASE | LOWERCASE | DIGIT | "_" ok
-ATOMCHAR       ::= CHAR - ("'"|"\"|NUL) TODO
-STRINGCHAR     ::= CHAR - ("""|"\"|NUL) TODO
-VARIABLECHAR   ::= CHAR - ("`"|"\"|NUL) TODO
-CHARCHAR       ::= CHAR - ("\"|NUL) TODO
+ATOMCHAR       ::= CHAR - ("'"|"\")
+STRINGCHAR     ::= CHAR - ("""|"\")
+VARIABLECHAR   ::= CHAR - ("`"|"\")
+CHARCHAR       ::= CHAR - ("\")
 ESCCHAR        ::= "a"|"b"|"f"|"n"|"r"|"t"|"v"|"\"|"'"|"""|"`"|"°"
 OCTDIGIT       ::= "0"|...|"7" ok
 HEXDIGIT       ::= "0"|...|"9"|"A"|...|"F"|"a"|...|"f" ok
@@ -163,7 +163,7 @@ BINDIGIT       ::= "0"|"1" ok
 NONZERODIGIT   ::= "1"|...|"9" ok
 PSEUDOCHAR     ::= "\" OCTDIGIT OCTDIGIT OCTDIGIT ok
                 | "\" ("x" | "X") HEXDIGIT HEXDIGIT ok
-                | "\" ESCCHAR ok
 
+CHAR           ::= TODO all the keyboard basically ?!
 // End of file
 EOF            ::= "<end of file>"

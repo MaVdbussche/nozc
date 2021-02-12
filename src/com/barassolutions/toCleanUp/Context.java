@@ -161,7 +161,7 @@ class ClassContext extends Context {
 class LocalContext extends Context {
 
   public LocalContext(Context surrounding) {
-    super(surrounding, surrounding.classContext surrounding.compilationBlockContext());
+    super(surrounding, surrounding.classContext, surrounding.compilationBlockContext());
   }
 
   /**

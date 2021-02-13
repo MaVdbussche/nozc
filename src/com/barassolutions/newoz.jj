@@ -185,6 +185,7 @@ TOKEN : {
 //| < REQUIRE: "require" > //TODO What's this ?
 | < RETURN: "return" >
 | < SKP: "skip" >
+| < SUPER: "super" >
 | < THIS: "this" >
 | < THREAD: "thread" >
 | < TRUE: "true" >
@@ -197,6 +198,8 @@ TOKEN : {
 // Operators
 TOKEN : {
   <ASSIGN: "=">
+| <PLUSASSIGN: "+=">
+| <MINUSASSIGN: "-=">
 | <DEFINE: ":=">
 | <EQUAL: "==">
 | <NE: "\\=">
@@ -217,8 +220,8 @@ TOKEN : {
 | <STAR: "*">
 //| <STARSTAR: "**">
 | <SLASH: "/">
-| <POSTINC: "++">
-| <POSTDEC: "--">
+| <INC: "++">
+| <DEC: "--">
 | <BACKSLASH: "\\">
 | <MODULO: "%">
 | <HASHTAG: "#">
@@ -267,12 +270,12 @@ TOKEN : {
 | < VARIABLE: <LOWERCASE>(<ALPHANUM>)* >
 | < ATOM: (<ATOMLISP> | "´" (<ESC>| <PSEUDO_CHAR> | ~["´","\\","\n","\r"]) "´") >
 | < ATOMLISP: <APOSTROPHE> (<LOWERCASE>|<UPPERCASE>) (<ALPHANUM>)* >
-| < LABEL: (<VARIABLE>|<ATOM>|<BOOLEAN>|<UNIT>) >
+//| < LABEL: (<VARIABLE>|<ATOM>|<BOOLEAN>|<UNIT>) >
 | < STRING: "\"" (<ESC>| <PSEUDO_CHAR> | ~["\"","\\","\n","\r"]) "\"" >
 | < CHARACTER: (<DEGREE>(<CHARCHAR> | <PSEUDO_CHAR>) | <CHARINT>) >
 | < INT: (<DECINT> | <HEXINT> | <OCTINT> | <BININT>) >
 | < FLOAT: (<MINUS>)? (<DIGIT>)+ <DOT> (<DIGIT>)* (("e"|"E")("~")?(<DIGIT>)+)? >
-| < BOOLEAN: (<TRUE> | <FALSE>) >
+//| < BOOLEAN: (<TRUE> | <FALSE>) >
 
 | < #UPPERCASE: ["A"-"Z"] >
 | < #LOWERCASE: ["a"-"z"] >
@@ -288,7 +291,7 @@ TOKEN : {
 | < #HEXDIGIT: (<DIGIT> | ["A"-"F"] | ["a"-"f"]) >
 | < #BINDIGIT: ["0"-"1"] >
 
-| < #ESCAPE_CHAR: ("a"|"b"|"f"|"n"|"r"|"t"|"v"|<BACKSLASH>|<APOSTROPHE>|<QUOTE>|<DEGREE>) > //TODO <LACCENT> here iff it is present in <VARIABLESTRICT definition
+| < #ESCAPE_CHAR: ("a"|"b"|"f"|"n"|"r"|"t"|<BACKSLASH>|<APOSTROPHE>|<QUOTE>|<DEGREE>) > //TODO <LACCENT> here iff it is present in <VARIABLESTRICT definition
 | < #ESC: <BACKSLASH> <ESCAPE_CHAR> >
 | < #CHARCHAR: ~["\\"] >
 // In the classes of words <variable>, <atom>, <string>, and <character> we use pseudo-characters,
@@ -361,8 +364,8 @@ private InterStatement interStatement(): {
  *                  | nestDecVariable
  *                  | SKIP
  *                  | SEMI
- *                  //| statement SEMI statemnt //TODO removable if inStatement is correct ?
- *                  | DECLARE statement
+ *                  //| DECLARE statement
+ *                  | RETURN expression
  * </pre>
  *
  * @return an AST for a statement.
@@ -376,10 +379,13 @@ private Statement statement(): {
         statement = nestConStatement() { line = token.beginLine; }
         | statement = nestDecVariable() { line = token.beginLine; }
         | <SKP>
-        { line = token.beginLine;
+          { line = token.beginLine;
           statement = new SkipStatement(line); } |
-        <SEMI> | //Ignore it
-        <DECLARE> statement = statement() { line = token.beginLine; }
+        <SEMI> //Ignore it
+        //| <DECLARE> statement = statement() { line = token.beginLine; }
+        | <RETURN> { line = token.beginLine; }
+          expression = expression()
+          { statement = new ReturnStatement(line, expression); }
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{EOF}, e);
@@ -391,18 +397,8 @@ private Statement statement(): {
  * Parse an expression.
  *
  * <pre>
- *   expression ::= {LPAREN}+ expression {RPAREN}+ //TODO create parenthesizedExpression instead
- *                  | nestConExpression
+ *   expression ::= nestConExpression
  *                  | nestDecAnonym
- *                  | monOp expression
- *                  | expression POSTINC
- *                  | expression POSTDEC
- *                  | expression pointOp expression
- *                  | expression arithOpFirst expression
- *                  | expression arithOpSecond expression
- *                  | expression arithOpThird expression
- *                  | expression consBinOp expression
- *                  | expression evalBinOp expression
  *                  | DOLLAR
  *                  | term
  *                  | THIS
@@ -421,29 +417,6 @@ private Expression expression(): {
     try {
           expression = nestConExpression() { line = expression.line(); }
         | expression = nestDecAnonym() { line = expression.line(); }
-        | operator = monOp() { line = token.beginLine; }
-          expression = expression()
-          { expression = new MonOpExpression(line, operator, expression); }
-        | expression = expression() { line = token.beginLine; } //TODO look at how j-- handles postIncExpr
-          (
-            <POSTINC> { expression = new PostFixExpression(line, expression, "++"); }
-            | <POSTDEC> { expression = new PostFixExpression(line, expression, "--"); }
-          )
-        | expression = expression() { line = expression.line(); }
-          (
-            operator = pointOp()
-            expression2 = expression()
-            { expression = new SelectorExpression(line, expression, expression2); } |
-            (
-              operator = arithOpFirst() |
-              operator = arithOpSecond() |
-              operator = arithOpThird() |
-              operator = consBinOp() |
-              operator = evalBinOp()
-            )
-            expression2 = expression()
-            { expression = new BinaryExpression(line, expression, expression2); }
-          )
         | <DOLLAR>
           { line = token.beginLine;
             expression = new AnonymExpression(line); }
@@ -463,10 +436,33 @@ private Expression expression(): {
 }
 
 /**
+ * Parse a parenthesized expression.
+ *
+ * <pre>
+ *   parExpression ::= LPAREN expression RPAREN
+ * </pre>
+ *
+ * @return an AST for a parExpression.
+ */
+
+private Expression parExpression(): {
+    Expression expr = null;
+}
+{
+    try {
+        <LPAREN> expr = expression() <RPAREN>
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return expr; }
+}
+
+/**
  * Parse an inStatement, that is a/multiple statement/s included in a block.
  *
  * <pre>
- *   inStatement ::= LCURLY {declarationPart} {statement}+ RCURLY
+ *   inStatement ::= LCURLY {declarationPart} {statement} RCURLY
  *                    | LCURLY {declarationPart} expression RCURLY
  * </pre>
  *
@@ -487,11 +483,11 @@ private InStatement inStatement(): {
           aDecl = declarationPart() { decls.add(aDecl); }
         )*
         (
+          expression = expression()
+          |
           (
             aStatement = statement() { statements.add(aStatement); }
           )*
-          |
-          expression = expression()
         )
         <RCURLY>
     }
@@ -540,11 +536,11 @@ private InExpression inExpression(): {
  * Parse a nestable construct (statement).
  *
  * <pre>
- *   nestConStatement ::= expression (ASSIGN|DEFINE) expression
- *                    | variable LPAREN {expresseion {COMMA expression}} RPAREN
+ *   nestConStatement ::= assignmentExpression
+ *                    | variable LPAREN {expression {COMMA expression}} RPAREN
  *                    | {LCURLY}+ expression {expression} {RCURLY}+ //TODO create curledExpression instead
  *                    | LPAREN inStatement RPAREN
- *                    | IF LPAREN expression RPAREN inStatement
+ *                    | IF parExpression inStatement
  *                      {ELSE IF LPAREN expression RPAREN inStatement}
  *                      [ELSE inStatement]
  *                    | MATCH expression LCURLY
@@ -572,7 +568,7 @@ private Statement nestConStatement(): {
     Statement statement2 = null;
     Expression expression = null;
     Expression expression2 = null;
-    ArrayList<Expression> args = new ArrayList<Expression>();
+    ArrayList<Expression> args = new ArrayList<Expression>(); //TODO move to a map instead
     ArrayList<Expression> conds = new ArrayList<Expression>();
     ArrayList<InStatement> consq = new ArrayList<InStatement>();
     CaseStatementClause aClause = null;
@@ -582,14 +578,9 @@ private Statement nestConStatement(): {
 }
 {
     try {
-        expression = expression() { line = expression.line(); }
-         (
-          <ASSIGN> expression2 = expression()
-          { out = new AssignStatement(line, expression, expression2, "assign"); }
-          | <DEFINE> expression2 = expression()
-          { out = new AssignStatement(line, expression, expression2, "define"); }
-         )
-        | <VARIABLE> { line = token.beginLine; name = token.image; }
+        expression = assignmentExpression() { line = expression.line();
+         out = expression; }
+         | <VARIABLE> { line = token.beginLine; name = token.image; }
           <LPAREN> expression2 = expression() { args.add(expression2); }
           (
             <COMMA> expression2 = expression() { args.add(expression2); }
@@ -598,10 +589,10 @@ private Statement nestConStatement(): {
         | <LPAREN> { line = token.beginLine; } statement = inStatement() <RPAREN>
           { out = statement; }
         | <IF> { line = token.beginLine; }
-          <LPAREN> expression = expression() <RPAREN> statement = inStatement()
+          expression = parExpression() statement = inStatement()
           { conds.add(expression); consq.add(statement); }
           (
-            <ELSE> <IF> <LPAREN> expression = expression() <RPAREN> statement = inStatement()
+            <ELSE> <IF> expression = parExpression() statement = inStatement()
             { conds.add(expression); consq.add(statement); }
           )*
           [
@@ -1073,7 +1064,7 @@ private Statement nestDecAnonym(): {
  * Parse a case/match statement clause.
  *
  * <pre>
- *   caseStatementClause ::= pattern {logicOp expression} IMPL inStatement
+ *   caseStatementClause ::= pattern {(LAND|LOR) conditionalExpression} IMPL inStatement
  * </pre>
 
  * @return an AST for a caseStatementClause.
@@ -1082,7 +1073,7 @@ private CaseStatementClause caseStatementClause(): {
     int line = 0;
     Statement statement = null;
     Pattern pattern = null;
-    LogicOp logicOp = null;
+    Operator op = null;
     ArrayList<LogicOp> ops = new ArrayList<LogicOp>();
     Expression expression = null;
     ArrayList<Expression> exprs = new ArrayList<Expression>();
@@ -1091,8 +1082,9 @@ private CaseStatementClause caseStatementClause(): {
     try {
         pattern = pattern() { line = pattern.line(); }
         (
-          logicOp = logicOp()
-          expression = expression()
+          (<LAND> { op = new Operator(token.beginLine, Operator.AND); }
+          | <LOR> { op = new Operator(token.beginLine, Operator.OR); })
+          expression = conditionalExpression()
           { ops.add(logicOp); exprs.add(expression); }
         )*
         <IMPL> statement = inStatement()
@@ -1108,7 +1100,7 @@ private CaseStatementClause caseStatementClause(): {
  * Parse a case/match expression clause.
  *
  * <pre>
- *   caseExpressionClause ::= pattern {logicOp expression} IMPL inExpression
+ *   caseExpressionClause ::= pattern {(LAND|LOR) conditionalExpression} IMPL inExpression
  * </pre>
 
  * @return an AST for a caseExpressionClause.
@@ -1117,7 +1109,7 @@ private CaseExpressionClause caseExpressionClause(): {
     int line = 0;
     Statement expression = null;
     Pattern pattern = null;
-    LogicOp logicOp = null;
+    Operator op = null;
     ArrayList<LogicOp> ops = new ArrayList<LogicOp>();
     Expression aExpression = null;
     ArrayList<Expression> exprs = new ArrayList<Expression>();
@@ -1126,7 +1118,8 @@ private CaseExpressionClause caseExpressionClause(): {
     try {
         pattern = pattern() { line = pattern.line(); }
         (
-          logicOp = logicOp()
+          (<LAND> { op = new Operator(token.beginLine, Operator.AND); }
+          | <LOR> { op = new Operator(token.beginLine, Operator.OR); })
           aExpression = expression()
           { ops.add(logicOp); exprs.add(aExpression); }
         )*
@@ -1140,13 +1133,536 @@ private CaseExpressionClause caseExpressionClause(): {
 }
 
 /**
+ * Parse an assignment expression.
+ *
+ * <pre>
+ *   assignmentExpression ::= assignmentExpression
+ *                              [(ASSIGN|PLUSASSIGN|MINUSASSIGN|DEFINE) assignmentExpression]
+ * </pre>
+ *
+ * @return an AST for an AssignmentExpression.
+ */
+private Expression assignmentExpression(): {
+    int line = 0;
+    Expression lhs = null;
+    Expression rhs = null;
+}
+{
+    try {
+        lhs = conditionalExpression() { line = token.beginLine; }
+        [
+            (<ASSIGN> rhs = assignmentExpression()
+                { lhs = new OperationAssignment(line, lhs, rhs); }
+             | <PLUSASSIGN>  rhs = assignmentExpression()
+                { lhs = new OperationPlusAssignment(line, lhs, rhs); }
+             | <MINUSASSIGN> rhs = assignmentExpression()
+                { lhs = new OperationMinusAssignment(line, lhs, rhs); }
+             | <DEFINE> rhs = assignmentExpression()
+                { lhs = new OperationsAssignmentDefine(line, lhs, rhs); }
+            )
+        ]
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return lhs; }
+}
+
+/**
+ * Parse a conditional expression.
+ *
+ * <pre>
+ *   conditionalExpression ::= conditionalOrExpression
+ * </pre>
+ *
+ * @return an AST for a conditionalExpression.
+ */
+private Expression conditionalExpression(): {
+    int line = 0;
+    Expression lhs = null;
+}
+{
+    try {
+        lhs = conditionalOrExpression() //{ line = token.beginLine; }
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return lhs; }
+}
+
+/**
+ * Parse a conditional OR expression.
+ *
+ * <pre>
+ *   conditionalOrExpression ::= conditionalAndExpression {LOR conditionalAndExpression}
+ * </pre>
+ *
+ * @return an AST for a conditionalOrExpression.
+ */
+private Expression conditionalOrExpression(): {
+    int line = 0;
+    Expression lhs = null;
+    Expression rhs = null;
+}
+{
+    try {
+        lhs = conditionalAndExpression() { line = token.beginLine; }
+        (
+            <LOR> rhs = conditionalAndExpression()
+            { lhs = new OperationLogicalOr(line, lhs, rhs); }
+        )*
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return lhs; }
+}
+
+/**
+ * Parse a conditional AND expression.
+ *
+ * <pre>
+ *   conditionalAndExpression ::= equalityExpression {LAND equalityExpression}
+ * </pre>
+ *
+ * @return an AST for a conditionalAndExpression.
+ */
+private Expression conditionalAndExpression(): {
+    int line = 0;
+    Expression lhs = null;
+    Expression rhs = null;
+}
+{
+    try {
+        lhs = equalityExpression() { line = token.beginLine; }
+        (
+            <LAND> rhs = equalityExpression()
+            { lhs = new OperationLogicalAnd(line, lhs, rhs); }
+        )*
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return lhs; }
+}
+
+/**
+ * Parse an equality expression.
+ *
+ * <pre>
+ *   equalityExpression ::= relationalExpression {EQUAL relationalExpression}
+ * </pre>
+ *
+ * @return an AST for an equalityExpression.
+ */
+private Expression equalityExpression(): {
+    int line = 0;
+    Expression lhs = null;
+    Expression rhs = null;
+}
+{
+    try {
+        lhs = relationalExpression() { line = token.beginLine; }
+        (
+            <EQUAL> rhs = relationalExpression()
+            { lhs = new OperationLogicalEqual(line, lhs, rhs); }
+        )*
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return lhs; }
+}
+
+/**
+ * Parse a relational expression.
+ *
+ * <pre>
+ *   relationalExpression ::= additiveExpression {(GT|GE|LT|LE) additiveExpression}
+ * </pre>
+ *
+ * @return an AST for a relationalExpression.
+ */
+private Expression relationalExpression(): {
+    int line = 0;
+    Expression lhs = null;
+    Expression rhs = null;
+}
+{
+    try {
+        lhs = additiveExpression() { line = token.beginLine; }
+        [
+            <GT> rhs = additiveExpression() { lhs = new OperationLogicalGreaterThan(line, lhs, rhs); }
+            | <GE> rhs = additiveExpression() { lhs = new OperationLogicalGreaterEqual(line, lhs, rhs); }
+            | <LT> rhs = additiveExpression() { lhs = new OperationLogicalLessThan(line, lhs, rhs); }
+            | <LE> rhs = additiveExpression() { lhs = new OperationLogicalLessEqual(line, lhs, rhs); }
+        ]
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return lhs; }
+}
+
+/**
+ * Parse an additive expression.
+ *
+ * <pre>
+ *   additiveExpression ::= multiplicativeExpression {(PLUS|MINUS) multiplicativeExpression}
+ * </pre>
+ *
+ * @return an AST for an additiveExpression.
+ */
+private Expression additiveExpression(): {
+    int line = 0;
+    Expression lhs = null;
+    Expression rhs = null;
+}
+{
+    try {
+        lhs = multiplicativeExpression() { line = token.beginLine; }
+        (
+            <PLUS> rhs = multiplicativeExpression()
+                { lhs = new OperationPlus(line, lhs, rhs); }
+            | <MINUS> rhs = multiplicativeExpression()
+                { lhs = new OperationMinus(line, lhs, rhs); }
+        )*
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return lhs; }
+}
+
+/**
+ * Parse a multiplicative expression.
+ *
+ * <pre>
+ *   multiplicativeExpression ::= unaryExpression {(STAR|SLASH|MODULO) unaryExpression}
+ * </pre>
+ *
+ * @return an AST for a multiplicativeExpression.
+ */
+private Expression multiplicativeExpression(): {
+    int line = 0;
+    Expression lhs = null;
+    Expression rhs = null;
+}
+{
+    try {
+        lhs = unaryExpression() { line = token.beginLine; }
+        (
+            <STAR> rhs = unaryExpression()
+                { lhs = new OperationMultiplication(line, lhs, rhs); }
+            | <SLASH> rhs = unaryExpression()
+                { lhs = new OperationDivision(line, lhs, rhs); }
+            | <MODULO> rhs = unaryExpression()
+                { lhs = new OperationModulo(line, lhs, rhs); }
+        )*
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return lhs; }
+}
+
+/**
+ * Parse an unary expression.
+ *
+ * <pre>
+ *   unaryExpression ::= (INC|DEC|MINUS|PLUS) unaryExpression
+ *                          | simpleUnaryExpression
+ * </pre>
+ *
+ * @return an AST for an unaryExpression.
+ */
+private Expression unaryExpression(): {
+    int line = 0;
+    Expression expr = null;
+    Expression expr2 = null;
+}
+{
+    try {
+        <INC> { line = token.beginLine; }
+        expr2 = unaryExpression()
+        { expr = new OperationPreIncr(line, expr2); }
+        | <DEC> { line = token.beginLine; }
+            expr2 = unaryExpression()
+            { expr = new OperationPreDecr(line, expr2); }
+        | <PLUS> { line = token.beginLine; }
+            expr2 = unaryExpression()
+            { expr = new OperationValidate(line, expr2); }
+        | <MINUS> { line = token.beginLine; }
+            expr2 = unaryExpression()
+            { expr = new OperationNegate(line, expr2); }
+        | expr = simpleUnaryExpression()
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return expr; }
+}
+
+/**
+ * Parse a simple unary expression.
+ *
+ * <pre>
+ *   simpleUnaryExpression ::= LNOT unaryExpression
+ *                          | postfixExpression
+ * </pre>
+ *
+ * @return an AST for a simpleUnaryExpression.
+ */
+private Expression simpleUnaryExpression(): {
+    int line = 0;
+    Expression expr = null;
+    Expression expr2 = null;
+}
+{
+    try {
+        <LNOT> { line = token.beginLine; }
+        expr2 = unaryExpression()
+        { expr = new OperatorLogicalNot(line, expr2); }
+        | expr = postfixExpression()
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return expr; }
+}
+
+/**
+ * Parse a postfix expression.
+ *
+ * <pre>
+ *   postfixExpression ::= primary {(DEC|INC)}
+ * </pre>
+ *
+ * @return an AST for a postfixExpression.
+ */
+
+private Expression postfixExpression(): {
+    int line = 0;
+    Expression primaryExpr = null;
+}
+{
+    try {
+        primaryExpr = primary() { line = primaryExpr.line(); }
+        (
+            <DEC> { primaryExpr = new OperationPostDecr(line, primaryExpr); }
+            | <INC> { primaryExpr = new OperationPostInc(line, primaryExpr); }
+        )*
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[]{RCURLY}, e );
+    }
+    { return primaryExpr; }
+}
+
+/**
+ * Parse a primary expression.
+ *
+ * <pre>
+ *   primary ::= parExpression
+ *             | THIS DOT variable [LPAREN {expression {COMMA expression}} RPAREN]
+ *             | SUPER LPAREN variableStrict RPAREN
+ *                      DOT variable [LPAREN {expression {COMMA expression}} RPAREN]
+ *             | literal
+ *             | qualifiedIdentifier
+ *             | initializer
+ * </pre>
+ *
+ * @return an AST for a primaryExpression.
+ */
+private Expression primary(): {
+    int line = 0;
+    Expr out = null;
+    Expression expr = null;
+    Variable variable = null;
+    String name = null;
+    Expression arg = null;
+    ArayList<Expression> args = new ArrayList<Expression>();
+}
+{
+    try {
+        expr = parExpression()
+        | <THIS> { line = token.beginLine; }
+            <DOT> <VARIABLE> { variable = new Variable(line, token.image);
+            out = new ExpressionThisAttribute(line, variable); } //TODO actually, attributes are private in Oz
+            [
+                <LPAREN>
+                (
+                    arg = expression() { args.add(arg); }
+                    (
+                        <COMMA> arg = expression() { args.add(arg); }
+                    )*
+                )*
+                <RPAREN>
+                { out = new ExpressionThisMethod(line, variable, args); }
+            ]
+        | <SUPER> { line = token.beginLine; }
+            <LPAREN> <VARIABLESTRICT> { name = token.image; } <RPAREN>
+            <DOT> <VARIABLE> { variable = new Variable(token.beginLine, token.image);
+            out = new ExpressionSuperAttribute(line, name, variable); } //TODO actually, attributes are private in Oz
+            [
+                <LPAREN>
+                (
+                    arg = expression() { args.add(arg); }
+                    (
+                        <COMMA> arg = expression() { args.add(arg); }
+                    )*
+                )*
+                <RPAREN>
+                { out = new ExpressionSuperMethod(line, variable, args); }
+            ]
+        | out = literal()
+        | out = qualifiedIdentifier()
+        | out = initializer()
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[]{RCURLY}, e );
+    }
+    { return out; }
+}
+
+/**
+ * Parse a qualified identifier.
+ *
+ * <pre>
+ *   qualifiedIdentifier ::= variable {DOT variable [LPAREN {expression {COMMA expression}} RPAREN]}
+ * </pre>
+ *
+ * @return an AST for a qualifiedIdentifier.
+ */
+private Expression qualifiedIdentifier(): {
+    int line = 0;
+    Expression out = null;
+    Variable var = null;
+    Variable var = null;
+    Expression arg = null;
+    ArrayList<Expression> args = new ArrayList<Expression>();
+}
+{
+    try {
+        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image); out = var; }
+        (
+            <DOT> <VARIABLE>
+            { var2 = new Variable(token.beginLine, token.image);
+            out = new ExpressionSelectionAttribute(line, var, var2); } //TODO actually, attributes are private in Oz
+            [
+                <LPAREN>
+                (
+                    arg = expression() { args.add(arg); }
+                    (
+                        <COMMA> arg = expression() { args.add(arg); }
+                    )*
+                )*
+                <RPAREN>
+                { out = new ExpressionSelectionMethod(line, var, var2, args); }
+            ]
+        )*
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[]{RCURLY}, e );
+    }
+    { return out; }
+}
+
+/**
+ * Parse an initializer, which creates a tuple or a list.
+ *
+ * <pre>
+ *   initializer ::= expression {HASHTAG expression}
+ *                  | LBRACK {expression {COLCOL expression}} RBRACK
+ *                  | expression {COLCOL expression} [NIL] //If ends with nil -> list of values. Else -> concat 2 lists
+ * </pre>
+ *
+ * @return an AST for an initializer.
+ */
+private Expression initializer(): {
+    int line = 0;
+    Expression out = null;
+    Expression element = null;
+    ArrayList<Expression> elements = new ArrayList<Expression>();
+}
+{
+    try {
+        LOOKAHEAD( expression() <HASHTAG> expression() )
+        element = expression()
+        { line = element.line(); elements.add(element); }
+        (
+            <HASHTAG> element = expression()
+            { elements.add(element); }
+        )*
+        { out = new ExpressionTupleInit(line, elements); }
+        |
+        <LBRACK> { line = token.beginLine; }
+            (
+                element = expression()
+                { elements.add(element); }
+                (
+                    <COLCOL> element = expression()
+                    { elements.add(element); }
+                )*
+            )*
+        <RBRACK>
+        { out = new ExpressionListInit(line, elements); }
+        |
+        LOOKAHEAD( expression() <COLCOL> expression() )
+        element = expression() { line = token.beginLine; elements.add(element); }
+        (
+            <COLCOL> { line = token.beginLine; }
+            element = expression() { elements.add(element); }
+        )*
+        { out = new ExpressionListInit(line, elements, true); }
+        [
+            <NIL> { out = new ExpressionListInit(line, elements, false); }
+        ]
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[]{RCURLY}, e );
+    }
+    { return out; }
+}
+
+/**
+ * Parse a literal.
+ *
+ * <pre>
+ *   literal ::= UNIT | TRUE | FALSE | UNDERSCORE | NIL | int | float | string | character
+ * </pre>
+ *
+ * @return an AST for a literal.
+ */
+private Expression literal(): {
+    int line = 0;
+    Expr out = null;
+}
+{
+    try {
+        <UNIT> { out = new Literal(token.beginLine, Literal.UNIT); }
+        | <TRUE> { out = new Literal(token.beginLine, Literal.BOOLEAN, true); }
+        | <FALSE> { out = new Literal(token.beginLine, Literal.BOOLEAN, false); }
+        | <UNDERSCORE> { out = new Literal(token.beginLine, Literal.UNDERSCORE); }
+        | <NIL> { out = new Literal(token.beginLine, Literal.NIL); }
+        | <INT> { out = new Literal(token.beginLine, Literal.INT, token.image); }
+        | <FLOAT> { out = new Literal(token.beginLine, Literal.FLOAT, token.image); }
+        | <STRING> { out = new Literal(token.beginLine, Literal.STRING, token.image); }
+        | <CHARACTER> { out = new Literal(token.beginLine, Literal.CHAR, token.image); }
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[]{RCURLY}, e );
+    }
+    { return out; }
+}
+
+/**
  * Parse a term.
  *
  * <pre>
- *   term ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
+ *   term ::= atom
  *            | atomLisp LPAREN [[feature COLON]expression {COMMA [feature COLON]expression}] RPAREN
- *            | variable LPAREN [expression {COMMA expression}] RPAREN
- *            | LBRACK [expression {COMMA expression}] RBRACK
  * </pre>
 
  * @return an AST for a term.
@@ -1164,21 +1680,7 @@ private Term term(): {
 }
 {
     try {
-        <UNIT> { out = new Term(token.beginLine, Term.UNIT); }
-        | <TRUE> { out = new Term(token.beginLine, Term.BOOLEAN, true); }
-        | <FALSE> { out = new Term(token.beginLine, Term.BOOLEAN, false); }
-        | <UNDERSCORE> { out = new Term(token.beginLine, Term.UNDERSCORE); }
-        | <NIL> { out = new Term(token.beginLine, Term.NIL); }
-        | <INT> { out = new Term(token.beginLine, Term.INT, token.image); }
-        | <FLOAT> { out = new Term(token.beginLine, Term.FLOAT, token.image); }
-        | <CHARACTER> { out = new Term(token.beginLine, Term.CHAR, token.image); }
-        | <ATOM> {out = new Term(token.beginLine, Term.ATOM, token.image); }
-        | <STRING> { out = new Term(token.beginLine, Term.STRING, token.image); }
-        | (
-          <LNOT> {bool = !bool; }
-          )*
-          <VARIABLE> { line = token.beginLine; value = token.image;
-          out = new Term(line, Term.UNKNOWN, value, bool); } //TODO if bool is false, we must ensure type is BOOLEAN
+        <ATOM> {out = new Term(token.beginLine, Term.ATOM, token.image); }
         | <ATOMLISP> { line = token.beginLine; value = token.image; } //This is a record
           <LPAREN> [
           [ aFeature = feature() <COLON> { map.put(aFeature, null); }]
@@ -1201,22 +1703,6 @@ private Term term(): {
               }}
           )* ] <RPAREN>
           { out = new Record(line, value, map); }
-        | <VARIABLE> { line = token.beginLine; value = token.image; } //This is a function call
-          <LPAREN> [
-          val = expression() { args.add(val); }
-          (
-            <COMMA>
-            val = expression() { args.add(val); }
-          )* ] <RPAREN>
-          { out = new Call(line, value, args, "function"); }
-        | <LBRACK> { line = token.beginLine; }
-          [
-            val = expression() { args.add(val); }
-            (
-              <COMMA> val = expression() { args.add(val); }
-            )*
-          ]
-          { out = new ListInit(line, args); }
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
@@ -1231,7 +1717,7 @@ private Term term(): {
  * <pre>
  *   pattern ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
  *            | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN
- *            | LPAREN pattern consBinOp pattern RPAREN
+ *            | LPAREN pattern {(HASHTAG|COLCOL) pattern} RPAREN
  *            | LBRACK [pattern {COMMA pattern}] RBRACK
  *            | LPAREN pattern RPAREN
  * </pre>
@@ -1296,7 +1782,8 @@ private Pattern pattern(): {
            { out = new PatternRecord(line, value, map, more); }
         | <LPAREN> { line = token.beginLine; }
           pat1 = pattern()
-          op = consBinOp()
+          (<HASHTAG> { op = new Operator(token.beginLine,  Operator.HASHTAG); }
+          | <COLCOL> { op = new Operator(token.beginLine,  Operator.COLCOL); })
           pat2 = pattern() <RPAREN>
           { out = new PatternUnion(line, pat1, pat2, op); }
         | <LBRACK> { line = token.beginLine; }
@@ -1413,202 +1900,7 @@ private LoopDeclaration loopDeclaration(): {
           { out = new LoopDeclaration(line, var, generator); }
     }
     catch ( ParseException e ) {
-        recoverFromError( new int[] { RCURLY, EOF }, e );
-    }
-    { return out; }
-}
-
-/**
- * Parse a point operator.
- *
- * <pre>
- *   pointOp ::= DOT
- * </pre>
- *
- * @return an AST for a dot operator.
- */
-private Operator pointOp(): {
-    int line = 0;
-    Operator out = null;
-}
-{
-    try {
-        <DOT> { out = new Operator(token.beginLine, Operator.DOT); }
-    }
-    catch ( ParseException e ) {
-        recoverFromError(new int[]{RCURLY}, e);
-    }
-    { return out; }
-}
-
-/**
- * Parse a mono/unary operator.
- *
- * <pre>
- *   monOp ::= LNOTNOT | RETURN | MINUS
- * </pre>
- *
- * @return an AST for an unary operator.
- */
-private Operator monOp(): {
-    int line = 0;
-    Operator out = null;
-}
-{
-    try {
-        <LNOTNOT> { out = new Operator(token.beginLine, Operator.LNOTNOT); }
-        | <RETURN> { out = new Operator(token.beginLine, Operator.RETURN); }
-        | <MINUS> { out = new Operator(token.beginLine, Operator.MINUS); }
-    } catch ( ParseException e ) {
-        recoverFromError(new int[]{RCURLY}, e);
-    }
-    { return out; }
-}
-
-/**
- * Parse a constant binary operator.
- *
- * <pre>
- *   consBinOp ::= HASHTAG | COLCOL
- * </pre>
- * Reminder : COLCOL replaces Oz's pipe
- *
- * @return an AST for a constant binary operator.
- */
-private Operator consBinOp(): {
-    int line = 0;
-    Operator out = null;
-}
-{
-    try {
-        <HASHTAG> { out = new Operator(token.beginLine, Operator.HASHTAG); }
-        | <COLCOL> { out = new Operator(token.beginLine, Operator.COLCOL); }
-    } catch ( ParseException e ) {
-        recoverFromError(new int[]{RCURLY}, e);
-    }
-    { return out; }
-}
-
-/**
- * Parse an evaluation binary operator.
- *
- * <pre>
- *   evalBinOp ::= LAND | LOR | DEFINE | ASSIGN //| COMMA
- * </pre>
- *
- * @return an AST for an evaluation binary operator.
- */
-private Operator evalBinOp(): {
-    int line = 0;
-    Operator out = null;
-}
-{
-    try {
-        <LAND> { out = new Operator(token.beginLine, Operator.LAND); }
-        | <LOR> { out = new Operator(token.beginLine, Operator.LOR); }
-        | <DEFINE> { out = new Operator(token.beginLine, Operator.DEFINE); }
-        | <ASSIGN> { out = new Operator(token.beginLine, Operator.ASSIGN); }
-    } catch ( ParseException e ) {
-        recoverFromError(new int[]{RCURLY}, e);
-    }
-    { return out; }
-}
-
-/**
- * Parse a logical operator.
- *
- * <pre>
- *   logicOp ::= LAND | LOR
- * </pre>
- *
- * @return an AST for a logical operator.
- */
-private Operator logicOp(): {
-    int line = 0;
-    Operator out = null;
-}
-{
-    try {
-        <LAND> { out = new Operator(token.beginLine, Operator.LAND); }
-        | <LOR> { out = new Operator(token.beginLine, Operator.LOR); }
-    } catch ( ParseException e ) {
-        recoverFromError(new int[]{RCURLY}, e);
-    }
-    { return out; }
-}
-
-/**
- * Parse a first-priority arithmetic operator.
- *
- * <pre>
- *   arithOpFirst ::= STAR | SLASH | MODULO | HAT | STARSTAR //TODO what is it ? Do we keep it in newOz ?
- * </pre>
- *
- * @return an AST for a first-priority arithmetic operator.
- */
-private Operator arithOpFirst(): {
-    int line = 0;
-    Operator out = null;
-}
-{
-    try {
-        <STAR> { out = new Operator(token.beginLine, Operator.STAR); }
-        | <SLASH> { out = new Operator(token.beginLine, Operator.SLASH); }
-        | <MODULO> { out = new Operator(token.beginLine, Operator.MODULO); }
-        | <HAT> { out = new Operator(token.beginLine, Operator.HAT); }
-        //| <STARSTAR> { out = new Operator(token.beginLine, Operator.STARSTAR); }
-    } catch ( ParseException e ) {
-        recoverFromError(new int[]{RCURLY}, e);
-    }
-    { return out; }
-}
-
-/**
- * Parse a second-priority arithmetic operator.
- *
- * <pre>
- *   arithOpSecond ::= PLUS | MINUS
- * </pre>
- *
- * @return an AST for a second-priority arithmetic operator.
- */
-private Operator arithOpSecond(): {
-    int line = 0;
-    Operator out = null;
-}
-{
-    try {
-        <PLUS> { out = new Operator(token.beginLine, Operator.PLUS); }
-        | <MINUS> { out = new Operator(token.beginLine, Operator.MINUS); }
-    } catch ( ParseException e ) {
-        recoverFromError(new int[]{RCURLY}, e);
-    }
-    { return out; }
-}
-
-/**
- * Parse a third-priority arithmetic operator.
- *
- * <pre>
- *   arithOpThird ::= EQUAL | NE | LE | LT | GE | GT
- * </pre>
- *
- * @return an AST for a third-priority arithmetic operator.
- */
-private Operator arithOpThird(): {
-    int line = 0;
-    Operator out = null;
-}
-{
-    try {
-        <EQUAL> { out = new Operator(token.beginLine, Operator.EQUAL); }
-        | <NE> { out = new Operator(token.beginLine, Operator.NE); }
-        | <LE> { out = new Operator(token.beginLine, Operator.LE); }
-        | <LT> { out = new Operator(token.beginLine, Operator.LT); }
-        | <GE> { out = new Operator(token.beginLine, Operator.GE); }
-        | <GT> { out = new Operator(token.beginLine, Operator.GT); }
-    } catch ( ParseException e ) {
-        recoverFromError(new int[]{RCURLY}, e);
+        recoverFromError( new int[]{RCURLY}, e );
     }
     { return out; }
 }
@@ -1702,8 +1994,8 @@ private MethodHead methHead(): {
 {
     try {
         (
-          <VARIABLESTRICT> { line = token.beginLine(); priv = true; name = token.image; }
-          | <ATOMLISP> { line = token.beginLine(); priv = false; name = token.image; }
+          <VARIABLESTRICT> { line = token.beginLine; priv = true; name = token.image; }
+          | <ATOMLISP> { line = token.beginLine; priv = false; name = token.image; }
         )
         [
           <LPAREN>
@@ -1745,7 +2037,7 @@ private MethodArg methArg(): {
 }
 {
     try {
-        feature = feature() { token.beginLine(); }
+        feature = feature() { feature.line(); }
         <COLON>
         (
           <VARIABLE> { priv = true; name = token.image; }

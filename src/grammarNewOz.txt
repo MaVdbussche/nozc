@@ -21,24 +21,17 @@ statement ::= nestConStatement
             | nestDecVariable
             | SKIP
             | SEMI
-            | statement SEMI statement
-            | DECLARE statement
+            //| DECLARE statement //TODO removed bcs matched in interStatement ?
+            | RETURN expression
 
 expression ::= nestConExpression
             | nestDecAnonym
-            | monOp expression
-            | expression POSTINC
-            | expression POSTDEC
-            | expression pointOp expression
-            | expression arithOpFirst expression
-            | expression arithOpSecond expression
-            | expression arithOpThird expression
-            | expression consBinOp expression
-            | expression evalBinOp expression
             | DOLLAR
             | term
             | THIS
             | LCURLY expression {expression} RCURLY //TODO not implemented like this
+
+parExpression ::= LPAREN expression RPAREN
 
 inStatement ::= LCURLY {declarationPart} {statement} RCURLY //TODO added possibility for multiple chained statements
             | LCURLY {declarationPart} expression RCURLY
@@ -46,11 +39,11 @@ inStatement ::= LCURLY {declarationPart} {statement} RCURLY //TODO added possibi
 inExpression ::= LCURLY {declarationPart} [statement] expression RCURLY
             | LCURLY {declarationPart} statement RCURLY
 
-nestConStatement ::= expression (ASSIGN|DEFINE) expression
-            | expression LPAREN {expression {COMMA expression}} RPAREN
+nestConStatement ::= assignmentExpression
+            | variable LPAREN {expression {COMMA expression}} RPAREN
             | {LCURLY}+ expression {expression} {RCURLY}+
             | LPAREN inStatement RPAREN
-            | IF LPAREN expression RPAREN inStatement
+            | IF parExpression inStatement
               {ELSE IF LPAREN expression RPAREN inStatement}
               [ELSE inStatement]
             | MATCH expression LCURLY
@@ -67,7 +60,7 @@ nestConStatement ::= expression (ASSIGN|DEFINE) expression
             | THREAD inStatement
             | LOCK [LPAREN expression RPAREN] inStatement
 
-nestConExpression ::= expression LPAREN {expression {COMMA expression}} RPAREN
+nestConExpression ::= variable LPAREN {expression {COMMA expression}} RPAREN
             | LPAREN expression RPAREN
             | IF LPAREN expression RPAREN inExpression
                 {ELSE IF LPAREN expression RPAREN inExpression}
@@ -115,19 +108,47 @@ exportClause ::= [(atom|int) COLON] variable
 classElementDef ::= DEF methHead [ASSIGN variable] (inExpression|inStatement)
                   | classDescriptor
 
-caseStatementClause ::= pattern {logicOp expression} IMPL inStatement
+caseStatementClause ::= pattern {(LAND|LOR) conditionalExpression} IMPL inStatement
 
-caseExpressionClause ::= pattern {logicOp expression IMPL inExpression
+caseExpressionClause ::= pattern {(LAND|LOR) conditionalExpression} IMPL inExpression
+
+assignmentExpression ::= conditionalExpression [(ASSIGN|PLUSASSIGN|MINUSASSIGN|DEFINE) assignmentExpression]
+
+conditionalExpression ::= conditionalOrExpression
+
+conditionalOrExpression ::= conditionalAndExpression {LOR conditionalAndExpression}
+
+conditionalAndExpression ::= equalityExpression {LAND equalityExpression}
+
+equalityExpression ::= relationalExpression {EQUAL relationalExpression}
+
+relationalExpression ::= additiveExpression [(GT|GE|LT|LE) additiveExpression]
+
+additiveExpression ::= multiplicativeExpression {(PLUS|MINUS) multiplicativeExpression}
+
+multiplicativeExpression ::= unaryExpression {(STAR|SLASH|MODULO) unaryExpression}
+
+unaryExpression ::= (INC|DEC|MINUS|PLUS) unaryExpression
+                    | simpleUnaryExpression
+
+simpleUnaryExpression ::= LNOT unaryExpression | postfixExpression
+
+postfixExpression ::= primary {selector} {(DEC|INC)}
+
+primary ::= parExpression
+            | THIS DOT variable [LPAREN {expression {COMMA expresssion}} RPAREN]
+            | SUPER LPAREN variableStrict RPAREN DOT variable [LPAREN {expression {COMMA expression}} RPAREN]
+            | literal
+            | qualifiedIdentifier
+            | initializer
 
 // Terms and patterns
-term ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL //TODO we can remove character bcs of int representation ?
+term ::= atom
       | atomLisp LPAREN [[feature COLON]expression {COMMA [feature COLON]expression}] RPAREN
-      | variable LPAREN [expression {COMMA expression}] RPAREN
-      | LBRACK [expression {COMMA expression}] RBRACK
 
 pattern ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL //TODO we can remove character bcs of int representation ?
       | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN
-      | LPAREN pattern consBinOp pattern RPAREN
+      | LPAREN pattern {(HASHTAG|COLCOL) pattern} RPAREN
       | LBRACK [pattern {COMMA pattern}] RBRACK
       | LPAREN pattern RPAREN
 
@@ -141,22 +162,7 @@ loopDec ::= variable IN expression [DOTDOT expression] [SEMI expression]
         | DEFLT COLON expression
         | COLLECT COLON variable
 
-pointOp ::= DOT
-
-monOp ::= LNOTNOT | RETURN | MINUS
-
-consBinOp ::= HASHTAG | COLCOL
-//COLCOL replaces PIPE from OldOz
-
-evalBinOp ::= LAND | LOR | DEFINE | ASSIGN //| COMMA //TODO comma ?!
-
-logicOp ::= LAND | LOR
-
-arithOpFirst ::= STAR | SLASH | MODULO | HAT | STARSTAR //TODO what is it ? Do we keep it in newOz ?
-
-arithOpSecond ::= PLUS | MINUS
-
-arithOpThird ::= EQUAL | NE | LT | LE | GT | GE
+literal ::= TRUE | FALSE | NIL | int | string | character | float //TODO we can remove character bcs of int representation ?
 
 //label ::= UNIT | TRUE | FALSE | variable | atom //TODO actually not used anywhere
 

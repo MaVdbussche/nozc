@@ -89,6 +89,8 @@ VAR     ::= "var"
 
 ASSIGN      ::= "=" ok
 DEFINE      ::= ":=" ok
+PLUSASSIGN  ::= "+=" ok
+MINUSASSIGN ::= "-=" ok
 EQUAL       ::= "==" ok
 NE          ::= "\=" ok
 LT          ::= "<" ok

@@ -127,7 +127,7 @@ PARSER_END( JavaCCParser )
 /////////////////////////////////////////////////////////
 
 // Whitespace -- ignored
-SKIP: {" "|"\b"|"\t"|"\n"|"\r"|"\f"|"\v"}
+SKIP: {" "|"\b"|"\t"|"\n"|"\r"|"\f"}//|"\v"}
 
 // Single-line comment -- ignored
 SKIP: {<SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>}
@@ -475,9 +475,9 @@ private Expression expression(): {
 private InStatement inStatement(): {
     int line = 0;
     DeclarationPart aDecl = null;
-    ArrayList<DeclarationPart> decls = new ArrayList<>();
+    ArrayList<DeclarationPart> decls = new ArrayList<DeclarationPart>();
     Statement aStatement = null;
-    ArrayList<Statement> statements = new ArrayList<>();
+    ArrayList<Statement> statements = new ArrayList<Statement>();
     Expression expression = null;
 }
 {
@@ -514,7 +514,7 @@ private InStatement inStatement(): {
 private InExpression inExpression(): {
     int line = 0;
     DeclarationPart aDecl = null;
-    ArrayList<DeclarationPart> decls = new ArrayList<>();
+    ArrayList<DeclarationPart> decls = new ArrayList<DeclarationPart>();
     Statement statement = null;
     Expression expression = null;
 }
@@ -551,7 +551,7 @@ private InExpression inExpression(): {
  *                      {CASE caseStatementClause}+
  *                      [ELSE inStatement]
  *                      RCURLY
- *                    | FOR LPAREN {loopDec}+ RPAREN inStatement //TODO how could we have mult loopDecs ?
+ *                    | FOR LPAREN {loopDec}+ RPAREN inStatement
  *                    | TRY inStatement
  *                      [CATCH LCURLY
  *                      {CASE caseStatementClause}+
@@ -572,13 +572,13 @@ private Statement nestConStatement(): {
     Statement statement2 = null;
     Expression expression = null;
     Expression expression2 = null;
-    ArrayList<Expression> args = new ArrayList<>();
-    ArrayList<Expression> conds = new ArrayList<>();
-    ArrayList<InStatement> consq = new ArrayList<>();
+    ArrayList<Expression> args = new ArrayList<Expression>();
+    ArrayList<Expression> conds = new ArrayList<Expression>();
+    ArrayList<InStatement> consq = new ArrayList<InStatement>();
     CaseStatementClause aClause = null;
-    ArrayList<CaseStatementClause> clauses = new ArrayList<>();
+    ArrayList<CaseStatementClause> clauses = new ArrayList<CaseStatementClause>();
     LoopDeclaration loopDec = null;
-    ArrayList<LoopDec> loopDecs = new ArrayList<>();
+    ArrayList<LoopDec> loopDecs = new ArrayList<LoopDec>();
 }
 {
     try {
@@ -688,13 +688,13 @@ private Expression nestConExpression(): {
     Statement statement = null;
     Expression expression = null;
     Expression expression2 = null;
-    ArrayList<Expression> args = new ArrayList<>();
-    ArrayList<Expression> conds = new ArrayList<>();
-    ArrayList<InStatement> consq = new ArrayList<>();
+    ArrayList<Expression> args = new ArrayList<Expression>();
+    ArrayList<Expression> conds = new ArrayList<Expression>();
+    ArrayList<InStatement> consq = new ArrayList<InStatement>();
     CaseStatementClause aClause = null;
-    ArrayList<CaseStatementClause> clauses = new ArrayList<>();
+    ArrayList<CaseStatementClause> clauses = new ArrayList<CaseStatementClause>();
     LoopDeclaration loopDec = null;
-    ArrayList<LoopDeclaration> loopDecs = new ArrayList<>();
+    ArrayList<LoopDeclaration> loopDecs = new ArrayList<LoopDeclaration>();
 }
 {
     try {
@@ -790,15 +790,15 @@ private Statement nestDecVariable(): {
     String name = null;
     boolean lazy = false;
     Pattern aPattern = null;
-    ArrayList<Pattern> args = new ArrayList<>();
+    ArrayList<Pattern> args = new ArrayList<Pattern>();
     ImportClause importClause = null;
-    ArrayList<ImportClause> imports = new ArrayList<>();
+    ArrayList<ImportClause> imports = new ArrayList<ImportClause>();
     ExportClause exportClause = null;
-    ArrayList<ExportClause> exports = new ArrayList<>();
+    ArrayList<ExportClause> exports = new ArrayList<ExportClause>();
     ClassDescriptor aDescriptor = null;
-    ArrayList<ClassDescriptor> descriptors = new ArrayList<>();
+    ArrayList<ClassDescriptor> descriptors = new ArrayList<ClassDescriptor>();
     ClassElement classElement = null;
-    ArrayList<Method> methods = new ArrayList<>();
+    ArrayList<Method> methods = new ArrayList<Method>();
 }
 {
     try {
@@ -888,15 +888,15 @@ private Statement nestDecAnonym(): {
     Variable name = null;
     boolean lazy = false;
     Pattern aPattern = null;
-    ArrayList<Pattern> args = new ArrayList<>();
+    ArrayList<Pattern> args = new ArrayList<Pattern>();
     ImportClause importClause = null;
-    ArrayList<ImportClause> imports = new ArrayList<>();
+    ArrayList<ImportClause> imports = new ArrayList<ImportClause>();
     ExportClause exportClause = null;
-    ArrayList<ExportClause> exports = new ArrayList<>();
+    ArrayList<ExportClause> exports = new ArrayList<ExportClause>();
     ClassDescriptor aDescriptor = null;
-    ArrayList<ClassDescriptor> descriptors = new ArrayList<>();
+    ArrayList<ClassDescriptor> descriptors = new ArrayList<ClassDescriptor>();
     ClassElement classElement = null;
-    ArrayList<Method> methods = new ArrayList<>();
+    ArrayList<Method> methods = new ArrayList<Method>();
 }
 {
     try {
@@ -974,7 +974,7 @@ private Statement nestDecAnonym(): {
     String name = null;
     String label = null;
     Variable var = null;
-    Map<String, Variable> map = new HashMap<>();
+    Map<String, Variable> map = new HashMap<String, Variable>();
     String source = null;
 }
 {
@@ -1054,12 +1054,12 @@ private Statement nestDecAnonym(): {
     try {
         <DEF> { line = token.beginLine; }
           aMethodHead = methHead()
-          [<ASSIGN> <VARIABLE> { name = token.image; }]
+          [<ASSIGN> <VARIABLE> { name = new Variable(line, token.image); }]
           (
             expression = inExpression() |
             statement = inStatement()
           )
-          { method = new Method(line, aMethodHead, name, expression, statement)); out = method; }
+          { out = new Method(line, aMethodHead, name, expression, statement); }
         | descriptor = classDescriptor()
           { out= descriptor; }
     }
@@ -1083,9 +1083,9 @@ private CaseStatementClause caseStatementClause(): {
     Statement statement = null;
     Pattern pattern = null;
     LogicOp logicOp = null;
-    ArrayList<LogicOp> ops = new ArrayList<>();
+    ArrayList<LogicOp> ops = new ArrayList<LogicOp>();
     Expression expression = null;
-    ArrayList<Expression> exprs = new ArrayList<>();
+    ArrayList<Expression> exprs = new ArrayList<Expression>();
 }
 {
     try {
@@ -1118,9 +1118,9 @@ private CaseExpressionClause caseExpressionClause(): {
     Statement expression = null;
     Pattern pattern = null;
     LogicOp logicOp = null;
-    ArrayList<LogicOp> ops = new ArrayList<>();
+    ArrayList<LogicOp> ops = new ArrayList<LogicOp>();
     Expression aExpression = null;
-    ArrayList<Expression> exprs = new ArrayList<>();
+    ArrayList<Expression> exprs = new ArrayList<Expression>();
 }
 {
     try {
@@ -1159,8 +1159,8 @@ private Term term(): {
     String value = null;
     Feature aFeature = null;
     Expression val = null;
-    Map<Feature, Expression> map = new HashMap<>();
-    ArrayList<Expression> args = new ArrayList<>();
+    Map<Feature, Expression> map = new HashMap<Feature, Expression>();
+    ArrayList<Expression> args = new ArrayList<Expression>();
 }
 {
     try {
@@ -1246,12 +1246,12 @@ private Pattern pattern(): {
     String value = null;
     Feature aFeature = null;
     Expression val = null;
-    Map<Feature, Pattern> map = new HashMap<>();
+    Map<Feature, Pattern> map = new HashMap<Feature, Pattern>();
     bool more = false;
     Pattern pat1 = null;
     Operator op = null;
     Pattern pat2 = null;
-    ArrayList<Pattern> patterns = new ArrayList<>();
+    ArrayList<Pattern> patterns = new ArrayList<Pattern>();
 }
 {
     try {
@@ -1334,7 +1334,7 @@ private DeclarationPart declarationPart(): {
     DeclarationPart out = null;
     Variable variable = null;
     Expression value = null;
-    Map<Variable, Expression> map = new HashMap<>();
+    Map<Variable, Expression> map = new HashMap<Variable, Expression>();
 }
 {
     try {
@@ -1389,7 +1389,7 @@ private LoopDeclaration loopDeclaration(): {
     Expression cond = true;
     Expression step = 1;
     Expression end = null;
-    ArrayList<Feature> feats = new ArrayList<>(); //TODO implement loop features later
+    ArrayList<Feature> feats = new ArrayList<Feature>(); //TODO implement loop features later
 }
 {
     try {
@@ -1399,7 +1399,7 @@ private LoopDeclaration loopDeclaration(): {
           [
             <SEMI> step = expression()
           ]
-          { out = new LoopDeclaration(line, var, init, true, step, end, feats)}
+          { out = new LoopDeclaration(line, var, init, true, step, end, feats); }
         | <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image); }
           <IN> init = expression()
           <SEMI> step = expression()
@@ -1650,7 +1650,7 @@ private Feature feature(): {
 private ClassDescriptor classDescriptor(): {
     int line = 0;
     ClassDescriptor out = null;
-    ArrayList<String> extensions = new ArrayList<>();
+    ArrayList<String> extensions = new ArrayList<String>();
     Variable var = null;
     Expression expr = null;
 }
@@ -1695,7 +1695,7 @@ private MethodHead methHead(): {
     boolean priv = false;
     String name = null;
     MethodArg arg = null;
-    ArrayList<MethodArg> args = new ArrayList<>();
+    ArrayList<MethodArg> args = new ArrayList<MethodArg>();
     boolean moreArgs = false;
     boolean isAFunction = false;
 }

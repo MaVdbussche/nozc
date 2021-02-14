@@ -2,7 +2,7 @@
 
 package junit;
 
-import com.barassolutions.Main;
+import com.barassolutions.NewOzToOzMain;
 import junit.framework.TestCase;
 
 import java.io.File;
@@ -33,17 +33,19 @@ public class NozcTest extends TestCase {
         boolean errorHasOccurred = false;
         for (int i = 0; files != null && i < files.length; i++) {
             if (files[i].toString().endsWith(".java")) {
-                String[] args = null;
-                System.out.printf("Running j-- (with "
-                        + "handwritten frontend) on %s ...\n\n", files[i]
+                String[] args;
+                System.out.printf("""
+                        Running j-- (with handwritten frontend) on %s ...
+
+                        """, files[i]
                         .toString());
                 args = new String[] { "-d", genClassDir.getAbsolutePath(),
                         files[i].toString() };
-                Main.main(args);
-                System.out.printf("\n\n");
+                NewOzToOzMain.main(args);
+                System.out.print("\n\n");
 
                 // true even if a single test fails
-                errorHasOccurred |= Main.isInErrorState();
+                errorHasOccurred |= NewOzToOzMain.errorHasOccurred();
             }
         }
 
@@ -64,17 +66,19 @@ public class NozcTest extends TestCase {
         boolean errorHasOccurred = true;
         for (int i = 0; files != null && i < files.length; i++) {
             if (files[i].toString().endsWith(".java")) {
-                String[] args = null;
-                System.out.printf("Running j-- (with "
-                        + "handwritten frontend) on %s ...\n\n", files[i]
+                String[] args;
+                System.out.printf("""
+                        Running j-- (with handwritten frontend) on %s ...
+
+                        """, files[i]
                         .toString());
                 args = new String[] { "-d", genClassDir.getAbsolutePath(),
                         files[i].toString() };
-                Main.main(args);
-                System.out.printf("\n\n");
+                NewOzToOzMain.main(args);
+                System.out.print("\n\n");
 
                 // true only if all tests fail
-                errorHasOccurred &= Main.isInErrorState();
+                errorHasOccurred &= NewOzToOzMain.errorHasOccurred();
             }
         }
 

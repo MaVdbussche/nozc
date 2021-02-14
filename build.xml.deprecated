@@ -5,13 +5,13 @@
 <project default="runCompilerTests">
 
     <property name="APP_FULL_NAME" value="nozc (A Compiler for NewOz)" />
-    <property name="SRC_DIR" value="src" />
+    <property name="SRC_DIR" value="app/src/main/java" />
     <property name="CLASS_DIR" value="classes" />
     <property name="LIB_DIR" value="lib" />
     <property name="JAVADOC_DIR" value="javadoc" />
     <property name="J2H_DIR" value="java2html" />
-    <property name="PASS_TESTS_DIR" value="${basedir}/tests/pass" />
-    <property name="FAIL_TESTS_DIR" value="${basedir}/tests/fail" />
+    <property name="PASS_TESTS_DIR" value="/tests/pass" />
+    <property name="FAIL_TESTS_DIR" value="/tests/fail" />
     <property name="GEN_CLASS_DIR" value="${basedir}/${CLASS_DIR}" />
 
     <!-- help: Lists main targets -->

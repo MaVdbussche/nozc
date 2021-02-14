@@ -1,0 +1,33 @@
+plugins {
+    id 'application'
+    id 'java-library'
+}
+
+compileJava {
+    options.release = 15
+}
+
+compileTestJava {
+    options.release = 15
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+group 'com.barassolutions'
+version '0.1'
+
+
+application {
+    mainClass = 'com.barassolutions.Nozc'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.1'
+}

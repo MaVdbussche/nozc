@@ -2,11 +2,8 @@
 
 package junit;
 
-import java.io.File;
-import junit.framework.TestCase;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import pass.*;
 
 /**
  * JUnit test suite for running the newOz programs in tests/pass.

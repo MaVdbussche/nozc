@@ -1,5 +1,7 @@
 package com.barassolutions.toCleanUp;
 
+import com.barassolutions.Emitter;
+
 /**
  * Superclass of all nodes in the Abstract Syntax Tree
  */

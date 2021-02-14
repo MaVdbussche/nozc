@@ -2,6 +2,8 @@
 
 package com.barassolutions.toCleanUp;
 
+import com.barassolutions.Emitter;
+
 abstract class Assignment extends BinaryExpression {
 
     /**

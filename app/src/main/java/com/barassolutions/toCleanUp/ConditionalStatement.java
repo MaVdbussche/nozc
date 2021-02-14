@@ -2,6 +2,8 @@
 
 package com.barassolutions.toCleanUp;
 
+import com.barassolutions.Emitter;
+
 /**
  * The AST node for an if-statement.
  */

@@ -1,5 +1,7 @@
 package com.barassolutions.toCleanUp;
 
+import com.barassolutions.Emitter;
+
 /**
  * The AST node for an expression that appears as a statement. Only the
  * expressions that have a side-effect are valid statement expressions.

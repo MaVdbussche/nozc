@@ -1,5 +1,7 @@
 package com.barassolutions.toCleanUp;
 
+import com.barassolutions.Emitter;
+
 public class VariableDeclaration extends Statement {
     @Override
     public AST analyze(Context context) {

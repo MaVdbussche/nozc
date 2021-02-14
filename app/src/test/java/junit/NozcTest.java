@@ -2,7 +2,6 @@
 
 package junit;
 
-import com.barassolutions.NewOzToOzMain;
 import junit.framework.TestCase;
 
 import java.io.File;

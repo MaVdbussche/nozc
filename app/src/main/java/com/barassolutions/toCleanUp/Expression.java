@@ -1,5 +1,7 @@
 package com.barassolutions.toCleanUp;
 
+import com.barassolutions.Emitter;
+
 /**
  * The AST node for an expression. The syntax says all expressions are
  * statements, but a semantic check throws some (those without a side-effect)

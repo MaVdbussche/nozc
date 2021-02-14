@@ -324,11 +324,12 @@ TOKEN:
  *
  * @return an AST for an interStatement.
  */
-private InterStatement interStatement(): {
+public InterStatement interStatement(): {
     int line = 0;
     DeclarationPart aDeclarationPart = null;
     ArrayList<DeclarationPart> declarations = new ArrayList<DeclarationPart>();
     InterStatement interStatement = null;
+    Statement statement = null;
     InterStatement out = null;
 }
 {
@@ -344,9 +345,9 @@ private InterStatement interStatement(): {
       <RCURLY> <EOF>
       { out = new InterStatement(line, declarations, interStatement); }) //Declare block
       |
-      ( interStatement = statement()
+      ( statement = statement()
       { line = token.beginLine;
-        out = new InterStatement(line, interStatement); //Stand-alone statement
+        out = new InterStatement(line, statement); //Stand-alone statement
       })
     }
     catch ( ParseException e ) {

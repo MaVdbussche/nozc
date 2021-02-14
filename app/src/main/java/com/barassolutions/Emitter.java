@@ -1,6 +1,6 @@
 // Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
 
-package com.barassolutions.toCleanUp;
+package com.barassolutions;
 
 /**
  * This class provides a high level interface for creating representation of Oz files.

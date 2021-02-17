@@ -1,3 +1,4 @@
+//TODO reflect changes here in the TeX report appendix B !
 // Lexical grammar for newOz
 // This is translated directly from M. Mbonyincungu's thesis
 // Notations :
@@ -13,7 +14,7 @@
 //w_1 - w_2     difference of w_1 and w_2
 
 // White spaces - ignored
-WHITESPACE ::= (" "|"\t"|"\n"|"\r"|"\f")
+WHITESPACE ::= (" "|"\b"|"\t"|"\n"|"\r"|"\f")
 
 // Comments - ignored
 ("//" {~("\n"|"\r")} ("\n"|"\r"["\n"])) | "?"
@@ -89,8 +90,8 @@ VAR     ::= "var"
 
 ASSIGN      ::= "=" ok
 DEFINE      ::= ":=" ok
-PLUSASSIGN  ::= "+=" ok
-MINUSASSIGN ::= "-=" ok
+PLUSASS  ::= "+=" ok
+MINUSASS ::= "-=" ok
 EQUAL       ::= "==" ok
 NE          ::= "\=" ok
 LT          ::= "<" ok
@@ -166,6 +167,5 @@ NONZERODIGIT   ::= "1"|...|"9" ok
 PSEUDOCHAR     ::= "\" OCTDIGIT OCTDIGIT OCTDIGIT ok
                 | "\" ("x" | "X") HEXDIGIT HEXDIGIT ok
 
-CHAR           ::= TODO all the keyboard basically ?!
 // End of file
 EOF            ::= "<end of file>"

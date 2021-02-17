@@ -1,3 +1,4 @@
+//TODO reflect changes here in the TeX report appendix B !
 // EBNF grammar for newOz, suitable for recursive descent
 // This is translated directly from M. Mbonyincungu's thesis
 // Note that the concatenation symbol in EBNF (comma) is omitted for readability reasons
@@ -112,7 +113,7 @@ caseStatementClause ::= pattern {(LAND|LOR) conditionalExpression} IMPL inStatem
 
 caseExpressionClause ::= pattern {(LAND|LOR) conditionalExpression} IMPL inExpression
 
-assignmentExpression ::= conditionalExpression [(ASSIGN|PLUSASSIGN|MINUSASSIGN|DEFINE) assignmentExpression]
+assignmentExpression ::= conditionalExpression [(ASSIGN|PLUSASS|MINUSASS|DEFINE) assignmentExpression]
 
 conditionalExpression ::= conditionalOrExpression
 

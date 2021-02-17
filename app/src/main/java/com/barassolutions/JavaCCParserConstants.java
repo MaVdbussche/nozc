@@ -97,9 +97,9 @@ public interface JavaCCParserConstants {
   /** RegularExpression Id. */
   int ASSIGN = 52;
   /** RegularExpression Id. */
-  int PLUSASSIGN = 53;
+  int PLUSASS = 53;
   /** RegularExpression Id. */
-  int MINUSASSIGN = 54;
+  int MINUSASS = 54;
   /** RegularExpression Id. */
   int DEFINE = 55;
   /** RegularExpression Id. */

@@ -1681,8 +1681,8 @@ class JavaCCParser implements JavaCCParserConstants {
                                         line = token.beginLine;
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case ASSIGN:
-      case PLUSASSIGN:
-      case MINUSASSIGN:
+      case PLUSASS:
+      case MINUSASS:
       case DEFINE:
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case ASSIGN:
@@ -1690,13 +1690,13 @@ class JavaCCParser implements JavaCCParserConstants {
           rhs = assignmentExpression();
                   lhs = new OperationAssignment(line, lhs, rhs);
           break;
-        case PLUSASSIGN:
-          jj_consume_token(PLUSASSIGN);
+        case PLUSASS:
+          jj_consume_token(PLUSASS);
           rhs = assignmentExpression();
                   lhs = new OperationPlusAssignment(line, lhs, rhs);
           break;
-        case MINUSASSIGN:
-          jj_consume_token(MINUSASSIGN);
+        case MINUSASS:
+          jj_consume_token(MINUSASS);
           rhs = assignmentExpression();
                   lhs = new OperationMinusAssignment(line, lhs, rhs);
           break;
@@ -5338,13 +5338,13 @@ class JavaCCParser implements JavaCCParserConstants {
   }
 
   static private boolean jj_3R_229() {
-    if (jj_scan_token(MINUSASSIGN)) return true;
+    if (jj_scan_token(MINUSASS)) return true;
     if (jj_3R_195()) return true;
     return false;
   }
 
   static private boolean jj_3R_228() {
-    if (jj_scan_token(PLUSASSIGN)) return true;
+    if (jj_scan_token(PLUSASS)) return true;
     if (jj_3R_195()) return true;
     return false;
   }

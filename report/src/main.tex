@@ -1,3 +1,5 @@
+%! Author = Martin Vandenbussche
+
 \documentclass[a4paper,11pt]{scrreprt}
 \input{header.tex}
 
@@ -14,18 +16,30 @@
 
 \input{abstract.tex}
 \medskip
-\input{technical.tex}
+
+\chapter{Introduction}\label{ch:intro}
+\input{introduction.tex}
 
 \chapter{Previous works}\label{ch:1}
 \input{chapter1.tex}
 
-\begin{appendices}
-\section*{Appendix A : newOz EBNF Grammar}\label{sec:appendix-a}
-\input{tex/grammarNewOz.tex}
+\chapter{The NewOz Compiler : nozc}\label{ch:2}
+\input{chapter2.tex}
 
-\section*{Appendix B : lexical grammar}\label{sec:appendix-b}
-\input{tex/lexicalGrammarNewOz.tex}
+\chapter{New adaptations to NewOz}\label{ch:3}
+\input{chapter3.tex}
+
+\chapter{Conclusion}\label{ch:conclusion}
+\input{conclusion.tex}
+
+\begin{appendices}
+\input{appendices.tex}
 \end{appendices}
+
+\printbibliography
+
+
+
 \begin{comment}
 Promoters:
 Peter Van Roy
@@ -58,6 +72,5 @@ References
 [9] François Fonteyn, Comprehensions in Mozart, Master's thesis, ICTEAM Institute, Université catholique de Louvain, June 2014.
 \end{comment}
 
-\printbibliography
 
 \end{document}

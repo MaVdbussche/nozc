@@ -198,8 +198,8 @@ TOKEN : {
 // Operators
 TOKEN : {
   <ASSIGN: "=">
-| <PLUSASSIGN: "+=">
-| <MINUSASSIGN: "-=">
+| <PLUSASS: "+=">
+| <MINUSASS: "-=">
 | <DEFINE: ":=">
 | <EQUAL: "==">
 | <NE: "\\=">
@@ -1138,7 +1138,7 @@ private CaseExpressionClause caseExpressionClause(): {
  *
  * <pre>
  *   assignmentExpression ::= assignmentExpression
- *                              [(ASSIGN|PLUSASSIGN|MINUSASSIGN|DEFINE) assignmentExpression]
+ *                              [(ASSIGN|PLUSASS|MINUSASS|DEFINE) assignmentExpression]
  * </pre>
  *
  * @return an AST for an AssignmentExpression.
@@ -1154,9 +1154,9 @@ private Expression assignmentExpression(): {
         [
             (<ASSIGN> rhs = assignmentExpression()
                 { lhs = new OperationAssignment(line, lhs, rhs); }
-             | <PLUSASSIGN>  rhs = assignmentExpression()
+             | <PLUSASS>  rhs = assignmentExpression()
                 { lhs = new OperationPlusAssignment(line, lhs, rhs); }
-             | <MINUSASSIGN> rhs = assignmentExpression()
+             | <MINUSASS> rhs = assignmentExpression()
                 { lhs = new OperationMinusAssignment(line, lhs, rhs); }
              | <DEFINE> rhs = assignmentExpression()
                 { lhs = new OperationsAssignmentDefine(line, lhs, rhs); }

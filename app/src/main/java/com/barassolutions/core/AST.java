@@ -11,8 +11,15 @@ abstract class AST {
   /** Current interactive statement (set in InterStatement() constructor). */
   public static InterStatement interStatement;
 
+  protected String fileName;
+
   /** Line in which the source for the AST was found. */
   protected int line;
+
+  /**
+   * Construct an AST node.
+   */
+  protected AST() { this.line = 0; }
 
   /**
    * Construct an AST node the given its line number in the source file.
@@ -32,6 +39,8 @@ abstract class AST {
   public int line() {
     return line;
   }
+
+  public void fileName(String fileName) { this.fileName = fileName; }
 
   /**
    * Perform semantic analysis on this AST. In some instances a new returned

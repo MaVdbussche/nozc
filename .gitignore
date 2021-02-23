@@ -11,3 +11,5 @@ app/build/
 # Latex compilation files
 report/build_latex/
 report/out/
+
+lib/

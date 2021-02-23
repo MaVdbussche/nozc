@@ -1,4 +1,4 @@
-package com.barassolutions.toCleanUp;
+package com.barassolutions;
 
 public class Utils {
 

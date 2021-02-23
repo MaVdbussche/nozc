@@ -30,20 +30,6 @@ class JavaCCParser {
     private String fileName;
 
     /**
-     * Pull out the ambiguous part of a name and return it.
-     *
-     * @param name with an ambiguous part (possibly).
-     * @return ambiguous part or null.
-     */ //TODO what do we do with this ?
-    private AmbiguousName ambiguousPart(TypeName name) {
-        String qualifiedName = name.toString();
-        int lastDotIndex = qualifiedName.lastIndexOf('.');
-        return lastDotIndex == -1
-            ? null // It was a simple name
-            : new AmbiguousName(name.line(), qualifiedName.substring( 0, lastDotIndex));
-    }
-
-    /**
      * Report a syntax error.
      *
      * @param message message identifying the error.
@@ -318,8 +304,8 @@ TOKEN:
  * for it. After constructing the Parser, this is its entry point.
  *
  * <pre>
- *   interStatement ::= statement
- *                      | DECLARE LCURLY {declarationPart}+ [interStatement] RCURLY EOF
+ *   interStatement ::= {nestConStatement}+
+ *                      | DECLARE LCURLY {declarationPart} {statement} RCURLY EOF
  * </pre>
  *
  * @return an AST for an interStatement.
@@ -328,8 +314,8 @@ public InterStatement interStatement(): {
     int line = 0;
     DeclarationPart aDeclarationPart = null;
     ArrayList<DeclarationPart> declarations = new ArrayList<DeclarationPart>();
-    InterStatement interStatement = null;
-    Statement statement = null;
+    Statement aStatement = null;
+    ArrayList<Statement> statements = new ArrayList<Statement>();
     InterStatement out = null;
 }
 {
@@ -339,16 +325,17 @@ public InterStatement interStatement(): {
           aDeclarationPart = declarationPart()
           { declarations.add(aDeclarationPart); }
       )*
-      [
-          interStatement = interStatement()
-      ]
+      (
+          aStatement = statement()
+          { statements.add(aStatement); }
+      )*
       <RCURLY> <EOF>
-      { out = new InterStatement(line, declarations, interStatement); }) //Declare block
+      { out = new InterStatement(line, declarations, statements); }) //Declare block
       |
-      ( statement = statement()
-      { line = token.beginLine;
-        out = new InterStatement(line, statement); //Stand-alone statement
-      })
+      ( aStatement = nestConStatement()
+      { statements.add(aStatement); } //Stand-alone statements
+      )+
+      { out = new InterStatement(line, statements); }
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{EOF}, e);
@@ -362,7 +349,6 @@ public InterStatement interStatement(): {
  *
  * <pre>
  *   statement ::= nestConStatement
- *                  | nestDecVariable
  *                  | SKIP
  *                  | SEMI
  *                  //| DECLARE statement
@@ -378,7 +364,6 @@ private Statement statement(): {
 {
     try {
         statement = nestConStatement() { line = token.beginLine; }
-        | statement = nestDecVariable() { line = token.beginLine; }
         | <SKP>
           { line = token.beginLine;
           statement = new SkipStatement(line); } |
@@ -460,11 +445,11 @@ private Expression parExpression(): {
 }
 
 /**
- * Parse an inStatement, that is a/multiple statement/s included in a block.
+ * Parse an tement, that is a/multiple statement/s included in a block.
  *
  * <pre>
  *   inStatement ::= LCURLY {declarationPart} {statement} RCURLY
- *                    | LCURLY {declarationPart} expression RCURLY
+ *                    | LCURLY {declarationPart} expression RCURLY //TODO why expression ? Not necessary since we have RETURN keyword ?
  * </pre>
  *
  * @return an AST for an inStatement.
@@ -484,8 +469,8 @@ private InStatement inStatement(): {
           aDecl = declarationPart() { decls.add(aDecl); }
         )*
         (
-          expression = expression()
-          |
+          //expression = expression()
+          //|
           (
             aStatement = statement() { statements.add(aStatement); }
           )*
@@ -495,7 +480,7 @@ private InStatement inStatement(): {
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
     }
-    { return new InStatement(line, decls, statements, expression); }
+    { return new InStatement(line, decls, statements);}//, expression); }
 }
 
 /**
@@ -773,10 +758,10 @@ private Expression nestConExpression(): {
  *
  * @return an AST for a nestDecVariable.
  */
-private Statement nestDecVariable(): {
+private DeclarationPart nestDecVariable(): {
     int line = 0;
     int line2 = 0;
-    Statement out = null;
+    DeclarationPart out = null;
     Statement statement = null;
     Expression expression = null;
     String name = null;
@@ -1810,8 +1795,9 @@ private Pattern pattern(): {
  * Parse a variables declaration group.
  *
  * <pre>
- *   declarationPart ::= (VAL|VAR) (variable|pattern) ASSIGN (expression|statement) //TODO why statement ?
- *                        {COMMA (variable|pattern) ASSIGN (expression|statement)} //TODO why pattern ?
+ *   declarationPart ::= (VAL|VAR) (variable|pattern) [ASSIGN (expression|statement)] //TODO why statement ? => because of statements like i++
+ *                        {COMMA (variable|pattern) [ASSIGN (expression|statement)]} //TODO why pattern ?
+ *                      | nestDecVariable
  * </pre>
  *
  * @return an AST for a declarationPart.
@@ -1827,18 +1813,23 @@ private DeclarationPart declarationPart(): {
 {
     try {
         (
-          <VAL> { line = token.beginLine; constant = true; }
-        | <VAR> { line = token.beginLine; constant = false; }
+          (
+            <VAL> { line = token.beginLine; constant = true; }
+          | <VAR> { line = token.beginLine; constant = false; }
+          )
+          <VARIABLE> { variable = new Variable(line, token.image); map.put(variable, null); }
+          [<ASSIGN> value = expression()
+          { map.put(variable, value); }]
+          (
+            <COMMA> <VARIABLE> { variable = new Variable(line, token.image); map.put(variable, null); }
+            [<ASSIGN> value = expression()
+            { map.put(variable, value); }]
+          )*
+          { out = new DeclarationPart(line, map, constant); }
+
+        |
+        out = nestDecVariable()
         )
-        <VARIABLE> { variable = new Variable(line, token.image); }
-        <ASSIGN> value = expression()
-        { map.put(variable, value); }
-        (
-          <COMMA> <VARIABLE> { variable = new Variable(line, token.image); }
-          <ASSIGN> value = expression()
-          { map.put(variable, value); }
-        )*
-        { out = new DeclarationPart(line, map, constant); }
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);

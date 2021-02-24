@@ -116,7 +116,6 @@ public class InterStatement extends AST {
       //TODO codegen DECLARE
       for (DeclarationPart decl : declarationParts) {
         decl.codegen(output);
-        output.write();
       }
       //TODO codegen IN
     }

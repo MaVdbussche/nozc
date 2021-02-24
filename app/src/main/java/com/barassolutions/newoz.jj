@@ -396,8 +396,6 @@ private Statement statement(): {
 private Expression expression(): {
     int line = 0;
     Expression expression = null;
-    Expression expression2 = null;
-    Operator operator = null;
 }
 {
     try {
@@ -550,13 +548,14 @@ private Statement nestConStatement(): {
     int line = 0;
     Statement out = null;
     String name = null;
-    Statement statement = null;
-    Statement statement2 = null;
+    InStatement statement = null;
+    InStatement statement2 = null;
     Expression expression = null;
     Expression expression2 = null;
     ArrayList<Expression> args = new ArrayList<Expression>(); //TODO move to a map instead
     ArrayList<Expression> conds = new ArrayList<Expression>();
     ArrayList<InStatement> consq = new ArrayList<InStatement>();
+    boolean firstClausePassed = false;
     CaseStatementClause aClause = null;
     ArrayList<CaseStatementClause> clauses = new ArrayList<CaseStatementClause>();
     LoopDeclaration loopDec = null;
@@ -589,16 +588,17 @@ private Statement nestConStatement(): {
         | <MATCH> { line = token.beginLine; }
           expression = expression() <LCURLY>
           (
-            <CASE> aClause = caseStatementClause() { clauses.add(aClause); }
+            <CASE> aClause = caseStatementClause(firstClausePassed) { firstClausePassed = true; clauses.add(aClause); }
           )+
-          <ELSE> statement = inStatement() <RCURLY>
+          [ <ELSE> statement = inStatement() ]
           { out = new CaseStructure(line, expression, clauses, statement); }
+          <RCURLY>
         | <FOR> { line = token.beginLine; }
           <LPAREN>
           (
             loopDec = loopDeclaration()
             { loopDecs.add(loopDec); }
-          )*
+          )+
           <RPAREN> statement = inStatement()
           { out = new LoopStructure(line, loopDecs, statement); }
         | <TRY> { line = token.beginLine; }
@@ -606,8 +606,9 @@ private Statement nestConStatement(): {
           [
             <CATCH> <LCURLY>
             (
-              <CASE> aClause = caseStatementClause() { clauses.add(aClause); }
-            )+ <RCURLY>
+              <CASE> aClause = caseStatementClause(firstClausePassed) { firstClausePassed = true; clauses.add(aClause); }
+            )+
+            <RCURLY>
           ]
           [
             <FINALLY> statement2 = inStatement()
@@ -668,6 +669,7 @@ private Expression nestConExpression(): {
     ArrayList<Expression> args = new ArrayList<Expression>();
     ArrayList<Expression> conds = new ArrayList<Expression>();
     ArrayList<InStatement> consq = new ArrayList<InStatement>();
+    boolean firstClausePassed = false;
     CaseStatementClause aClause = null;
     ArrayList<CaseStatementClause> clauses = new ArrayList<CaseStatementClause>();
     LoopDeclaration loopDec = null;
@@ -698,16 +700,17 @@ private Expression nestConExpression(): {
         | <MATCH> { line = token.beginLine; }
           expression = expression() <LCURLY>
           (
-            <CASE> aClause = caseExpressionClause() { clauses.add(aClause); }
+            <CASE> aClause = caseExpressionClause(firstClausePassed) { firstClausePassed = true; clauses.add(aClause); }
           )+
-          <ELSE> expression2 = inExpression() <RCURLY>
+          [ <ELSE> expression2 = inExpression() ]
           { out = new CaseStructure(line, expression, clauses, expression2); }
+          <RCURLY>
         | <FOR> { line = token.beginLine; }
           <LPAREN>
           (
             loopDec = loopDeclaration()
             { loopDecs.add(loopDec); }
-          )*
+          )+
           <RPAREN> expression = inExpression()
           { out = new LoopStructure(line, loopDecs, expression); }
         | <TRY> { line = token.beginLine; }
@@ -715,8 +718,9 @@ private Expression nestConExpression(): {
           [
             <CATCH> <LCURLY>
             (
-              <CASE> aClause = caseExpressionClause() { clauses.add(aClause); }
-            )+ <RCURLY>
+              <CASE> aClause = caseExpressionClause(firstClausePassed) { firstClausePassed = true; clauses.add(aClause); }
+            )+
+            <RCURLY>
           ]
           [
             <FINALLY> statement = inStatement()
@@ -1055,12 +1059,13 @@ private Statement nestDecAnonym(): {
 
  * @return an AST for a caseStatementClause.
  */
-private CaseStatementClause caseStatementClause(): {
+private CaseStatementClause caseStatementClause(boolean firstClausePassed): {
     int line = 0;
+    CaseStatementClause out = null;
     Statement statement = null;
     Pattern pattern = null;
     Operator op = null;
-    ArrayList<LogicOp> ops = new ArrayList<LogicOp>();
+    ArrayList<Operator> ops = new ArrayList<Operator>();
     Expression expression = null;
     ArrayList<Expression> exprs = new ArrayList<Expression>();
 }
@@ -1068,13 +1073,13 @@ private CaseStatementClause caseStatementClause(): {
     try {
         pattern = pattern() { line = pattern.line(); }
         (
-          (<LAND> { op = new Operator(token.beginLine, Operator.AND); }
-          | <LOR> { op = new Operator(token.beginLine, Operator.OR); })
+          (<LAND> { op = Operator.LAND; }
+          | <LOR> { op = Operator.LOR; })
           expression = conditionalExpression()
-          { ops.add(logicOp); exprs.add(expression); }
+          { ops.add(op); exprs.add(expression); }
         )*
         <IMPL> statement = inStatement()
-        { out = new CaseStatementClause(line, pattern, ops, exprs, statement); }
+        { out = new CaseStatementClause(line, pattern, ops, exprs, statement, !firstClausePassed); }
     }
     catch ( ParseException e ) {
        recoverFromError(new int[]{RCURLY}, e);
@@ -1091,12 +1096,13 @@ private CaseStatementClause caseStatementClause(): {
 
  * @return an AST for a caseExpressionClause.
  */
-private CaseExpressionClause caseExpressionClause(): {
+private CaseExpressionClause caseExpressionClause(boolean firstClausePassed): {
     int line = 0;
+    CaseExpressionClause out = null;
     Statement expression = null;
     Pattern pattern = null;
     Operator op = null;
-    ArrayList<LogicOp> ops = new ArrayList<LogicOp>();
+    ArrayList<Operator> ops = new ArrayList<Operator>();
     Expression aExpression = null;
     ArrayList<Expression> exprs = new ArrayList<Expression>();
 }
@@ -1104,13 +1110,13 @@ private CaseExpressionClause caseExpressionClause(): {
     try {
         pattern = pattern() { line = pattern.line(); }
         (
-          (<LAND> { op = new Operator(token.beginLine, Operator.AND); }
-          | <LOR> { op = new Operator(token.beginLine, Operator.OR); })
+          (<LAND> { op = Operator.LAND; }
+          | <LOR> { op = Operator.LOR; })
           aExpression = expression()
-          { ops.add(logicOp); exprs.add(aExpression); }
+          { ops.add(op); exprs.add(aExpression); }
         )*
         <IMPL> expression = inExpression()
-        { out = new CaseExpressionClause(line, pattern, ops, exprs, expression); }
+        { out = new CaseExpressionClause(line, pattern, ops, exprs, expression, !firstClausePassed); }
     }
     catch ( ParseException e ) {
        recoverFromError(new int[]{RCURLY}, e);
@@ -1768,8 +1774,8 @@ private Pattern pattern(): {
            { out = new PatternRecord(line, value, map, more); }
         | <LPAREN> { line = token.beginLine; }
           pat1 = pattern()
-          (<HASHTAG> { op = new Operator(token.beginLine,  Operator.HASHTAG); }
-          | <COLCOL> { op = new Operator(token.beginLine,  Operator.COLCOL); })
+          (<HASHTAG> { op = Operator.HASHTAG; }
+          | <COLCOL> { op = Operator.COLCOL; })
           pat2 = pattern() <RPAREN>
           { out = new PatternUnion(line, pat1, pat2, op); }
         | <LBRACK> { line = token.beginLine; }

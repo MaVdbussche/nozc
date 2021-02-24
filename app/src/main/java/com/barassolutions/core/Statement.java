@@ -5,7 +5,7 @@ package com.barassolutions.core;
  * statements.
  */
 //TODO use Type hierarchy tool on j-- project
-abstract class Statement extends AST {
+public abstract class Statement extends AST {
 
   /**
    * Construct an AST node for a statement given its line number.

@@ -46,9 +46,9 @@ public class InStatement extends Statement {
   public AST analyze(Context context) {
     this.context = new LocalContext(context);
 
-    declarationParts.forEach(e -> (DeclarationPart) e.analyze(this.context));
+    declarationParts.forEach(e -> e = (DeclarationPart) e.analyze(this.context));
 
-    statements.forEach(e -> (Statement) e.analyze(this.context));
+    statements.forEach(e -> e = (Statement) e.analyze(this.context));
 
     return this;
   }
@@ -63,11 +63,16 @@ public class InStatement extends Statement {
    */
   @Override
   public void codegen(Emitter output) {
+    output.newLine();
+    output.indentRight();
+    //TODO do local..in..end only if there are declarations. Otherwise current scope is enough
     //TODO codegen LOCAL
     declarationParts.forEach(e -> e.codegen(output));
     //TODO codegen IN
     statements.forEach(e -> e.codegen(output));
     //TODO codegen END
+    output.newLine();
+    output.indentLeft();
   }
 
   /**

@@ -55,14 +55,11 @@ public class ConditionalStruct extends Statement {
   @Override
   public Statement analyze(Context context) {
     conditions.forEach(c -> {
-          (Expression) c.analyze(context);
+          c = (Expression) c.analyze(context);
           c.type().mustMatchExpected(line(), Type.BOOLEAN);
         }
     );
-    consequences.forEach(c -> {
-          (Statement) c.analyze(context);
-        }
-    );
+    consequences.forEach(c -> c = (InStatement) c.analyze(context));
     return this;
   }
 
@@ -88,7 +85,7 @@ public class ConditionalStruct extends Statement {
     p.printf("<IfStatement line=\"%d\">\n", line());
     p.indentRight();
 
-    for(int i=0; i<conditions.size(); i++) {
+    for (int i = 0; i < conditions.size(); i++) {
       p.printf("<TestExpression>\n");
       p.indentRight();
       conditions.get(i).writeOut(p);
@@ -103,7 +100,7 @@ public class ConditionalStruct extends Statement {
     if (elsePart) {
       p.printf("<ElseClause>\n");
       p.indentRight();
-      consequences.get(consequences.size()-1).writeOut(p);
+      consequences.get(consequences.size() - 1).writeOut(p);
       p.indentLeft();
       p.printf("</ElseClause>\n");
     }

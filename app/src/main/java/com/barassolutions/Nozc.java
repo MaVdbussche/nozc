@@ -171,6 +171,7 @@ public class Nozc implements Callable<Integer> {
     Emitter emitter = new Emitter();
     emitter.destinationDir(destDirectory.toString());
     ast.codegen(emitter);
+    emitter.close();
     errorHasOccurred |= ast.errorHasOccurred();
     if (errorHasOccurred) {
       return 1; //TODO catch this custom exit code and display appropriate error/help message https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions

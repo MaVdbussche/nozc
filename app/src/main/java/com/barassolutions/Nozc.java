@@ -1,17 +1,17 @@
 package com.barassolutions;
 
 import com.barassolutions.core.InterStatement;
-import java.io.FileNotFoundException;
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.IVersionProvider;
-
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.IVersionProvider;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 /* Read the Picocli documentation at https://picocli.info/ */
 //TODO generate specific exit codes for custom exceptions ? https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
@@ -35,51 +35,53 @@ public class Nozc implements Callable<Integer> {
     private boolean printHelp = false;
     */
 
-  @Parameters(description = "The .noz file(s) to compile or translate.", paramLabel = "FILE", arity = "1..*")
-  private File[] inputFiles;
-
-  @Option(names = {"-o",
-      "--out"}, description = "name of the output file. When using this option, you can only pass one input file as parameter")
-  private File outputFile;
-
-  @Option(names = {"-d",
-      "--directory"}, description = "output directory for compiled and/or translated files (default: ${DEFAULT_VALUE})", arity = "1", defaultValue = ".")
-  private File destDirectory;
-
   @Option(names = {
       "--no-keep"}, negatable = true, description = "Keep the intermediary Oz files in the output folder. True by default")
   boolean keepOzFiles;
-
   @Option(names = {"-t",
       "--tokenize"}, description = "tokenize the NewOz input, print the tokens to STDOUT, and then stop the compilation")
   boolean stopAtTokenizer;
-
   @Option(names = {"-s",
       "--scan"}, description = "scan/parse the NewOz input, print the AST to STDOUT, and then stop the compilation")
   boolean stopAtParser;
-
   @Option(names = {"-p",
       "--preAnalyze"}, description = "pre-analyze the NewOz input, print the AST to STDOUT, and then stop the compilation")
   boolean stopAtPreAnalysis;
-
   @Option(names = {"-a",
       "--analyze"}, description = "analyze the NewOz input, print the AST to STDOUT, and then stop the compilation")
   boolean stopAtAnalysis;
-
   @Option(names = {"-v", "--verbose"})
   boolean verbose;
-
+  @Parameters(description = "The .noz file(s) to compile or translate.", paramLabel = "FILE", arity = "1..*")
+  private File[] inputFiles;
+  @Option(names = {"-o",
+      "--out"}, description = "name of the output file. This option will be ignored if you pass more than one input file.")
+  private File outputFile;
+  @Option(names = {"-d",
+      "--directory"}, description = "output directory for compiled and/or translated files, relative to the current folder (default: ${DEFAULT_VALUE})", arity = "1", defaultValue = ".")
+  private File destDirectory;
   private boolean errorHasOccurred;
+
+  public static void main(String[] args) {
+    PrintWriter out = null;
+    PrintWriter err = null;
+    //Ansi ansi = Ansi.AUTO;
+
+    CommandLine cmd = new CommandLine(new Nozc())
+        .setOut(out)
+        .setErr(err);
+    //.setColorScheme(Help.defaultColorScheme(ansi));
+
+    cmd.printVersionHelp(System.out);
+    int exitCode = cmd.execute(args);
+    System.exit(exitCode);
+  }
 
   @Override
   public Integer call() throws Exception {
-    // This check is done manually because it is too complex for picocli (I think). See "-o" parameter description.
-    if (outputFile != null && inputFiles.length != 1) {
-      return 3; //TODO catch this custom exit code and display appropriate error/help message https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
-    }
-
     //TODO for each input file : (think about exact loop placement)
     File inputFile = inputFiles[0];
+
     /* Create the Scanner */
     JavaCCParserTokenManager scanner;
     try {
@@ -135,8 +137,8 @@ public class Nozc implements Callable<Integer> {
 
     // Scan/parse the NewOz input, print the AST to STDOUT, and then stop the compilation
     if (stopAtParser) {
-        ast.writeToStdOut(new PrettyPrinter());
-        return 0;
+      ast.writeToStdOut(new PrettyPrinter());
+      return 0;
     }
     if (errorHasOccurred) {
       return 1; //TODO catch this custom exit code and display appropriate error/help message https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
@@ -168,8 +170,15 @@ public class Nozc implements Callable<Integer> {
     }
 
     /* Generate Oz code */
-    Emitter emitter = new Emitter();
-    emitter.destinationDir(destDirectory.toString());
+    Emitter emitter;
+    if (Arrays.asList(inputFiles).size() == 1) {
+      String outPath = destDirectory.getPath().concat(outputFile.getName());
+      emitter = new Emitter(new File(outPath));
+    } else { //Ignore the -o option
+      String outPath = destDirectory.getPath().concat(
+          inputFile.getName().substring(0, inputFile.getName().lastIndexOf('.')).concat(".ozf"));
+      emitter = new Emitter(new File(outPath));
+    }
     ast.codegen(emitter);
     emitter.close();
     errorHasOccurred |= ast.errorHasOccurred();
@@ -178,26 +187,12 @@ public class Nozc implements Callable<Integer> {
     }
 
     /**
-    //TODO now launch to Oz compiler (ozc)
-    **/
+     //TODO now launch to Oz compiler (ozc)
+     * Use -c flag on ozc compiler if isFunctor==true
+     **/
 
     // No error occurred
     return 0;
-  }
-
-  public static void main(String[] args) {
-    PrintWriter out = null;
-    PrintWriter err = null;
-    //Ansi ansi = Ansi.AUTO;
-
-    CommandLine cmd = new CommandLine(new Nozc())
-        .setOut(out)
-        .setErr(err);
-    //.setColorScheme(Help.defaultColorScheme(ansi));
-
-    cmd.printVersionHelp(System.out);
-    int exitCode = cmd.execute(args);
-    System.exit(exitCode);
   }
 
   static class VersionProvider implements IVersionProvider {

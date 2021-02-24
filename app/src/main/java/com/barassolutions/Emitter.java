@@ -2,23 +2,16 @@
 
 package com.barassolutions;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+
 /**
  * This class provides a high level interface for creating representation of Oz files.
  * <p>
  * NOzC uses this interface to produce target Oz code from a NewOz source program.
- * //TODO mimic a CharStream, with open() and close()
  */
 public class Emitter {
-
-  /**
-   * Name of the file.
-   */
-  private String name;
-
-  /**
-   * Destination directory for the class.
-   */
-  private String destDir;
 
   /**
    * Whether an error occurred while creating/writing the file.
@@ -26,19 +19,17 @@ public class Emitter {
   private boolean errorHasOccurred;
 
   /**
-   * Construct an Emitter instance.
+   * The underlying PrettyPrinter.
    */
-  public Emitter() {
-    destDir = ".";
-  }
+  private final PrettyPrinter out;
 
   /**
-   * Set the destination directory for the class file to the specified value.
+   * Construct an Emitter instance.
    *
-   * @param destDir destination directory.
+   * @param outputFile the file to write to.
    */
-  public void destinationDir(String destDir) {
-    this.destDir = destDir;
+  public Emitter(File outputFile) throws FileNotFoundException {
+    this.out = new PrettyPrinter(new PrintStream(outputFile));
   }
 
   /**
@@ -57,27 +48,27 @@ public class Emitter {
    * @see TokenOz
    */
   public void token(int token) {
-    //TODO
+    out.print(TokenOz.tokenImage[token]);
   }
 
   /**
    * Print a space at the current position in the output file.
    */
   public void space() {
-    //TODO
+    out.print(" ");
   }
 
   /**
    * Print a line at the current position in the output file.
-   * //TODO remember indentation level etc for readability!
    */
   public void newLine() {
-
+    out.println();
   }
+
   /**
    * Close the stream.
    */
   public void close() {
-    //TODO
+    out.close();
   }
 }

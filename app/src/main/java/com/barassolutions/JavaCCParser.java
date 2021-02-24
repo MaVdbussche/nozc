@@ -569,7 +569,7 @@ class JavaCCParser implements JavaCCParserConstants {
     CaseStatementClause aClause = null;
     ArrayList<CaseStatementClause> clauses = new ArrayList<CaseStatementClause>();
     LoopDeclaration loopDec = null;
-    ArrayList<LoopDec> loopDecs = new ArrayList<LoopDec>();
+    ArrayList<LoopDeclaration> loopDecs = new ArrayList<LoopDeclaration>();
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case CLASS:
@@ -3037,7 +3037,7 @@ class JavaCCParser implements JavaCCParserConstants {
     Expression cond = true;
     Expression step = 1;
     Expression end = null;
-    ArrayList<Feature> feats = new ArrayList<Feature>();
+    Feature feat = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case VARIABLE:
@@ -3056,7 +3056,7 @@ class JavaCCParser implements JavaCCParserConstants {
           jj_la1[123] = jj_gen;
           ;
         }
-            out = new LoopDeclaration(line, var, init, true, step, end, feats);
+            out = new LoopDeclaration(line, var, init, cond, step, end);
         break;
         jj_consume_token(VARIABLE);
                        line = token.beginLine; var = new Variable(line, token.image);
@@ -3074,7 +3074,7 @@ class JavaCCParser implements JavaCCParserConstants {
           jj_la1[124] = jj_gen;
           ;
         }
-            out = new LoopDeclaration(line, var, init, cond, step, null, feats);
+            out = new LoopDeclaration(line, var, init, cond, step, null);
         break;
         jj_consume_token(VARIABLE);
                        line = token.beginLine; var = new Variable(line, token.image);

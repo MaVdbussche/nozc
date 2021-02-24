@@ -559,7 +559,7 @@ private Statement nestConStatement(): {
     CaseStatementClause aClause = null;
     ArrayList<CaseStatementClause> clauses = new ArrayList<CaseStatementClause>();
     LoopDeclaration loopDec = null;
-    ArrayList<LoopDec> loopDecs = new ArrayList<LoopDec>();
+    ArrayList<LoopDeclaration> loopDecs = new ArrayList<LoopDeclaration>();
 }
 {
     try {
@@ -1874,7 +1874,7 @@ private LoopDeclaration loopDeclaration(): {
     Expression cond = true;
     Expression step = 1;
     Expression end = null;
-    ArrayList<Feature> feats = new ArrayList<Feature>(); //TODO implement loop features later
+    Feature feat = null; //TODO implement loop features later
 }
 {
     try {
@@ -1884,7 +1884,7 @@ private LoopDeclaration loopDeclaration(): {
           [
             <SEMI> step = expression()
           ]
-          { out = new LoopDeclaration(line, var, init, true, step, end, feats); }
+          { out = new LoopDeclaration(line, var, init, cond, step, end); }
         | <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image); }
           <IN> init = expression()
           <SEMI> step = expression()
@@ -1892,7 +1892,7 @@ private LoopDeclaration loopDeclaration(): {
             <SEMI> end  = expression()
             { cond=step; step=end; }
           ]
-          { out = new LoopDeclaration(line, var, init, cond, step, null, feats); }
+          { out = new LoopDeclaration(line, var, init, cond, step, null); }
         | <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image); }
           <IN> generator = expression()
           { out = new LoopDeclaration(line, var, generator); }

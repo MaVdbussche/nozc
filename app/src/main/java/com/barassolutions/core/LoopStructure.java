@@ -5,23 +5,39 @@ import com.barassolutions.PrettyPrinter;
 import com.barassolutions.TokenOz;
 import java.util.ArrayList;
 
+/**
+ * In Oz, loops have the following form :
+ * <code>
+ * for <it>Declarations</it> do ... end
+ * </code>
+ * where Declarations is a sequence of 0 or more iterator and feature declarations. An iterator has
+ * the form: <code>Pat in Generator</code> where Generator describes how to generate the successive
+ * values for pattern Pat whose variables are local to the loop. The generators are stepped in
+ * parallel and the loop terminates as soon as one of the generators runs out of values.
+ *
+ * @see LoopDeclaration
+ */
 public class LoopStructure extends Statement {
 
-  /** The loop declarations */
-  private ArrayList<LoopDec> loopDecs;
+  /**
+   * The loop declarations
+   */
+  private ArrayList<LoopDeclaration> loopDecs;
 
-  /** The body of the loop */
+  /**
+   * The body of the loop
+   */
   private InStatement statement;
 
   /**
    * Construct an AST node for a loop given its line number, the loop declarations, and the
    * statement block.
    *
-   * @param line       line in which the if-statement occurs in the source file.
-   * @param loopDecs   loop declaration(s).
-   * @param statement  statement block executed in the loop.
+   * @param line      line in which the if-statement occurs in the source file.
+   * @param loopDecs  loop declaration(s).
+   * @param statement statement block executed in the loop.
    */
-  public LoopStructure(int line, ArrayList<LoopDec> loopDecs, InStatement statement) {
+  public LoopStructure(int line, ArrayList<LoopDeclaration> loopDecs, InStatement statement) {
     super(line);
     this.loopDecs = loopDecs;
     this.statement = statement;
@@ -35,7 +51,7 @@ public class LoopStructure extends Statement {
    */
   @Override
   public AST analyze(Context context) {
-    loopDecs.forEach(l -> l = (LoopDec) l.analyze(context));
+    loopDecs.forEach(l -> l = (LoopDeclaration) l.analyze(context));
 
     statement = (InStatement) statement.analyze(context);
     return this;
@@ -67,18 +83,14 @@ public class LoopStructure extends Statement {
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<LoopStatement line=\"%d\">\n", line());
     p.indentRight();
-    loopDecs.forEach(l -> {
-      p.printf("<LoopDec>\n");
-      p.indentRight();
-      l.writeToStdOut(p);
-      p.indentLeft();
-      p.printf("</LoopDec>\n");
-    });
+
+    loopDecs.forEach(l -> l.writeToStdOut(p));
     p.printf("<Body>\n");
     p.indentRight();
     statement.writeToStdOut(p);
     p.indentLeft();
     p.printf("</Body>\n");
+
     p.indentLeft();
     p.printf("</LoopStatement>\n");
   }

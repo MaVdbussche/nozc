@@ -1,9 +1,13 @@
 package com.barassolutions;
 
+import java.io.PrintStream;
+
 /**
- * A utility class that allows pretty (indented) printing to STDOUT.
+ * A utility class that allows pretty (indented) printing to a stream.
  */
 public class PrettyPrinter {
+
+  private final PrintStream out;
 
   /** Width of an indentation. */
   private final int indentWidth;
@@ -25,6 +29,31 @@ public class PrettyPrinter {
    *            number of blank spaces for an indent.
    */
   public PrettyPrinter(int indentWidth) {
+    out = System.out;
+    this.indentWidth = indentWidth;
+    indent = 0;
+  }
+
+  /**
+   * Construct a PrettyPrinter given the output Stream and an indentation width of 2.
+   *
+   * @param out
+   *            PrintStream to use for printing.
+   */
+  public PrettyPrinter(PrintStream out) {
+    this(out, 2);
+  }
+
+  /**
+   * Construct a PrettyPrinter given the output Stream and indentation width.
+   *
+   * @param out
+   *            PrintStream to use for printing.
+   * @param indentWidth
+   *            number of blank spaces for an indent.
+   */
+  public PrettyPrinter(PrintStream out, int indentWidth) {
+    this.out = out;
     this.indentWidth = indentWidth;
     indent = 0;
   }
@@ -46,37 +75,37 @@ public class PrettyPrinter {
   }
 
   /**
-   * Print an empty line to STDOUT.
+   * Print an empty line to the output stream.
    */
   public void println() {
     doIndent();
-    System.out.println();
+    out.println();
   }
 
   /**
-   * Print the specified string (followed by a newline) to STDOUT.
+   * Print the specified string (followed by a newline) to the output stream.
    *
    * @param s
    *            string to print.
    */
   public void println(String s) {
     doIndent();
-    System.out.println(s);
+    out.println(s);
   }
 
   /**
-   * Print the specified string to STDOUT.
+   * Print the specified string to the output stream.
    *
    * @param s
    *            string to print.
    */
   public void print(String s) {
     doIndent();
-    System.out.print(s);
+    out.print(s);
   }
 
   /**
-   * Print args to STDOUT according to the specified format.
+   * Print args to the output stream according to the specified format.
    *
    * @param format
    *            format specifier.
@@ -85,15 +114,24 @@ public class PrettyPrinter {
    */
   public void printf(String format, Object... args) {
     doIndent();
-    System.out.printf(format, args);
+    out.printf(format, args);
   }
 
   /**
-   * Indent by printing spaces to STDOUT.
+   * Indent by printing spaces to the output stream.
    */
   private void doIndent() {
     for (int i = 0; i < indent; i++) {
-      System.out.print(" ");
+      out.print(" ");
+    }
+  }
+
+  /**
+   * Close files, not STDOUT.
+   */
+  public void close() {
+    if (! out.equals(System.out)) {
+        out.close();
     }
   }
 

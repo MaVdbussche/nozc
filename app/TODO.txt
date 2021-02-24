@@ -8,3 +8,6 @@ TODO list
 [] handle newOz atoms
 [] handle octal/hexa numbers
 [] !! operator is actually used ! see Oz doc online
+
+For now we can handle functors (ozc -c MyFunctor.oz => yFunctor.ozf)
+How do we handle files not representing functors ?

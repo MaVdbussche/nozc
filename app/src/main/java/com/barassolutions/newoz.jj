@@ -388,7 +388,7 @@ private Statement statement(): {
  *                  | DOLLAR
  *                  | term
  *                  | THIS
- *                  | [LCURLY] expression [RCURLY]
+ *                  | inExpression
  * </pre>
  *
  * @return an AST for an expression.
@@ -408,10 +408,8 @@ private Expression expression(): {
         | <THIS>
           { line = token.beginLine;
             expression = new ThisExpression(line); }
-        | LOOKAHEAD( <LCURLY> expression() <RCURLY> )
-          <LCURLY>
-          expression = expression()
-          <RCURLY>
+        | LOOKAHEAD( inExpression() )
+          expression = inExpression()
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{EOF}, e);
@@ -486,7 +484,7 @@ private InStatement inStatement(): {
  *
  * <pre>
  *   inExpression ::= LCURLY {declarationPart} [statement] expression RCURLY
- *                    | LCURLY {declarationPart} statement RCURLY
+ *                    | LCURLY {declarationPart} statement RCURLY //TODO wth ?
  * </pre>
  *
  * @return an AST for an inExpression.
@@ -575,14 +573,14 @@ private Statement nestConStatement(): {
           { out = statement; }
         | <IF> { line = token.beginLine; }
           expression = parExpression() statement = inStatement()
-          { conds.add(expression); consq.add(statement); }
+          { conds.add(expression); consq.add((InStatement) statement); }
           (
             <ELSE> <IF> expression = parExpression() statement = inStatement()
-            { conds.add(expression); consq.add(statement); }
+            { conds.add(expression); consq.add((InStatement) statement); }
           )*
           [
             <ELSE> statement = inStatement()
-            { consq.add(statement); }
+            { consq.add((InStatement) statement); }
           ]
           { out = new ConditionalStruct(line, conds, consq); }
         | <MATCH> { line = token.beginLine; }
@@ -600,7 +598,7 @@ private Statement nestConStatement(): {
             { loopDecs.add(loopDec); }
           )+
           <RPAREN> statement = inStatement()
-          { out = new LoopStructure(line, loopDecs, statement); }
+          { out = new LoopStructure(line, loopDecs, (InStatement) statement); }
         | <TRY> { line = token.beginLine; }
           statement = inStatement()
           [
@@ -613,9 +611,9 @@ private Statement nestConStatement(): {
           [
             <FINALLY> statement2 = inStatement()
           ]
-          { out = new TryStructure(line, statement, clauses, statement2); }
+          { out = new TryStructure(line, (InStatement) statement, clauses, statement2); }
         | <RAISE> { line = token.beginLine; }
-          expression = inExpression()
+          expression = expression()
           { out = new RaiseStructure(line, expression); }
         | <THREAD> { line = token.beginLine; }
           statement = inStatement()

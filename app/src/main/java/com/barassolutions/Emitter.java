@@ -65,6 +65,9 @@ public class Emitter {
     out.println();
   }
 
+  public void indentLeft() { out.indentLeft(); }
+
+  public void indentRight() { out.indentRight(); }
   /**
    * Close the stream.
    */

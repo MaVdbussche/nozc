@@ -3,48 +3,50 @@ package com.barassolutions.core;
 import com.barassolutions.Emitter;
 import com.barassolutions.PrettyPrinter;
 import com.barassolutions.TokenOz;
-import com.barassolutions.Utils;
 import java.util.ArrayList;
 import org.jetbrains.annotations.Nullable;
 
-public class CaseStructure extends Statement {
+public class TryStructure extends Statement {
 
   /**
-   * Expression to be matched against.
+   * The statement to try and execute.
    */
-  private Expression expression;
+  private InStatement statement;
 
   /**
-   * Clauses to test against <code>expression</code>
+   * The clauses in the "catch" block.
    */
   private ArrayList<CaseStatementClause> clauses;
 
   /**
-   * Optional, default clause
+   * The optional "finally" statement.
    */
-  private InStatement defaultStatement;
+  @Nullable
+  private InStatement finallyStatement;
 
-  public CaseStructure(int line, Expression expression, ArrayList<CaseStatementClause> clauses,
-      @Nullable InStatement statement) {
+  public TryStructure(int line, InStatement statement, ArrayList<CaseStatementClause> clauses,
+      @Nullable InStatement statement2) {
     super(line);
-    this.expression = expression;
+    this.statement = statement;
     this.clauses = clauses;
-    this.defaultStatement = statement;
+    this.finallyStatement = statement2;
   }
 
   /**
-   * Analyzing the pattern-matching block means analyzing its components.
+   * Analyzing the try..catch block means analyzing its components.
    *
    * @param context context in which names are resolved.
    * @return the analyzed (and possibly rewritten) AST subtree.
    */
   @Override
   public AST analyze(Context context) {
-    expression = (Expression) expression.analyze(context);
+    statement = (InStatement) statement.analyze(context);
 
     clauses.forEach(c -> c = (CaseStatementClause) c.analyze(context));
 
-    defaultStatement = (InStatement) defaultStatement.analyze(context);
+    if (finallyStatement != null) {
+      finallyStatement = (InStatement) finallyStatement.analyze(context);
+    }
     return this;
   }
 
@@ -55,47 +57,44 @@ public class CaseStructure extends Statement {
    */
   @Override
   public void codegen(Emitter output) {
-    output.token(TokenOz.CASE);
+    output.token(TokenOz.TRY);
     output.space();
-    expression.codegen(output);
+    statement.codegen(output);
     output.space();
-    output.token(TokenOz.OF);
+    output.token(TokenOz.CATCH);
     output.newLine();
     output.indentRight();
     clauses.forEach(c -> c.codegen(output));
-    if (defaultStatement!=null) {
-      output.token(TokenOz.ELSE);
-      defaultStatement.codegen(output);
-      output.newLine();
+    output.indentLeft();
+    if (finallyStatement != null) {
+      output.token(TokenOz.FINALLY);
+      finallyStatement.codegen(output);
     }
     output.token(TokenOz.END);
-    output.newLine();
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
-    p.printf("<CaseStatement line=\"%d\">\n", line());
+    p.printf("<TryStatement line=\"%d\">\n", line());
     p.indentRight();
 
-    p.printf("<Expression>\n");
+    p.printf("<Statement>\n");
     p.indentRight();
-    expression.writeToStdOut(p);
+    statement.writeToStdOut(p);
     p.indentLeft();
-    p.printf("</Expression>\n");
+    p.printf("</Statement>\n");
 
     clauses.forEach(c -> c.writeToStdOut(p));
 
-    if (defaultStatement != null) {
+    if (finallyStatement != null) {
       p.printf("<Statement>\n");
       p.indentRight();
-      defaultStatement.writeToStdOut(p);
+      finallyStatement.writeToStdOut(p);
       p.indentLeft();
       p.printf("</Statement>\n");
     }
     p.indentLeft();
-    p.printf("</CaseStatement>\n");
+    p.printf("</TryStatement>\n");
+
   }
 }

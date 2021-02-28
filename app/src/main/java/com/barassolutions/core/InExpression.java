@@ -3,17 +3,24 @@ package com.barassolutions.core;
 import com.barassolutions.Emitter;
 import com.barassolutions.PrettyPrinter;
 import com.barassolutions.TokenOz;
-import java.util.ArrayList;
+import java.beans.Expression;
+import org.jetbrains.annotations.Nullable;
 
-public class InStatement extends Statement {
+public class InExpression extends Expression {
 
   /**
    * List of variables/values/procedures/functions/functors/classes declared in this block.
    */
   private ArrayList<DeclarationPart> declarationParts;
 
-  /** List of statements forming the block body. */
-  private ArrayList<Statement> statements;
+  /** Optional statement. */
+  private Statement statement;
+
+  /**
+   * Expresion to evaluate.
+   */
+  @Nullable
+  private Expression expression;
 
   /**
    * The context represented by this block.
@@ -22,24 +29,25 @@ public class InStatement extends Statement {
 
   /**
    * Construct an AST node for a block given its line number, and the list of
-   * statements forming the block body.
+   * statements and/or expressions forming the block body.
    *
    * @param line
    *            line in which the block occurs in the source file.
-   * @param decls
-   *            declarations appearing in the block body
-   * @param statements
-   *            list of statements forming the block body.
+   * @param statement
+   *            statement present in the block body.
+   * @param expression
+   *            optional expression present in the block body.
    */
-  public InStatement(int line, ArrayList<DeclarationPart> decls, ArrayList<Statement> statements) {
+  public InExpression(int line, ArrayList<DeclarationPart> decls, Statement statement, @Nullable Expression expression) {
     super(line);
     this.declarationParts = decls;
-    this.statements = statements;
+    this.statement = statement;
+    this.expression = expression;
   }
 
   /**
    * Analyzing a block consists of creating a new nested context for that
-   * block and analyzing each of its statements within that context.
+   * block and analyzing each of its statements/expressions within that context.
    *
    * @param context
    *            context in which names are resolved.
@@ -51,14 +59,17 @@ public class InStatement extends Statement {
 
     declarationParts.forEach(e -> e = (DeclarationPart) e.analyze(this.context));
 
-    statements.forEach(e -> e = (Statement) e.analyze(this.context));
+    statement = (Statement) statement.analyze(this.context);
 
+    if(expression!=null) {
+      expression = (Expression) expression.analyze(this.context);
+    }
     return this;
   }
 
   /**
    * Generating code for a block consists of generating code for each of its declarations and
-   * statements.
+   * statements/expressions.
    *
    * @param output
    *            the code emitter (basically an abstraction for producing the
@@ -77,7 +88,10 @@ public class InStatement extends Statement {
     output.token(TokenOz.IN);
     output.newLine();
     output.indentRight();
-    statements.forEach(e -> e.codegen(output));
+    statement.codegen(output);
+    if(expression!=null) {
+      expression.codegen(output);
+    }
     output.indentLeft();
     output.newLine();
     output.token(TokenOz.END);
@@ -90,7 +104,7 @@ public class InStatement extends Statement {
    */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
-    p.printf("<StatementBlock line=\"%d\">\n", line());
+    p.printf("<ExpressionBlock line=\"%d\">\n", line());
     if (context != null) {
       p.indentRight();
       context.writeToStdOut(p);
@@ -101,11 +115,16 @@ public class InStatement extends Statement {
       decl.writeToStdOut(p);
       p.indentLeft();
     }
-    for (Statement statement : statements) {
+    p.indentRight();
+    statement.writeToStdOut(p);
+    p.indentLeft();
+
+    if(expression!=null) {
       p.indentRight();
-      statement.writeToStdOut(p);
+      expression.writeToStdOut(p);
       p.indentLeft();
     }
-    p.printf("</StatementBlock>\n");
+
+    p.printf("</ExpressionBlock>\n");
   }
 }

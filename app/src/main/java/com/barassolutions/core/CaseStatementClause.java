@@ -95,10 +95,11 @@ public class CaseStatementClause extends Statement {
    */
   @Override
   public void codegen(Emitter output) {
-    if(isFirstClause) {
-      output.token(TokenOz.OF);
-    } else {
+    if(!isFirstClause) {
       output.token(TokenOz.BOX);
+    } else {
+      output.space();
+      output.space();
     }
     output.space();
     pattern.codegen(output);

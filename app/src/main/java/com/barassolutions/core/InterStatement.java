@@ -100,13 +100,9 @@ public class InterStatement extends AST {
   @Override
   public AST analyze(Context context) {
     if (declarationParts != null) {
-      for (DeclarationPart decl : declarationParts) {
-        decl.analyze(this.context);
-      }
+      declarationParts.forEach(dp -> dp = dp.analyze(this.context));
     }
-    for (Statement statement : statements) {
-        statement.analyze(this.context);
-    }
+    statements.forEach(s -> s = s.analyze(this.context));
     return this;
   }
 

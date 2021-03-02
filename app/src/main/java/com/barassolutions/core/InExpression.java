@@ -3,7 +3,6 @@ package com.barassolutions.core;
 import com.barassolutions.Emitter;
 import com.barassolutions.PrettyPrinter;
 import com.barassolutions.TokenOz;
-import java.beans.Expression;
 import org.jetbrains.annotations.Nullable;
 
 public class InExpression extends Expression {

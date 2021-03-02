@@ -1,4 +1,4 @@
-package com.barassolutions.toCleanUp;
+package com.barassolutions.core;
 
 import com.barassolutions.Emitter;
 
@@ -10,7 +10,7 @@ import com.barassolutions.Emitter;
  * Every expression has a type and a flag saying whether or not it's a
  * statement-expression.
  */
-abstract class Expression extends Statement {
+public abstract class Expression extends Statement {
 
   /** Expression type. */
   protected Type type;
@@ -58,21 +58,12 @@ abstract class Expression extends Statement {
   public abstract Expression analyze(Context context);
 
   /**
-   * Perform (short-circuit) code generation for a boolean expression, given
-   * the code emitter, a target label, and whether we branch to that label on
-   * true or on false.
+   * Perform code generation for an expression, given
+   * the code emitter.
    *
    * @param output
    *            the code emitter (basically an abstraction for producing the
    *            .oz file).
-   * @param targetLabel
-   *            the label to which we should branch.
-   * @param onTrue
-   *            do we branch on true?
    */
-  public void codegen(Emitter output, String targetLabel, boolean onTrue) {
-    // We should never reach here, i.e., all boolean
-    // (including identifier) expressions must override this method.
-    System.err.println("Error in code generation");
-  }
+  public abstract void codegen(Emitter output);
 }

@@ -4,18 +4,15 @@ import com.barassolutions.Emitter;
 import com.barassolutions.PrettyPrinter;
 import com.barassolutions.TokenOz;
 
-public class RaiseStructure extends Statement {
+public class ThreadStructure extends Statement {
 
-  /**
-   * The expression to raise.
-   */
-  private Expression expression;
+  /** The statement to execute in the thread */
+  private InStatement statement;
 
-  public RaiseStructure(int line, Expression expression) {
+  public ThreadStructure(int line, InStatement statement) {
     super(line);
-    this.expression = expression;
+    this.statement = statement;
   }
-
   /**
    * Analyzing the raise block means analyzing its component.
    *
@@ -24,7 +21,7 @@ public class RaiseStructure extends Statement {
    */
   @Override
   public AST analyze(Context context) {
-    expression = (Expression) expression.analyze(context);
+    statement = (InStatement) statement.analyze(context);
 
     return this;
   }
@@ -36,12 +33,11 @@ public class RaiseStructure extends Statement {
    */
   @Override
   public void codegen(Emitter output) {
-    output.token(TokenOz.RAISE);
+    output.token(TokenOz.THREAD);
     output.space();
-    expression.codegen(output);
+    statement.codegen(output);
     output.space();
     output.token(TokenOz.END);
-    output.newLine();
   }
 
   /**
@@ -49,10 +45,10 @@ public class RaiseStructure extends Statement {
    */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
-    p.printf("<RaiseStatement line=\"%d\">\n", line());
+    p.printf("<ThreadStatement line=\"%d\">\n", line());
     p.indentRight();
-    expression.writeToStdOut(p);
+    statement.writeToStdOut(p);
     p.indentLeft();
-    p.printf("</RaiseStatement>\n");
+    p.printf("</ThreadStatement>\n");
   }
 }

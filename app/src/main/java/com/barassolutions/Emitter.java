@@ -52,6 +52,16 @@ public class Emitter {
   }
 
   /**
+   * Write a literal at the current position in the output file
+   *
+   * @param literal the String to generate.
+   * @see TokenOz
+   */
+  public void literal(String literal) {
+    out.print(literal);
+  }
+
+  /**
    * Print a space at the current position in the output file.
    */
   public void space() {
@@ -68,6 +78,7 @@ public class Emitter {
   public void indentLeft() { out.indentLeft(); }
 
   public void indentRight() { out.indentRight(); }
+
   /**
    * Close the stream.
    */

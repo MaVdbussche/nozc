@@ -12,7 +12,7 @@ public interface Declaration {
    *            class context in which names are resolved.
    * @param partial
    *            the code emitter (basically an abstraction for producing the
-   *            partial class).
+   *            partial class). //TODO not used ?
    */
   public void preAnalyze(Context context, Emitter partial);
 }

@@ -360,6 +360,7 @@ public InterStatement interStatement(): {
 private Statement statement(): {
     int line = 0;
     Statement statement = null;
+    Expression expression = null;
 }
 {
     try {
@@ -568,7 +569,7 @@ private Statement nestConStatement(): {
           (
             <COMMA> expression2 = expression() { args.add(expression2); }
           )* <RPAREN>
-          { out = new Call(line, name, args, "procedure"); }
+          { out = new CallProcedure(line, name, args); }
         | <LPAREN> { line = token.beginLine; } statement = inStatement() <RPAREN>
           { out = statement; }
         | <IF> { line = token.beginLine; }
@@ -613,8 +614,8 @@ private Statement nestConStatement(): {
           ]
           { out = new TryStructure(line, (InStatement) statement, clauses, statement2); }
         | <RAISE> { line = token.beginLine; }
-          expression = expression()
-          { out = new RaiseStructure(line, expression); }
+          expression = inExpression()
+          { out = new RaiseStructure(line, (InExpression) expression); }
         | <THREAD> { line = token.beginLine; }
           statement = inStatement()
           { out = new ThreadStructure(line, statement); }
@@ -660,7 +661,7 @@ private Statement nestConStatement(): {
 private Expression nestConExpression(): {
     int line = 0;
     Expression out = null;
-    Variable name = null;
+    String name = null;
     Statement statement = null;
     Expression expression = null;
     Expression expression2 = null;
@@ -680,7 +681,7 @@ private Expression nestConExpression(): {
           (
             <COMMA> expression = expression() { args.add(expression); }
           )* <RPAREN>
-          { out = new Call(line, name, args, "function"); }
+          { out = new CallFunction(line, name, args); }
         | <LPAREN> { line = token.beginLine; } expression = expression() <RPAREN>
           { out = expression; }
         | <IF> { line = token.beginLine; }
@@ -710,7 +711,7 @@ private Expression nestConExpression(): {
             { loopDecs.add(loopDec); }
           )+
           <RPAREN> expression = inExpression()
-          { out = new LoopStructure(line, loopDecs, expression); }
+          { out = new LoopStructure(line, loopDecs, (InExpression) expression); }
         | <TRY> { line = token.beginLine; }
           expression = inExpression()
           [
@@ -726,10 +727,10 @@ private Expression nestConExpression(): {
           { out = new TryStructure(line, expression, clauses, statement); }
         | <RAISE> { line = token.beginLine; }
           expression = inExpression()
-          { out = new RaiseStructure(line, expression); }
+          { out = new RaiseStructure(line, (InExpression) expression); }
         | <THREAD> { line = token.beginLine; }
           expression = inExpression()
-          { out = new ThreadStructure(line, expression); }
+          { out = new ThreadStructure(line, (InExpression) expression); }
         | <LOCK> { line = token.beginLine; }
           [
             <LPAREN> expression = expression() <RPAREN>
@@ -764,7 +765,7 @@ private DeclarationPart nestDecVariable(): {
     int line = 0;
     int line2 = 0;
     DeclarationPart out = null;
-    Statement statement = null;
+    InStatement statement = null;
     Expression expression = null;
     String name = null;
     boolean lazy = false;
@@ -805,15 +806,15 @@ private DeclarationPart nestDecVariable(): {
         | <FUNCTOR> { line = token.beginLine; }
           [ <VARIABLE> { name = token.image; } ]
           (
-            ( <IMPORT> importClause = importClause() { importClauses.add(importClause); }
+            ( <IMPORT> importClause = importClause() { imports.add(importClause); }
               (
-                <COMMA> importClause = importClause() { importClauses.add(importClause); }
+                <COMMA> importClause = importClause() { imports.add(importClause); }
               )*
             )
             |
-            ( <EXPORT> exportClause = exportClause() { exportClauses.add(exportClause); }
+            ( <EXPORT> exportClause = exportClause() { exports.add(exportClause); }
               (
-                <COMMA> exportClause = exportClause() { exportClauses.add(exportClause); }
+                <COMMA> exportClause = exportClause() { exports.add(exportClause); }
               )*
             )
           )*
@@ -861,7 +862,7 @@ private DeclarationPart nestDecVariable(): {
 private Statement nestDecAnonym(): {
     int line = 0;
     int line2 = 0;
-    Statement out = null;
+    InStatement out = null;
     Statement statement = null;
     Expression expression = null;
     Variable name = null;
@@ -884,6 +885,7 @@ private Statement nestDecAnonym(): {
           aPattern = pattern() { args.add(aPattern); }
           (
             <COMMA> aPattern = pattern() { args.add(aPattern); }
+            <COMMA> aPattern = pattern() { args.add(aPattern); }
           )* <RPAREN>
           statement = inStatement()
           { out = new ProcedureDef(line, null, args, statement); }
@@ -900,20 +902,20 @@ private Statement nestDecAnonym(): {
         | <FUNCTOR> { line = token.beginLine; }
           [ <DOLLAR> ]
           (
-            ( <IMPORT> importClause = importClause() { importClauses.add(importClause); }
+            ( <IMPORT> importClause = importClause() { imports.add(importClause); }
               (
-                <COMMA> importClause = importClause() { importClauses.add(importClause); }
+                <COMMA> importClause = importClause() { imports.add(importClause); }
               )*
             )
             |
-            ( <EXPORT> exportClause = exportClause() { exportClauses.add(exportClause); }
+            ( <EXPORT> exportClause = exportClause() { exports.add(exportClause); }
               (
-                <COMMA> exportClause = exportClause() { exportClauses.add(exportClause); }
+                <COMMA> exportClause = exportClause() { exports.add(exportClause); }
               )*
             )
           )*
           statement = inStatement()
-          { out = new Functor(line, name, imports, exports, statement); }
+          { out = new Functor(line, name, imports, exports, statement); }//TODO keyword IMPORT/EXPORT has to be generated there
         | <CLASS> { line = token.beginLine; }
           <DOLLAR>
           [

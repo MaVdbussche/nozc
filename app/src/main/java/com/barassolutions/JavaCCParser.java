@@ -274,6 +274,7 @@ class JavaCCParser implements JavaCCParserConstants {
   static final private Statement statement() throws ParseException {
     int line = 0;
     Statement statement = null;
+    Expression expression = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case CLASS:
@@ -628,7 +629,7 @@ class JavaCCParser implements JavaCCParserConstants {
                                                  args.add(expression2);
         }
         jj_consume_token(RPAREN);
-            out = new Call(line, name, args, "procedure");
+            out = new CallProcedure(line, name, args);
         break;
         jj_consume_token(LPAREN);
                      line = token.beginLine;
@@ -759,8 +760,8 @@ class JavaCCParser implements JavaCCParserConstants {
         break;
         jj_consume_token(RAISE);
                     line = token.beginLine;
-        expression = expression();
-            out = new RaiseStructure(line, expression);
+        expression = inExpression();
+            out = new RaiseStructure(line, (InExpression) expression);
         break;
         jj_consume_token(THREAD);
                      line = token.beginLine;
@@ -797,7 +798,7 @@ class JavaCCParser implements JavaCCParserConstants {
   static final private Expression nestConExpression() throws ParseException {
     int line = 0;
     Expression out = null;
-    Variable name = null;
+    String name = null;
     Statement statement = null;
     Expression expression = null;
     Expression expression2 = null;
@@ -832,7 +833,7 @@ class JavaCCParser implements JavaCCParserConstants {
                                                 args.add(expression);
         }
         jj_consume_token(RPAREN);
-            out = new Call(line, name, args, "function");
+            out = new CallFunction(line, name, args);
         break;
       case LPAREN:
         jj_consume_token(LPAREN);
@@ -929,7 +930,7 @@ class JavaCCParser implements JavaCCParserConstants {
         }
         jj_consume_token(RPAREN);
         expression = inExpression();
-            out = new LoopStructure(line, loopDecs, expression);
+            out = new LoopStructure(line, loopDecs, (InExpression) expression);
         break;
       case TRY:
         jj_consume_token(TRY);
@@ -974,13 +975,13 @@ class JavaCCParser implements JavaCCParserConstants {
         jj_consume_token(RAISE);
                     line = token.beginLine;
         expression = inExpression();
-            out = new RaiseStructure(line, expression);
+            out = new RaiseStructure(line, (InExpression) expression);
         break;
       case THREAD:
         jj_consume_token(THREAD);
                      line = token.beginLine;
         expression = inExpression();
-            out = new ThreadStructure(line, expression);
+            out = new ThreadStructure(line, (InExpression) expression);
         break;
       case LOCK:
         jj_consume_token(LOCK);
@@ -1014,7 +1015,7 @@ class JavaCCParser implements JavaCCParserConstants {
     int line = 0;
     int line2 = 0;
     DeclarationPart out = null;
-    Statement statement = null;
+    InStatement statement = null;
     Expression expression = null;
     String name = null;
     boolean lazy = false;
@@ -1118,7 +1119,7 @@ class JavaCCParser implements JavaCCParserConstants {
           case IMPORT:
             jj_consume_token(IMPORT);
             importClause = importClause();
-                                                       importClauses.add(importClause);
+                                                       imports.add(importClause);
             label_20:
             while (true) {
               switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1131,13 +1132,13 @@ class JavaCCParser implements JavaCCParserConstants {
               }
               jj_consume_token(COMMA);
               importClause = importClause();
-                                                        importClauses.add(importClause);
+                                                        imports.add(importClause);
             }
             break;
           case EXPORT:
             jj_consume_token(EXPORT);
             exportClause = exportClause();
-                                                       exportClauses.add(exportClause);
+                                                       exports.add(exportClause);
             label_21:
             while (true) {
               switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1150,7 +1151,7 @@ class JavaCCParser implements JavaCCParserConstants {
               }
               jj_consume_token(COMMA);
               exportClause = exportClause();
-                                                        exportClauses.add(exportClause);
+                                                        exports.add(exportClause);
             }
             break;
           default:
@@ -1217,7 +1218,7 @@ class JavaCCParser implements JavaCCParserConstants {
   static final private Statement nestDecAnonym() throws ParseException {
     int line = 0;
     int line2 = 0;
-    Statement out = null;
+    InStatement out = null;
     Statement statement = null;
     Expression expression = null;
     Variable name = null;
@@ -1320,7 +1321,7 @@ class JavaCCParser implements JavaCCParserConstants {
           case IMPORT:
             jj_consume_token(IMPORT);
             importClause = importClause();
-                                                       importClauses.add(importClause);
+                                                       imports.add(importClause);
             label_26:
             while (true) {
               switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1333,13 +1334,13 @@ class JavaCCParser implements JavaCCParserConstants {
               }
               jj_consume_token(COMMA);
               importClause = importClause();
-                                                        importClauses.add(importClause);
+                                                        imports.add(importClause);
             }
             break;
           case EXPORT:
             jj_consume_token(EXPORT);
             exportClause = exportClause();
-                                                       exportClauses.add(exportClause);
+                                                       exports.add(exportClause);
             label_27:
             while (true) {
               switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1352,7 +1353,7 @@ class JavaCCParser implements JavaCCParserConstants {
               }
               jj_consume_token(COMMA);
               exportClause = exportClause();
-                                                        exportClauses.add(exportClause);
+                                                        exports.add(exportClause);
             }
             break;
           default:
@@ -4057,7 +4058,7 @@ class JavaCCParser implements JavaCCParserConstants {
 
   static private boolean jj_3R_104() {
     if (jj_scan_token(RAISE)) return true;
-    if (jj_3R_57()) return true;
+    if (jj_3R_56()) return true;
     return false;
   }
 

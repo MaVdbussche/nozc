@@ -12,18 +12,18 @@ public class ImportClause extends Statement implements Declaration {
   /**
    * Name of the variable to import.
    */
-  private String name;
+  private final String name;
 
   /**
    * Map of the feature to import and to name to give them in this context.
    */
-  private Map<String, Variable> map;
+  private final Map<String, Variable> map;
 
   /**
    * Optional source of this import.
    */
   @Nullable
-  private String source;
+  private final String source;
 
   public ImportClause(int line, String name, Map<String, Variable> map, @Nullable String source) {
     super(line);
@@ -40,8 +40,8 @@ public class ImportClause extends Statement implements Declaration {
 
   @Override
   public AST analyze(Context context) {
-    map.forEach((k,v) -> {
-      map.put(k,(Variable) v.analyze(context));
+    map.forEach((k, v) -> {
+      map.put(k, (Variable) v.analyze(context));
     });
 
     return this;

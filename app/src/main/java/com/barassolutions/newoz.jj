@@ -766,7 +766,7 @@ private DeclarationPart nestDecVariable(): {
     int line2 = 0;
     DeclarationPart out = null;
     InStatement statement = null;
-    Expression expression = null;
+    InExpression expression = null;
     String name = null;
     boolean lazy = false;
     Pattern aPattern = null;
@@ -785,7 +785,7 @@ private DeclarationPart nestDecVariable(): {
         <DEFPROC> { line = token.beginLine; }
           <VARIABLE> { name = token.image; }
           <LPAREN>
-          aPattern = pattern() { args.add(aPattern); }
+          aPattern = pattern() { args.add(aPattern); } //TODO not all kinds of patterns are allowed here -> filter in ProcedureDef#analyze()
           (
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )*
@@ -796,7 +796,7 @@ private DeclarationPart nestDecVariable(): {
           [<LAZY> { lazy = true; }]
           <VARIABLE> { name = token.image; }
           <LPAREN>
-          aPattern = pattern() { args.add(aPattern); }
+          aPattern = pattern() { args.add(aPattern); } //TODO not all kinds of patterns are allowed here -> filter in ProcedureDef#analyze()
           (
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )*
@@ -862,9 +862,9 @@ private DeclarationPart nestDecVariable(): {
 private Statement nestDecAnonym(): {
     int line = 0;
     int line2 = 0;
-    InStatement out = null;
-    Statement statement = null;
-    Expression expression = null;
+    Statement out = null;
+    InStatement statement = null;
+    InExpression expression = null;
     Variable name = null;
     boolean lazy = false;
     Pattern aPattern = null;
@@ -882,9 +882,8 @@ private Statement nestDecAnonym(): {
     try {
         <DEFPROC> { line = token.beginLine; }
           <DOLLAR> <LPAREN>
-          aPattern = pattern() { args.add(aPattern); }
+          aPattern = pattern() { args.add(aPattern); } //TODO not all kinds of patterns are allowed here -> filter in ProcedureDef#analyze()
           (
-            <COMMA> aPattern = pattern() { args.add(aPattern); }
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )* <RPAREN>
           statement = inStatement()
@@ -892,7 +891,7 @@ private Statement nestDecAnonym(): {
         | <DEF> { line = token.beginLine; }
           [<LAZY> { lazy = true; }]
           <DOLLAR> <LPAREN>
-          aPattern = pattern() { args.add(aPattern); }
+          aPattern = pattern() { args.add(aPattern); } //TODO not all kinds of patterns are allowed here -> filter in ProcedureDef#analyze()
           (
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )* <RPAREN>
@@ -1150,7 +1149,7 @@ private Expression assignmentExpression(): {
              | <MINUSASS> rhs = assignmentExpression()
                 { lhs = new OperationMinusAssignment(line, lhs, rhs); }
              | <DEFINE> rhs = assignmentExpression()
-                { lhs = new OperationsAssignmentDefine(line, lhs, rhs); }
+                { lhs = new OperationAssignmentDefine(line, lhs, rhs); }
             )
         ]
     }
@@ -1709,7 +1708,8 @@ private Term term(): {
  * <pre>
  *   pattern ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
  *            | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN
- *            | LPAREN pattern {(HASHTAG|COLCOL) pattern} RPAREN
+ *            | LPAREN pattern {HASHTAG pattern} RPAREN
+ *            | LPAREN pattern {COLCOL pattern} RPAREN
  *            | LBRACK [pattern {COMMA pattern}] RBRACK
  *            | LPAREN pattern RPAREN
  * </pre>
@@ -1757,7 +1757,8 @@ private Pattern pattern(): {
                lostLabelsCounter++;
              } else {
                map.put(aFeature, val);
-             }}
+             }
+           }
            (
              <COMMA>
              [aFeature = feature() <COLON> { map.put(aFeature, null); }]
@@ -1772,12 +1773,22 @@ private Pattern pattern(): {
            [<COMMA> <ELLIPSIS> { more = true; }]
            ] <RPAREN>
            { out = new PatternRecord(line, value, map, more); }
-        | <LPAREN> { line = token.beginLine; }
-          pat1 = pattern()
-          (<HASHTAG> { op = Operator.HASHTAG; }
-          | <COLCOL> { op = Operator.COLCOL; })
-          pat2 = pattern() <RPAREN>
-          { out = new PatternUnion(line, pat1, pat2, op); }
+        | LOOKAHEAD( <LPAREN> pattern() <HASHTAG> pattern() )
+          <LPAREN> { line = token.beginLine; }
+          pat1 = pattern() { patterns.add(pat1); }
+          <HASHTAG>
+          pat2 = pattern() { patterns.add(pat2); }
+          (<HASHTAG> pat2 = pattern() { patterns.add(pat2); })*
+          <RPAREN>
+          { out = new PatternTuple(line, patterns); }
+        | LOOKAHEAD( <LPAREN> pattern() <COLCOL> pattern() )
+          <LPAREN> { line = token.beginLine; }
+          pat1 = pattern() { patterns.add(pat1); }
+          <COLCOL>
+          pat2 = pattern() { patterns.add(pat2); }
+          (<COLCOL> pat2 = pattern() { patterns.add(pat2); })*
+          <RPAREN>
+          { out = new PatternList(line, patterns); }
         | <LBRACK> { line = token.beginLine; }
           [
             pat1 = pattern() { patterns.add(pat1); }
@@ -1787,7 +1798,8 @@ private Pattern pattern(): {
             )*
           ] <RBRACK>
           { out = new PatternListInit(line, patterns); }
-        | <LPAREN> { line = token.beginLine; }
+        | LOOKAHEAD( <LPAREN> pattern() <RPAREN> )
+          <LPAREN> { line = token.beginLine; }
           pat1 = pattern() { out = pat1; }
           <RPAREN>
     }

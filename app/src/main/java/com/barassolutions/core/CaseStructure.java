@@ -3,7 +3,6 @@ package com.barassolutions.core;
 import com.barassolutions.Emitter;
 import com.barassolutions.PrettyPrinter;
 import com.barassolutions.TokenOz;
-import com.barassolutions.Utils;
 import java.util.ArrayList;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +16,7 @@ public class CaseStructure extends Statement {
   /**
    * Clauses to test against <code>expression</code>
    */
-  private ArrayList<CaseStatementClause> clauses;
+  private final ArrayList<CaseStatementClause> clauses;
 
   /**
    * Optional, default clause
@@ -40,7 +39,7 @@ public class CaseStructure extends Statement {
    */
   @Override
   public AST analyze(Context context) {
-    expression = (Expression) expression.analyze(context);
+    expression = expression.analyze(context);
 
     clauses.forEach(c -> c = (CaseStatementClause) c.analyze(context));
 

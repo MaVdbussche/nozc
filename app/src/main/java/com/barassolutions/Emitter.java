@@ -14,11 +14,6 @@ import java.io.PrintStream;
 public class Emitter {
 
   /**
-   * Whether an error occurred while creating/writing the file.
-   */
-  private boolean errorHasOccurred;
-
-  /**
    * The underlying PrettyPrinter.
    */
   private final PrettyPrinter out;
@@ -30,15 +25,6 @@ public class Emitter {
    */
   public Emitter(File outputFile) throws FileNotFoundException {
     this.out = new PrettyPrinter(new PrintStream(outputFile));
-  }
-
-  /**
-   * Has an emitter error occurred up to now?
-   *
-   * @return true or false.
-   */
-  public boolean isInErrorState() {
-    return errorHasOccurred;
   }
 
   /**

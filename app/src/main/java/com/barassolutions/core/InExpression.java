@@ -76,12 +76,6 @@ public class InExpression extends Expression {
    */
   @Override
   public void codegen(Emitter output) {
-    output.newLine();
-    output.indentRight();
-    //TODO do local..in..end only if there are declarations. Otherwise current scope is enough
-    output.token(TokenOz.LOCAL);
-    output.newLine();
-    output.indentRight();
     declarationParts.forEach(e -> e.codegen(output));
     output.indentLeft();
     output.token(TokenOz.IN);
@@ -91,11 +85,6 @@ public class InExpression extends Expression {
     if(expression!=null) {
       expression.codegen(output);
     }
-    output.indentLeft();
-    output.newLine();
-    output.token(TokenOz.END);
-    output.newLine();
-    output.indentLeft();
   }
 
   /**

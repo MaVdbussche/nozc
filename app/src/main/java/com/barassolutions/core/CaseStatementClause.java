@@ -96,7 +96,8 @@ public class CaseStatementClause extends Statement {
   @Override
   public void codegen(Emitter output) {
     if(!isFirstClause) {
-      output.token(TokenOz.BOX);
+      output.token(TokenOz.LBRACK);
+      output.token(TokenOz.RBRACK);
     } else {
       output.space();
       output.space();
@@ -105,7 +106,7 @@ public class CaseStatementClause extends Statement {
     pattern.codegen(output);
     output.space();
     for (int i = 0; i < expressions.size(); i++) {
-      output.token(operators.get(i).getOzTokenInt());
+      output.token(operators.get(i).getOzTokenInt()); //Avoiding an awkward switch here
       output.space();
       expressions.get(i).codegen(output);
       output.space();

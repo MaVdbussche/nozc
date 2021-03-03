@@ -1,6 +1,7 @@
 package com.barassolutions.toCleanUp;
 
 import com.barassolutions.Emitter;
+import com.barassolutions.core.Expression;
 
 /**
  * The AST for a "this" expression. It serves as a target of some field

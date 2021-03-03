@@ -66,23 +66,12 @@ public class InStatement extends Statement {
    */
   @Override
   public void codegen(Emitter output) {
-    output.newLine();
-    output.indentRight();
-    //TODO do local..in..end only if there are declarations. Otherwise current scope is enough
-    output.token(TokenOz.LOCAL);
-    output.newLine();
-    output.indentRight();
     declarationParts.forEach(e -> e.codegen(output));
     output.indentLeft();
     output.token(TokenOz.IN);
     output.newLine();
     output.indentRight();
     statements.forEach(e -> e.codegen(output));
-    output.indentLeft();
-    output.newLine();
-    output.token(TokenOz.END);
-    output.newLine();
-    output.indentLeft();
   }
 
   /**

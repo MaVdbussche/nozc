@@ -3,6 +3,7 @@
 package com.barassolutions.toCleanUp;
 
 import com.barassolutions.Emitter;
+import com.barassolutions.core.Expression;
 
 abstract class Assignment extends BinaryExpression {
 

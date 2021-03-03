@@ -1,12 +1,13 @@
 package com.barassolutions.toCleanUp;
 
 import com.barassolutions.Emitter;
+import com.barassolutions.core.Expression;
 
 /**
  * The AST node for an expression that appears as a statement. Only the
  * expressions that have a side-effect are valid statement expressions.
  */
-class StatementExpression extends Statement {
+class StatementExpression extends AST {
 
   /** The expression. */
   Expression expr;

@@ -4,6 +4,7 @@ package com.barassolutions.toCleanUp;
 
 import com.barassolutions.Emitter;
 import com.barassolutions.Utils;
+import com.barassolutions.core.Expression;
 
 /**
  * The AST node for a binary expression, defined as an operator and two operands: a lhs and a rhs.

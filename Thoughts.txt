@@ -47,9 +47,16 @@ Idées :
 
 Question :
 [] See this code : do we want to keep this mechanic of "covering" variable names in the scope ? vs. educational benefit of learning about good naming conventions ?
-declare A=1 in
+declare A=1 in => en fait un alias de local pour trick l'interactive
     proc{MyProc A}
         {Browse A}
     end
     {MyProc A}
-[] How to invert a boolean value (!bool equivalent) ?
+[] How to invert a boolean value (!bool equivalent) ? => can be added but !! used in case to keep the variable name used in external scope
+[] attributes are private in Oz ?
+[] what is PROP ? (properties vs attributes ?)
+
+Kim Mens
+Hélène Verhaeghe
+Nicolas Laurent
+Martin Hens

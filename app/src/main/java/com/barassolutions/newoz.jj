@@ -220,7 +220,7 @@ TOKEN : {
 | <HAT: "^">
 | <BOX: "[]">
 //| <TILDE: "~">
-| <DEGREE: "°">
+| <DEGREE: "°"> //TODO attention pas présent sur un clavier ISO ?
 //| <COMMERCAT: "@">
 //| <LARROW: "<-">
 //| <RARROW: "->">
@@ -258,9 +258,9 @@ TOKEN : {
 | < ATOMLISP: <APOSTROPHE> (<LOWERCASE>|<UPPERCASE>) (<ALPHANUM>)* >
 //| < LABEL: (<VARIABLE>|<ATOM>|<BOOLEAN>|<UNIT>) >
 | < STRING: "\"" (<ESC>| <PSEUDO_CHAR> | ~["\"","\\","\n","\r"]) "\"" >
-| < CHARACTER: (<DEGREE>(<CHARCHAR> | <PSEUDO_CHAR>) | <CHARINT>) >
+| < CHARACTER: (<DEGREE>(<CHARCHAR> | <PSEUDO_CHAR>) | <CHARINT> | <ALPHANUM> ) >
 | < INT: (<DECINT> | <HEXINT> | <OCTINT> | <BININT>) >
-| < FLOAT: (<MINUS>)? (<DIGIT>)+ <DOT> (<DIGIT>)* (("e"|"E")("~")?(<DIGIT>)+)? >
+| < FLOAT: (<DIGIT>)+ <DOT> (<DIGIT>)* (("e"|"E")("~")?(<DIGIT>)+)? >
 //| < BOOLEAN: (<TRUE> | <FALSE>) >
 
 | < #UPPERCASE: ["A"-"Z"] >
@@ -269,10 +269,10 @@ TOKEN : {
 | < #NON_ZERO_DIGIT: ["1"-"9"] >
 | < #CHARINT: (["0"-"9"]|["1"-"9"]["0"-"9"]|"1"["0"-"9"]["0"-"9"]|"2"["0"-"4"]["0"-"9"]|"25"["0"-"5"])> // [0-255]
 | < #ALPHANUM: (<UPPERCASE> | <LOWERCASE> | <DIGIT> | <UNDERSCORE>) >
-| < #DECINT: (<MINUS>)? (<DIGIT> | <NON_ZERO_DIGIT>(<DIGIT>)*) >
-| < #HEXINT: (<MINUS>)? "0" ("x"|"X") (<HEXDIGIT>)+ >
-| < #OCTINT: (<MINUS>)? "0" (<OCTDIGIT>)+ >
-| < #BININT: (<MINUS>)? "0" ("b"|"B") (<BINDIGIT>)+ >
+| < #DECINT: (<DIGIT> | <NON_ZERO_DIGIT>(<DIGIT>)*) >
+| < #HEXINT: "0" ("x"|"X") (<HEXDIGIT>)+ >
+| < #OCTINT: "0" (<OCTDIGIT>)+ >
+| < #BININT: "0" ("b"|"B") (<BINDIGIT>)+ >
 | < #OCTDIGIT: ["0"-"7"] >
 | < #HEXDIGIT: (<DIGIT> | ["A"-"F"] | ["a"-"f"]) >
 | < #BINDIGIT: ["0"-"1"] >
@@ -324,7 +324,7 @@ public InterStatement interStatement(): {
       (
           aDeclarationPart = declarationPart()
           { declarations.add(aDeclarationPart); }
-      )*
+      )+
       (
           aStatement = statement()
           { statements.add(aStatement); }
@@ -350,8 +350,8 @@ public InterStatement interStatement(): {
  * <pre>
  *   statement ::= nestConStatement
  *                  | SKIP
- *                  | SEMI
- *                  //| DECLARE statement
+ *                  //| SEMI //TODO removed
+ *                  //| DECLARE statement //TODO removed bcs matched in interStatement ?
  *                  | RETURN expression
  * </pre>
  *
@@ -367,8 +367,8 @@ private Statement statement(): {
         statement = nestConStatement() { line = token.beginLine; }
         | <SKP>
           { line = token.beginLine;
-          statement = new SkipStatement(line); } |
-        <SEMI> //Ignore it
+          statement = new SkipStatement(line); }
+        //| <SEMI> //Ignore it
         //| <DECLARE> statement = statement() { line = token.beginLine; }
         | <RETURN> { line = token.beginLine; }
           expression = expression()
@@ -466,12 +466,8 @@ private InStatement inStatement(): {
           aDecl = declarationPart() { decls.add(aDecl); }
         )*
         (
-          //expression = expression()
-          //|
-          (
-            aStatement = statement() { statements.add(aStatement); }
-          )*
-        )
+          aStatement = statement() { statements.add(aStatement); }
+        )*
         <RCURLY>
     }
     catch ( ParseException e ) {
@@ -485,7 +481,7 @@ private InStatement inStatement(): {
  *
  * <pre>
  *   inExpression ::= LCURLY {declarationPart} [statement] expression RCURLY
- *                    | LCURLY {declarationPart} statement RCURLY //TODO wth ?
+ *                    | LCURLY {declarationPart} statement RCURLY //TODO This encapsulates statements like "i++"
  * </pre>
  *
  * @return an AST for an inExpression.
@@ -1564,8 +1560,8 @@ private Expression qualifiedIdentifier(): {
  * Parse an initializer, which creates a tuple or a list.
  *
  * <pre>
- *   initializer ::= expression {HASHTAG expression}
- *                  | LBRACK {expression {COLCOL expression}} RBRACK
+ *   initializer ::= expression {HASHTAG expression}+
+ *                  | LBRACK [expression {COMMA expression}] RBRACK
  *                  | expression {COLCOL expression} [NIL] //If ends with nil -> list of values. Else -> concat 2 lists
  * </pre>
  *
@@ -1585,18 +1581,18 @@ private Expression initializer(): {
         (
             <HASHTAG> element = expression()
             { elements.add(element); }
-        )*
+        )+
         { out = new ExpressionTupleInit(line, elements); }
         |
         <LBRACK> { line = token.beginLine; }
-            (
+            [
                 element = expression()
                 { elements.add(element); }
                 (
-                    <COLCOL> element = expression()
+                    <COMMA> element = expression()
                     { elements.add(element); }
                 )*
-            )*
+            ]
         <RBRACK>
         { out = new ExpressionListInit(line, elements); }
         |

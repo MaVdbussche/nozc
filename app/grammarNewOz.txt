@@ -1,8 +1,6 @@
-//TODO reflect changes here in the TeX report appendix B !
 // EBNF grammar for newOz, suitable for recursive descent
-// This is translated directly from M. Mbonyincungu's thesis
+// This is adapted from M. Mbonyincungu's thesis, with my personal "refinements"
 // Note that the concatenation symbol in EBNF (comma) is omitted for readability reasons
-// <T> represents a generic definition (think about Java generic types)
 //Notation      Meaning
 //========================================================================
 //\epsilon      singleton containing the empty word
@@ -15,34 +13,31 @@
 //w_1 - w_2     difference of w_1 and w_2
 
 // Interactive statements [ENTRYPOINT]
-interStatement ::= statement
-                  | DECLARE LCURLY {declarationPart}+ [interStatement] RCURLY
+interStatement ::= {nestConStatement}+
+                  | DECLARE LCURLY {declarationPart}+ {statement} RCURLY
 
 statement ::= nestConStatement
-            | nestDecVariable
             | SKIP
-            | SEMI
-            //| DECLARE statement //TODO removed bcs matched in interStatement ?
-            | RETURN expression
+            | RETURN expression //For now we still use java-like return, but I think it should disappear in the future
 
 expression ::= nestConExpression
             | nestDecAnonym
             | DOLLAR
             | term
             | THIS
-            | LCURLY expression {expression} RCURLY //TODO not implemented like this
+            | inExpression
 
 parExpression ::= LPAREN expression RPAREN
 
-inStatement ::= LCURLY {declarationPart} {statement} RCURLY //TODO added possibility for multiple chained statements
-            | LCURLY {declarationPart} expression RCURLY
+inStatement ::= LCURLY {declarationPart} {statement} RCURLY //Declarations still need to come first (keeps Oz' idea)
+            | LCURLY {declarationPart} expression RCURLY //Will be used once we get rid of the RETURN keyword
 
 inExpression ::= LCURLY {declarationPart} [statement] expression RCURLY
-            | LCURLY {declarationPart} statement RCURLY
+            | LCURLY {declarationPart} statement RCURLY //This encapsulates statements like "i++"
 
 nestConStatement ::= assignmentExpression
             | variable LPAREN {expression {COMMA expression}} RPAREN
-            | {LCURLY}+ expression {expression} {RCURLY}+
+            | {LCURLY}+ expression {expression} {RCURLY}+ //We can create a unlimited amount of nested scopes
             | LPAREN inStatement RPAREN
             | IF parExpression inStatement
               {ELSE IF LPAREN expression RPAREN inStatement}
@@ -130,11 +125,11 @@ additiveExpression ::= multiplicativeExpression {(PLUS|MINUS) multiplicativeExpr
 multiplicativeExpression ::= unaryExpression {(STAR|SLASH|MODULO) unaryExpression}
 
 unaryExpression ::= (INC|DEC|MINUS|PLUS) unaryExpression
-                    | simpleUnaryExpression
+            | simpleUnaryExpression
 
 simpleUnaryExpression ::= LNOT unaryExpression | postfixExpression
 
-postfixExpression ::= primary {selector} {(DEC|INC)}
+postfixExpression ::= primary {(DEC|INC)}
 
 primary ::= parExpression
             | THIS DOT variable [LPAREN {expression {COMMA expresssion}} RPAREN]
@@ -143,48 +138,54 @@ primary ::= parExpression
             | qualifiedIdentifier
             | initializer
 
+qualifiedIdentifier ::= variable {DOT variable [LPAREN {expression {COMMA expression}} RPAREN]}
+
+initializer ::= expression {HASHTAG expression}
+            | LBRACK [expression {COMMA expression}] RBRACK
+            | expression {COLCOL expression} [NIL]
+
 // Terms and patterns
+literal ::= UNIT | TRUE | FALSE | UNDERSCORE | NIL | int | float | string | character
+
 term ::= atom
-      | atomLisp LPAREN [[feature COLON]expression {COMMA [feature COLON]expression}] RPAREN
+            | atomLisp LPAREN [[feature COLON]expression {COMMA [feature COLON]expression}] RPAREN
 
 pattern ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL //TODO we can remove character bcs of int representation ?
-      | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN
-      | LPAREN pattern {(HASHTAG|COLCOL) pattern} RPAREN
-      | LBRACK [pattern {COMMA pattern}] RBRACK
-      | LPAREN pattern RPAREN
+            | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN
+            | LPAREN pattern {HASHTAG pattern} RPAREN
+            | LPAREN pattern {COLCOL pattern} RPAREN
+            | LBRACK [pattern {COMMA pattern}] RBRACK
+            | LPAREN pattern RPAREN
 
-declarationPart ::= (VAL|VAR) (variable|pattern) ASSIGN (expression|statement) {COMMA (variable|pattern) ASSIGN (expression|statement)} //TODO why statement ?
+declarationPart ::= (VAL|VAR) (variable|pattern) ASSIGN (expression|statement) //statement should probably not be there
+                      {COMMA (variable|pattern) ASSIGN (expression|statement)} // pattern should proabaly not be there either
+            | nestDecVariable
 
-loopDec ::= variable IN expression [DOTDOT expression] [SEMI expression]
-        | variable IN expression SEMI expression SEMI expression
-        | BREAK COLON variable
-        | CONTINUE COLON variable
-        | RETURN COLON variable
-        | DEFLT COLON expression
-        | COLLECT COLON variable
+loopDec ::= variable IN expression DOTDOT expression [SEMI expression]
+            | variable IN expression SEMI expression [SEMI expression]
+            | variable IN expression
+            | BREAK COLON variable
+            | CONTINUE COLON variable
+            | RETURN COLON variable
+            | DEFLT COLON expression
+            | COLLECT COLON variable
 
-literal ::= TRUE | FALSE | NIL | int | string | character | float //TODO we can remove character bcs of int representation ?
-
-//label ::= UNIT | TRUE | FALSE | variable | atom //TODO actually not used anywhere
-
-feature ::= UNIT | TRUE | FALSE | atom | int | NIL //TODO not implemented like this
+feature ::= atomLisp //This is a WIP. Will probably change in the future
 
 classDescription ::= EXTENDS variableStrict {COMMA variableStrict}+
-                    | ATTR variable [ASSIGN expression]
-                    | PROP variable
+            | ATTR variable [ASSIGN expression]
+            | PROP variable
 
-//attrInit ::= ([LNOT] variable | atom | UNIT | TRUE | FALSE) [COLON expression] //TODO not implemented
-
-methHead ::= ([LNOT] variableStrict | atomLisp | UNIT | TRUE | FALSE) //TODO not implemented like this
+methHead ::= (variableStrict | atomLisp) //variableStrict => private, atomLisp => public
               [LPAREN methArg {COMMA methArg} [COMMA ELLIPSIS] [DOLLAR] RPAREN]
 
 methArg ::= [feature COLON] (variable | UNDERSCORE) [LE expression]
 
 variableStrict ::= UPPERCASE {ALPHANUM}
-              | LACCENT {VARIABLECHAR | PSEUDOCHAR} LACCENT
+            | LACCENT {VARIABLECHAR | PSEUDOCHAR} LACCENT
 
 variable ::= LOWERCASE {ALPHANUM}
-          | APOSTROPHE {VARIABLECHAR | PSEUDOCHAR} APOSTROPHE //TODO really ?
+          | APOSTROPHE {VARIABLECHAR | PSEUDOCHAR} APOSTROPHE
 
 atom ::= atomLisp
         | RACCENT {ATOMCHAR | PSEUDOCHAR} RACCENT
@@ -194,16 +195,10 @@ atomLisp ::= APOSTROPHE (LOWERCASE | UPPERCASE) {ALPHANUM}
 string ::= QUOTE {STRINGCHAR | PSEUDOCHAR} QUOTE
 
 character ::= CHARINT
-            | DEGREE CHARCHAR
-            | DEGREE PSEUDOCHAR
-            | CHAR // TODO in this case we should send a warning during analysis that it is not supported in underlying oldOz
+            | DEGREE CHARCHAR //TODO need to rethink this
+            | DEGREE PSEUDOCHAR //TODO need to rethink this
+            | ALPHANUM
 
-int ::= [MINUS] DIGIT
-        | [MINUS] NONZERODIGIT {DIGIT}
-        | [MINUS] "0" {OCTDIGIT}+
-        | [MINUS] ("0x"|"0X") {HEXDIGIT}+
-        | [MINUS] ("0b"|"0B") {BINDIGIT}+
+int ::= DECINT | HEXINT | OCTINT | BININT
 
-float ::= [MINUS] {DIGIT}+ DOT {DIGIT} [("e" | "E")[~]{DIGIT}+]
-
-boolean ::= TRUE | FALSE
+float ::= {DIGIT}+ DOT {DIGIT} [("e" | "E")[~]{DIGIT}+]

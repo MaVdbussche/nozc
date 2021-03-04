@@ -1,6 +1,5 @@
-//TODO reflect changes here in the TeX report appendix B !
-// Lexical grammar for newOz
-// This is translated directly from M. Mbonyincungu's thesis
+// Lexical grammar for NewOz
+// This is adapted from M. Mbonyincungu's thesis, with my personal "refinements"
 // Notations :
 //Notation      Meaning
 //========================================================================
@@ -29,7 +28,7 @@ ATTR    ::= "attr"
 BREAK   ::= "break"
 CASE    ::= "case"
 CATCH   ::= "catch"
-//CHOICE  ::= "choice"
+//CHOICE  ::= "choice" //Commented keywords are not implemented yet - don't exist in NewOz for now
 CLASS   ::= "class"
 //COLLECT ::= "collect"
 //COND    ::= "cond"
@@ -40,13 +39,10 @@ DEFPROC ::= "defproc"
 DEFAULT ::= "default"
 //DEFINE  ::= "define"
 //DIS     ::= "dis"
-//DIV     ::= "div"
 DO      ::= "do"
 ELSE    ::= "else"
 //ELSECASE  ::= "elsecase"
-//ELSEIF  ::= "elseif"
 //ELSEOF  ::= "elseof"
-//END     ::= "end"
 EXPORT  ::= "export"
 EXTENDS ::= "extends"
 //FAIL    ::= "fail"
@@ -55,7 +51,6 @@ FALSE   ::= "false"
 FINALLY ::= "finally"
 FOR     ::= "for"
 FROM    ::= "from"
-//FUN     ::= "fun"
 FUNCTOR ::= "functor"
 IF      ::= "if"
 IMPORT  ::= "import"
@@ -65,21 +60,17 @@ LAZY    ::= "lazy"
 LOCK    ::= "lock"
 MATCH   ::= "match"
 METH    ::= "meth"
-//MOD     ::= "mod"
 NIL     ::= "nil"
 //NOT     ::= "not"
 //OF      ::= "of"
 OR      ::= "or"
-//ORELSE  ::= "orelse"
 //PREPARE ::= "prepare"
-//PROC    ::= "proc"
 PROP    ::= "prop"
 RAISE   ::= "raise"
 //REQUIRE ::= "require"
 RETURN  ::= "return"
-//SELF    ::= "self"
 SKIP    ::= "skip"
-//THEN    ::= "then"
+SUPER   ::= "super"
 THIS    ::= "this"
 THREAD  ::= "thread"
 TRUE    ::= "true"
@@ -89,9 +80,9 @@ VAL     ::= "val"
 VAR     ::= "var"
 
 ASSIGN      ::= "=" ok
-DEFINE      ::= ":=" ok
 PLUSASS  ::= "+=" ok
 MINUSASS ::= "-=" ok
+DEFINE      ::= ":=" ok
 EQUAL       ::= "==" ok
 NE          ::= "\=" ok
 LT          ::= "<" ok
@@ -100,9 +91,9 @@ LE          ::= "=<" ok
 GE          ::= ">=" ok
 LBARROW     ::= "<=" ok
 IMPL        ::= "=>" ok
-AND         ::= "&" ok TODO DELETED
+//AND         ::= "&" ok //DELETED
 LAND        ::= "&&" ok
-PIPE        ::= "|" ok TODO DELETED
+//PIPE        ::= "|" ok //DELETED
 LOR         ::= "||" ok
 LNOT        ::= "!" ok
 LNOTNOT     ::= "!!" ok
@@ -121,19 +112,19 @@ LACCENT     ::= "`" ok
 RACCENT     ::= "´" ok
 HAT         ::= "^" ok
 BOX         ::= "[]" ok
-//TILDE       ::= "~" ok
-DEGREE      ::= "°" ok
-//COMMERCAT   ::= "@" ok
+//TILDE       ::= "~" ok //DELETED
+DEGREE      ::= "°" ok //TODO find another more common character
+//COMMERCAT   ::= "@" ok //DELETED
 //LARROW      ::= "<-" ok
 //RARROW      ::= "->" ok
-//FDASSIGN    ::= "=:" //skipped
-//FDNE        ::= "\=:" //skipped
-//FDLT        ::= "<:" //skipped
-//FDLE        ::= "=<:" //skipped
-//FDGT        ::= ">:" //skipped
-//FDGE        ::= ">=:" //skipped
+//FDASSIGN    ::= "=:" //not implemented yet
+//FDNE        ::= "\=:" //not implemented yet
+//FDLT        ::= "<:" //not implemented yet
+//FDLE        ::= "=<:" //not implemented yet
+//FDGT        ::= ">:" //not implemented yet
+//FDGE        ::= ">=:" //not implemented yet
 COLCOL      ::= "::" ok
-//COLCOLCOL   ::= ":::" ok
+//COLCOLCOL   ::= ":::" //not implemented yet
 
 COMMA       ::= "," ok
 DOT         ::= "." ok
@@ -155,15 +146,14 @@ DIGIT          ::= "0"|...|"9" ok
 NONZERODIGIT   ::= "1"|...|"9" ok
 CHARINT        ::= "0"|...|"255" ok
 ALPHANUM       ::= UPPERCASE | LOWERCASE | DIGIT | "_" ok
-ATOMCHAR       ::= CHAR - ("'"|"\")
-STRINGCHAR     ::= CHAR - ("""|"\")
-VARIABLECHAR   ::= CHAR - ("`"|"\")
-CHARCHAR       ::= CHAR - ("\")
-ESCCHAR        ::= "a"|"b"|"f"|"n"|"r"|"t"|"v"|"\"|"'"|"""|"`"|"°"
+DECINT         ::= DIGIT | NONZERODIGIT (DIGIT)*
+HEXINT         ::= "0" ("x"|"X") (HEXDIGIT)+
+OCTINT         ::= "0" (OCTDIGIT)+
+BININT         ::= "0" ("b"|"B") BINDIGIT+
 OCTDIGIT       ::= "0"|...|"7" ok
 HEXDIGIT       ::= "0"|...|"9"|"A"|...|"F"|"a"|...|"f" ok
 BINDIGIT       ::= "0"|"1" ok
-NONZERODIGIT   ::= "1"|...|"9" ok
+ESCCHAR        ::= "a"|"b"|"f"|"n"|"r"|"t"|"\"|"'"|"""|"`"|"°"
 PSEUDOCHAR     ::= "\" OCTDIGIT OCTDIGIT OCTDIGIT ok
                 | "\" ("x" | "X") HEXDIGIT HEXDIGIT ok
 

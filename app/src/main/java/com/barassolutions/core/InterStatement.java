@@ -33,8 +33,8 @@ public class InterStatement extends AST {
    * a possible child InterStatement.
    *
    * @param line      line in which the compilation unit occurs in the source file.
-   * @param decls     list of declarations.
-   * @param statement a (optional) statement representing a nested InterStatement.
+   * @param decls     an (optional list of declarations.
+   * @param statements a (optional) list of statements.
    */
   public InterStatement(int line, ArrayList<DeclarationPart> decls,
       ArrayList<Statement> statements) {
@@ -83,7 +83,7 @@ public class InterStatement extends AST {
   public void preAnalyze() {
     context = new GlobalContext();
 
-    context.addMethod() //TODO all implicit methods in Oz (Browse etc.)
+    context.addMethod(); //TODO all implicit methods in Oz (Browse etc.)
     //TODO also add system calls etc, things directly available without imports
 
     if (declarationParts != null) {

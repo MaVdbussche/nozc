@@ -100,7 +100,7 @@ class PlusOp extends BinaryExpression {
         if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
             type = Type.INT;
         } else { //TODO add floats
-            type = Type.ANY;
+            type = Type.NONE;
             AST.compilationBlock.reportSemanticError(line(), "Invalid operand types for +");
         }
         return this;

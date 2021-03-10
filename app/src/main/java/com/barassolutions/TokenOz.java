@@ -20,7 +20,7 @@ public interface TokenOz {
   int CONTINUE = 11 ;
   int DECLARE = 12 ;
   int DEFAULT = 13 ;
-  int DEFINE = 14 ;
+  int DEF = 14 ;
   int DIS = 15 ;
   int DIV = 16 ;
   int DO = 17 ;

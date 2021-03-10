@@ -1094,7 +1094,7 @@ private CaseStatementClause caseStatementClause(boolean firstClausePassed): {
 private CaseExpressionClause caseExpressionClause(boolean firstClausePassed): {
     int line = 0;
     CaseExpressionClause out = null;
-    Statement expression = null;
+    InExpression expression = null;
     Pattern pattern = null;
     Operator op = null;
     ArrayList<Operator> ops = new ArrayList<Operator>();
@@ -1144,7 +1144,7 @@ private Expression assignmentExpression(): {
                 { lhs = new OperationPlusAssignment(line, lhs, rhs); }
              | <MINUSASS> rhs = assignmentExpression()
                 { lhs = new OperationMinusAssignment(line, lhs, rhs); }
-             | <DEFINE> rhs = assignmentExpression()
+             | <DEFINE> rhs = assignmentExpression() //TODO when is this used ? Doesn't exist in NewOz !?
                 { lhs = new OperationAssignmentDefine(line, lhs, rhs); }
             )
         ]
@@ -1831,11 +1831,11 @@ private DeclarationPart declarationPart(): {
             <VAL> { line = token.beginLine; constant = true; }
           | <VAR> { line = token.beginLine; constant = false; }
           )
-          <VARIABLE> { variable = new Variable(line, token.image); map.put(variable, null); }
+          <VARIABLE> { variable = new Variable(line, token.image, constant); map.put(variable, null); }
           [<ASSIGN> value = expression()
           { map.put(variable, value); }]
           (
-            <COMMA> <VARIABLE> { variable = new Variable(line, token.image); map.put(variable, null); }
+            <COMMA> <VARIABLE> { variable = new Variable(line, token.image, constant); map.put(variable, null); }
             [<ASSIGN> value = expression()
             { map.put(variable, value); }]
           )*

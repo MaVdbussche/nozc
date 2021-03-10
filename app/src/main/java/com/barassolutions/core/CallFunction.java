@@ -52,7 +52,7 @@ public class CallFunction extends Expression {
     if (method == null) {
       AST.interStatement.reportSemanticError(line,
           "Could not find function for: " + Type.signatureFor(name, argTypes.length));
-      this.type = Type.ANY;
+      this.type = Type.NONE;
     } else {
       this.type = method.returnType();
     }

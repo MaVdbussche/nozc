@@ -7,7 +7,7 @@ import com.barassolutions.Utils;
 import java.util.ArrayList;
 import org.jetbrains.annotations.NotNull;
 
-public class CaseStatementClause extends Statement {
+public class CaseExpressionClause extends Expression {
 
   /**
    * Base pattern that this clause should try to match
@@ -25,9 +25,9 @@ public class CaseStatementClause extends Statement {
   private ArrayList<Expression> expressions;
 
   /**
-   * Statement to be executed in case of a successful match
+   * Expression to be returned in case of a successful match
    */
-  private InStatement statement;
+  private InExpression expression;
 
   /**
    * This variable is necessary because Oz's syntax is different for the first pattern-matching
@@ -36,24 +36,24 @@ public class CaseStatementClause extends Statement {
   private boolean isFirstClause;
 
   /**
-   * Construct an AST node for a pattern-matching clause followed by a statement, given its line
+   * Construct an AST node for a pattern-matching clause followed by an expression, given its line
    * number, the test expressions, and the consequences.
    *
    * @param line          line in which the clause occurs in the source file.
    * @param ops           optional operations to perform to match this clause.
    * @param exprs         optional operations to perform to match this clause.
    * @param pattern       pattern to match.
-   * @param statement     statement to execute if the matching succeeds.
+   * @param expression    expression to return if the matching succeeds.
    * @param isFirstClause is this clause the first one that will be tested ?
    */
-  public CaseStatementClause(int line, @NotNull Pattern pattern, @NotNull ArrayList<Operator> ops,
-      @NotNull ArrayList<Expression> exprs, @NotNull InStatement statement, boolean isFirstClause) {
+  public CaseExpressionClause(int line, @NotNull Pattern pattern, @NotNull ArrayList<Operator> ops,
+      @NotNull ArrayList<Expression> exprs, @NotNull InExpression expression, boolean isFirstClause) {
     super(line);
     this.pattern = pattern;
     if (ops.size() == exprs.size()) {
       this.operators = ops;
       this.expressions = exprs;
-      this.statement = statement;
+      this.expression = expression;
       this.isFirstClause = isFirstClause;
     } else {
       //TODO error
@@ -68,7 +68,7 @@ public class CaseStatementClause extends Statement {
    * @return the analyzed (and possibly rewritten) AST subtree.
    */
   @Override
-  public AST analyze(Context context) {
+  public Expression analyze(Context context) {
     pattern = (Pattern) pattern.analyze(context);
 
     operators.forEach(o -> {
@@ -84,7 +84,7 @@ public class CaseStatementClause extends Statement {
       e.type().mustMatchExpected(line(), Type.BOOLEAN);
     });
 
-    statement = (InStatement) statement.analyze(context);
+    expression = (InExpression) expression.analyze(context);
     return this;
   }
 
@@ -113,7 +113,7 @@ public class CaseStatementClause extends Statement {
     }
     output.token(TokenOz.THEN);
     output.space();
-    statement.codegen(output);
+    expression.codegen(output);
     output.newLine();
   }
 
@@ -140,7 +140,7 @@ public class CaseStatementClause extends Statement {
       p.printf("</Expression>\n");
     }
 
-    statement.writeToStdOut(p);
+    expression.writeToStdOut(p);
 
     p.indentLeft();
     p.printf("</CaseStatementClause>\n");

@@ -67,6 +67,7 @@ public class LoopDeclaration extends AST implements Declaration {
   @Override
   public void preAnalyze(Context context, Emitter partial) {
     //TODO ensure newly declared names do not already exist in this context, then add them as normal
+    // (if they are, "shadow" them)
   }
 
   /**

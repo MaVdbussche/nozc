@@ -39,7 +39,7 @@ public class ExportClause extends Statement {
       output.literal(name);
       output.token(TokenOz.COLON);
     }
-    output.literal(var.name());
+    output.literal(var.ozFriendlyName());
   }
 
   @Override

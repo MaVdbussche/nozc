@@ -3,6 +3,7 @@ package com.barassolutions.core;
 import com.barassolutions.Emitter;
 import com.barassolutions.PrettyPrinter;
 import com.barassolutions.TokenOz;
+import java.util.ArrayList;
 import org.jetbrains.annotations.Nullable;
 
 public class InExpression extends Expression {
@@ -53,7 +54,7 @@ public class InExpression extends Expression {
    * @return the analyzed (and possibly rewritten) AST subtree.
    */
   @Override
-  public AST analyze(Context context) {
+  public Expression analyze(Context context) {
     this.context = new LocalContext(context);
 
     declarationParts.forEach(e -> e = (DeclarationPart) e.analyze(this.context));

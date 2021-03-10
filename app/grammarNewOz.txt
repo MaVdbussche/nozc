@@ -65,7 +65,6 @@ nestConExpression ::= variable LPAREN {expression {COMMA expression}} RPAREN
                {CASE caseExpressionClause}+
                [ELSE inExpression]
               RCURLY
-            | FOR LPAREN {loopDec}+ RPAREN inExpression
             | TRY inExpression
               [CATCH LCURLY
                 {CASE caseExpressionClause}+

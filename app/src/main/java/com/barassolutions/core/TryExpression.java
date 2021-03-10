@@ -6,17 +6,17 @@ import com.barassolutions.TokenOz;
 import java.util.ArrayList;
 import org.jetbrains.annotations.Nullable;
 
-public class TryStructure extends Statement {
+public class TryExpression extends Expression {
 
   /**
-   * The statement to try and execute.
+   * The expression to try and return.
    */
-  private InStatement statement;
+  private InExpression expression;
 
   /**
    * The clauses in the "catch" block.
    */
-  private final ArrayList<CaseStatementClause> clauses;
+  private final ArrayList<CaseExpressionClause> clauses;
 
   /**
    * The optional "finally" statement.
@@ -24,10 +24,10 @@ public class TryStructure extends Statement {
   @Nullable
   private InStatement finallyStatement;
 
-  public TryStructure(int line, InStatement statement, ArrayList<CaseStatementClause> clauses,
+  public TryExpression(int line, InExpression expression, ArrayList<CaseExpressionClause> clauses,
       @Nullable InStatement statement2) {
     super(line);
-    this.statement = statement;
+    this.expression = expression;
     this.clauses = clauses;
     this.finallyStatement = statement2;
   }
@@ -39,10 +39,10 @@ public class TryStructure extends Statement {
    * @return the analyzed (and possibly rewritten) AST subtree.
    */
   @Override
-  public AST analyze(Context context) {
-    statement = (InStatement) statement.analyze(context);
+  public Expression analyze(Context context) {
+    expression = (InExpression) expression.analyze(context);
 
-    clauses.forEach(c -> c = (CaseStatementClause) c.analyze(context));
+    clauses.forEach(c -> c = (CaseExpressionClause) c.analyze(context));
 
     if (finallyStatement != null) {
       finallyStatement = (InStatement) finallyStatement.analyze(context);
@@ -59,7 +59,7 @@ public class TryStructure extends Statement {
   public void codegen(Emitter output) {
     output.token(TokenOz.TRY);
     output.space();
-    statement.codegen(output);
+    expression.codegen(output);
     output.space();
     output.token(TokenOz.CATCH);
     output.newLine();
@@ -78,14 +78,14 @@ public class TryStructure extends Statement {
    */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
-    p.printf("<TryStatement line=\"%d\">\n", line());
+    p.printf("<TryExpression line=\"%d\">\n", line());
     p.indentRight();
 
-    p.printf("<Statement>\n");
+    p.printf("<Expression>\n");
     p.indentRight();
-    statement.writeToStdOut(p);
+    expression.writeToStdOut(p);
     p.indentLeft();
-    p.printf("</Statement>\n");
+    p.printf("</Expression>\n");
 
     clauses.forEach(c -> c.writeToStdOut(p));
 
@@ -97,6 +97,6 @@ public class TryStructure extends Statement {
       p.printf("</Statement>\n");
     }
     p.indentLeft();
-    p.printf("</TryStatement>\n");
+    p.printf("</TryExpression>\n");
   }
 }

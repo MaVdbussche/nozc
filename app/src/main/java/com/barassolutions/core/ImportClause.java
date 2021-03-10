@@ -56,7 +56,7 @@ public class ImportClause extends Statement implements Declaration {
         output.space();
         output.literal(s);
         output.token(TokenOz.COLON);
-        output.literal(v.name());
+        output.literal(v.ozFriendlyName());
       });
       output.token(TokenOz.RPAREN);
     }

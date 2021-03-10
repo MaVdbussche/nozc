@@ -15,6 +15,7 @@ package com.barassolutions;
 
 import com.barassolutions.core.*;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.HashMap;
 
 /**
@@ -320,7 +321,8 @@ public InterStatement interStatement(): {
 }
 {
     try {
-      (<DECLARE> <LCURLY> { line = token.beginLine; }
+      LOOKAHEAD( <DECLARE> )
+      <DECLARE> <LCURLY> { line = token.beginLine; }
       (
           aDeclarationPart = declarationPart()
           { declarations.add(aDeclarationPart); }
@@ -330,7 +332,7 @@ public InterStatement interStatement(): {
           { statements.add(aStatement); }
       )*
       <RCURLY> <EOF>
-      { out = new InterStatement(line, declarations, statements); }) //Declare block
+      { out = new InterStatement(line, declarations, statements); } //Declare block
       |
       ( aStatement = nestConStatement()
       { statements.add(aStatement); } //Stand-alone statements
@@ -364,20 +366,22 @@ private Statement statement(): {
 }
 {
     try {
-        statement = nestConStatement() { line = token.beginLine; }
-        | <SKP>
+        <SKP>
           { line = token.beginLine;
           statement = new SkipStatement(line); }
-        //| <SEMI> //Ignore it
-        //| <DECLARE> statement = statement() { line = token.beginLine; }
         | <RETURN> { line = token.beginLine; }
           expression = expression()
           { statement = new ReturnStatement(line, expression); }
+        | LOOKAHEAD( nestConStatement() )
+          statement = nestConStatement() { line = token.beginLine; }
+        //| <SEMI> //Ignore it
+        //| <DECLARE> statement = statement() { line = token.beginLine; }
+
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{EOF}, e);
     }
-    { return new Statement(line, statement); }
+    { return statement; }
 }
 
 /**
@@ -400,12 +404,15 @@ private Expression expression(): {
 }
 {
     try {
-          expression = nestConExpression() { line = expression.line(); }
-        | expression = nestDecAnonym() { line = expression.line(); }
+          LOOKAHEAD( nestConExpression() )
+          expression = nestConExpression()
+        | LOOKAHEAD( nestDecAnonym() )
+          expression = nestDecAnonym()
         | <DOLLAR>
           { line = token.beginLine;
             expression = new AnonymExpression(line); }
-        | expression = term()
+        | LOOKAHEAD( term() )
+          expression = term()
         | <THIS>
           { line = token.beginLine;
             expression = new ThisExpression(line); }
@@ -499,7 +506,7 @@ private InExpression inExpression(): {
         (
           aDecl = declarationPart() { decls.add(aDecl); }
         )*
-        statement = statement()
+        statement = statement() //TODO this doesn't follow EBNF above ?
         [
           expression = expression()
         ]
@@ -543,7 +550,7 @@ private Statement nestConStatement(): {
     int line = 0;
     Statement out = null;
     String name = null;
-    InStatement statement = null;
+    Statement statement = null;
     InStatement statement2 = null;
     Expression expression = null;
     Expression expression2 = null;
@@ -558,26 +565,29 @@ private Statement nestConStatement(): {
 }
 {
     try {
-        expression = assignmentExpression() { line = expression.line();
-         out = expression; }
-         | <VARIABLE> { line = token.beginLine; name = token.image; }
+          LOOKAHEAD( assignmentExpression() )
+          expression = assignmentExpression()
+          { line = expression.line(); out = expression; }
+        | LOOKAHEAD( <VARIABLE> <LPAREN> )
+          <VARIABLE> { line = token.beginLine; name = token.image; }
           <LPAREN> expression2 = expression() { args.add(expression2); }
           (
             <COMMA> expression2 = expression() { args.add(expression2); }
           )* <RPAREN>
           { out = new CallProcedure(line, name, args); }
-        | <LPAREN> { line = token.beginLine; } statement = inStatement() <RPAREN>
+        | LOOKAHEAD( <LPAREN> statement() <RPAREN> )
+          <LPAREN> statement = statement() <RPAREN>
           { out = statement; }
         | <IF> { line = token.beginLine; }
-          expression = parExpression() statement = inStatement()
-          { conds.add(expression); consq.add((InStatement) statement); }
+          expression = parExpression() statement2 = inStatement()
+          { conds.add(expression); consq.add(statement2); }
           (
-            <ELSE> <IF> expression = parExpression() statement = inStatement()
-            { conds.add(expression); consq.add((InStatement) statement); }
+            <ELSE> <IF> expression = parExpression() statement2 = inStatement()
+            { conds.add(expression); consq.add(statement2); }
           )*
           [
-            <ELSE> statement = inStatement()
-            { consq.add((InStatement) statement); }
+            <ELSE> statement2 = inStatement()
+            { consq.add(statement2); }
           ]
           { out = new ConditionalStruct(line, conds, consq); }
         | <MATCH> { line = token.beginLine; }
@@ -585,8 +595,8 @@ private Statement nestConStatement(): {
           (
             <CASE> aClause = caseStatementClause(firstClausePassed) { firstClausePassed = true; clauses.add(aClause); }
           )+
-          [ <ELSE> statement = inStatement() ]
-          { out = new CaseStructure(line, expression, clauses, statement); }
+          [ <ELSE> statement2 = inStatement() ]
+          { out = new CaseStructure(line, expression, clauses, statement2); }
           <RCURLY>
         | <FOR> { line = token.beginLine; }
           <LPAREN>
@@ -594,8 +604,8 @@ private Statement nestConStatement(): {
             loopDec = loopDeclaration()
             { loopDecs.add(loopDec); }
           )+
-          <RPAREN> statement = inStatement()
-          { out = new LoopStructure(line, loopDecs, (InStatement) statement); }
+          <RPAREN> statement2 = inStatement()
+          { out = new LoopStructure(line, loopDecs, statement2); }
         | <TRY> { line = token.beginLine; }
           statement = inStatement()
           [
@@ -611,16 +621,16 @@ private Statement nestConStatement(): {
           { out = new TryStructure(line, (InStatement) statement, clauses, statement2); }
         | <RAISE> { line = token.beginLine; }
           expression = inExpression()
-          { out = new RaiseStructure(line, (InExpression) expression); }
+          { out = new RaiseStructure(line, expression); }
         | <THREAD> { line = token.beginLine; }
-          statement = inStatement()
-          { out = new ThreadStructure(line, statement); }
+          statement2 = inStatement()
+          { out = new ThreadStructure(line, statement2); }
         | <LOCK> { line = token.beginLine; }
           [
             <LPAREN> expression = expression() <RPAREN>
           ]
-          statement = inStatement()
-          { out = new LockStructure(line, expression, statement); }
+          statement2 = inStatement()
+          { out = new LockStructure(line, expression, statement2); }
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
@@ -632,16 +642,15 @@ private Statement nestConStatement(): {
  * Parse a nestable construct (expression).
  *
  * <pre>
- *   nestConExpression ::= variable LPAREN {expresseion {COMMA expression}} RPAREN
+ *   nestConExpression ::= variable LPAREN {expression {COMMA expression}} RPAREN
  *                    | LPAREN expression RPAREN
- *                    | IF LPAREN expression RPAREN inExpression
+ *                    | IF parExpression inExpression
  *                      {ELSE IF LPAREN expression RPAREN inExpression}
  *                      [ELSE inExpression]
  *                    | MATCH expression LCURLY
  *                      {CASE caseExpressionClause}+
  *                      [ELSE inExpression]
  *                      RCURLY
- *                    | FOR LPAREN {loopDec}+ RPAREN inExpression
  *                    | TRY inExpression
  *                      [CATCH LCURLY
  *                      {CASE caseExpressionClause}+
@@ -649,7 +658,6 @@ private Statement nestConStatement(): {
  *                      [FINALLY inStatement]
  *                    | RAISE inExpression
  *                    | THREAD inExpression
- *                    | LOCK [LPAREN expression RPAREN] inExpression
  * </pre>
  *
  * @return an AST for a nestConExpression.
@@ -658,56 +666,48 @@ private Expression nestConExpression(): {
     int line = 0;
     Expression out = null;
     String name = null;
-    Statement statement = null;
+    InStatement statement = null;
     Expression expression = null;
-    Expression expression2 = null;
+    InExpression expression2 = null;
     ArrayList<Expression> args = new ArrayList<Expression>();
     ArrayList<Expression> conds = new ArrayList<Expression>();
-    ArrayList<InStatement> consq = new ArrayList<InStatement>();
+    ArrayList<InExpression> consq = new ArrayList<InExpression>();
     boolean firstClausePassed = false;
-    CaseStatementClause aClause = null;
-    ArrayList<CaseStatementClause> clauses = new ArrayList<CaseStatementClause>();
-    LoopDeclaration loopDec = null;
-    ArrayList<LoopDeclaration> loopDecs = new ArrayList<LoopDeclaration>();
+    CaseExpressionClause aClause = null;
+    ArrayList<CaseExpressionClause> clauses = new ArrayList<CaseExpressionClause>();
 }
 {
     try {
-        <VARIABLE> { line = token.beginLine; name = token.image; }
+          LOOKAHEAD( <VARIABLE> <LPAREN> )
+          <VARIABLE> { line = token.beginLine; name = token.image; }
           <LPAREN> expression = expression() { args.add(expression); }
           (
             <COMMA> expression = expression() { args.add(expression); }
           )* <RPAREN>
           { out = new CallFunction(line, name, args); }
-        | <LPAREN> { line = token.beginLine; } expression = expression() <RPAREN>
+        | LOOKAHEAD( <LPAREN> expression() <RPAREN> )
+          <LPAREN> expression = expression() <RPAREN>
           { out = expression; }
         | <IF> { line = token.beginLine; }
-          <LPAREN> expression = expression() <RPAREN> expression2 = inExpression()
+          expression = parExpression() expression2 = inExpression()
           { conds.add(expression); consq.add(expression2); }
           (
             <ELSE> <IF> <LPAREN> expression = expression() <RPAREN> expression2 = inExpression()
             { conds.add(expression); consq.add(expression2); }
           )*
           [
-            <ELSE> expression = inExpression()
-            { consq.add(expression); }
+            <ELSE> expression2 = inExpression()
+            { consq.add(expression2); }
           ]
-          { out = new ConditionalStruct(line, conds, consq); }
+          { out = new ConditionalExpression(line, conds, consq); }
         | <MATCH> { line = token.beginLine; }
           expression = expression() <LCURLY>
           (
             <CASE> aClause = caseExpressionClause(firstClausePassed) { firstClausePassed = true; clauses.add(aClause); }
           )+
           [ <ELSE> expression2 = inExpression() ]
-          { out = new CaseStructure(line, expression, clauses, expression2); }
+          { out = new CaseExpression(line, expression, clauses, expression2); }
           <RCURLY>
-        | <FOR> { line = token.beginLine; }
-          <LPAREN>
-          (
-            loopDec = loopDeclaration()
-            { loopDecs.add(loopDec); }
-          )+
-          <RPAREN> expression = inExpression()
-          { out = new LoopStructure(line, loopDecs, (InExpression) expression); }
         | <TRY> { line = token.beginLine; }
           expression = inExpression()
           [
@@ -720,19 +720,13 @@ private Expression nestConExpression(): {
           [
             <FINALLY> statement = inStatement()
           ]
-          { out = new TryStructure(line, expression, clauses, statement); }
+          { out = new TryExpression(line, (InExpression) expression, clauses, statement); }
         | <RAISE> { line = token.beginLine; }
           expression = inExpression()
-          { out = new RaiseStructure(line, (InExpression) expression); }
+          { out = new RaiseExpression(line, expression); }
         | <THREAD> { line = token.beginLine; }
           expression = inExpression()
-          { out = new ThreadStructure(line, (InExpression) expression); }
-        | <LOCK> { line = token.beginLine; }
-          [
-            <LPAREN> expression = expression() <RPAREN>
-          ]
-          expression2 = inExpression()
-          { out = new LockStructure(line, expression, expression2); }
+          { out = new ThreadExpression(line, (InExpression) expression); }
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
@@ -759,7 +753,6 @@ private Expression nestConExpression(): {
  */
 private DeclarationPart nestDecVariable(): {
     int line = 0;
-    int line2 = 0;
     DeclarationPart out = null;
     InStatement statement = null;
     InExpression expression = null;
@@ -855,10 +848,9 @@ private DeclarationPart nestDecVariable(): {
  *
  * @return an AST for a nestDecAnonym.
  */
-private Statement nestDecAnonym(): {
+private Expression nestDecAnonym(): {
     int line = 0;
-    int line2 = 0;
-    Statement out = null;
+    Expression out = null;
     InStatement statement = null;
     InExpression expression = null;
     Variable name = null;
@@ -910,7 +902,7 @@ private Statement nestDecAnonym(): {
             )
           )*
           statement = inStatement()
-          { out = new Functor(line, name, imports, exports, statement); }//TODO keyword IMPORT/EXPORT has to be generated there
+          { out = new Functor(line, null, imports, exports, statement); }//TODO keyword IMPORT/EXPORT has to be generated there
         | <CLASS> { line = token.beginLine; }
           <DOLLAR>
           [
@@ -925,7 +917,7 @@ private Statement nestDecAnonym(): {
               }
             }
           )* <RCURLY>
-          { out = new ClassDeclaration(line, name, descriptors, methods); }
+          { out = new ClassDeclaration(line, null, descriptors, methods); }
     }
     catch ( ParseException e ) {
        recoverFromError(new int[]{RCURLY}, e);
@@ -1019,6 +1011,7 @@ private Statement nestDecAnonym(): {
  */
  private ClassElement classElementDef(): {
     int line = 0;
+    ClassElement out = null;
     MethodHead aMethodHead = null;
     Variable name = null;
     Expression expression = null;
@@ -1028,16 +1021,20 @@ private Statement nestDecAnonym(): {
 }
 {
     try {
-        <DEF> { line = token.beginLine; }
+          LOOKAHEAD( <DEF> methHead() )
+          <DEF> { line = token.beginLine; }
           aMethodHead = methHead()
           [<ASSIGN> <VARIABLE> { name = new Variable(line, token.image); }]
-          (
-            expression = inExpression() |
+          ( LOOKAHEAD( inExpression() )
+            expression = inExpression()
+          |
+            LOOKAHEAD( inStatement() )
             statement = inStatement()
           )
           { out = new Method(line, aMethodHead, name, expression, statement); }
-        | descriptor = classDescriptor()
-          { out= descriptor; }
+        | LOOKAHEAD( classDescriptor() )
+          descriptor = classDescriptor()
+          { out = descriptor; }
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
@@ -1057,7 +1054,7 @@ private Statement nestDecAnonym(): {
 private CaseStatementClause caseStatementClause(boolean firstClausePassed): {
     int line = 0;
     CaseStatementClause out = null;
-    Statement statement = null;
+    InStatement statement = null;
     Pattern pattern = null;
     Operator op = null;
     ArrayList<Operator> ops = new ArrayList<Operator>();
@@ -1371,7 +1368,9 @@ private Expression unaryExpression(): {
 }
 {
     try {
-        <INC> { line = token.beginLine; }
+        LOOKAHEAD( simpleUnaryExpression() )
+        expr = simpleUnaryExpression()
+        | <INC> { line = token.beginLine; }
         expr2 = unaryExpression()
         { expr = new OperationPreIncr(line, expr2); }
         | <DEC> { line = token.beginLine; }
@@ -1383,7 +1382,6 @@ private Expression unaryExpression(): {
         | <MINUS> { line = token.beginLine; }
             expr2 = unaryExpression()
             { expr = new OperationNegate(line, expr2); }
-        | expr = simpleUnaryExpression()
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
@@ -1408,10 +1406,11 @@ private Expression simpleUnaryExpression(): {
 }
 {
     try {
-        <LNOT> { line = token.beginLine; }
+        LOOKAHEAD(postfixExpression() )
+        expr = postfixExpression()
+        | <LNOT> { line = token.beginLine; }
         expr2 = unaryExpression()
         { expr = new OperatorLogicalNot(line, expr2); }
-        | expr = postfixExpression()
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
@@ -1452,9 +1451,9 @@ private Expression postfixExpression(): {
  *
  * <pre>
  *   primary ::= parExpression
- *             | THIS DOT variable [LPAREN {expression {COMMA expression}} RPAREN]
+ *             | THIS DOT variable [LPAREN [expression {COMMA expression}] RPAREN]
  *             | SUPER LPAREN variableStrict RPAREN
- *                      DOT variable [LPAREN {expression {COMMA expression}} RPAREN]
+ *                      DOT variable [LPAREN [expression {COMMA expression}] RPAREN]
  *             | literal
  *             | qualifiedIdentifier
  *             | initializer
@@ -1464,27 +1463,34 @@ private Expression postfixExpression(): {
  */
 private Expression primary(): {
     int line = 0;
-    Expr out = null;
+    Expression out = null;
     Expression expr = null;
     Variable variable = null;
     String name = null;
     Expression arg = null;
-    ArayList<Expression> args = new ArrayList<Expression>();
+    ArrayList<Expression> args = new ArrayList<Expression>();
 }
 {
     try {
-        expr = parExpression()
+          LOOKAHEAD( parExpression() )
+          out = parExpression()
+        | LOOKAHEAD( literal() )
+          out = literal()
+        | LOOKAHEAD( qualifiedIdentifier() )
+          out = qualifiedIdentifier()
+        | LOOKAHEAD( initializer() )
+          out = initializer()
         | <THIS> { line = token.beginLine; }
             <DOT> <VARIABLE> { variable = new Variable(line, token.image);
             out = new ExpressionThisAttribute(line, variable); } //TODO actually, attributes are private in Oz
             [
                 <LPAREN>
-                (
+                [
                     arg = expression() { args.add(arg); }
                     (
                         <COMMA> arg = expression() { args.add(arg); }
                     )*
-                )*
+                ]
                 <RPAREN>
                 { out = new ExpressionThisMethod(line, variable, args); }
             ]
@@ -1494,18 +1500,15 @@ private Expression primary(): {
             out = new ExpressionSuperAttribute(line, name, variable); } //TODO actually, attributes are private in Oz
             [
                 <LPAREN>
-                (
+                [
                     arg = expression() { args.add(arg); }
                     (
                         <COMMA> arg = expression() { args.add(arg); }
                     )*
-                )*
+                ]
                 <RPAREN>
                 { out = new ExpressionSuperMethod(line, variable, args); }
             ]
-        | out = literal()
-        | out = qualifiedIdentifier()
-        | out = initializer()
     }
     catch ( ParseException e ) {
         recoverFromError( new int[]{RCURLY}, e );
@@ -1517,7 +1520,7 @@ private Expression primary(): {
  * Parse a qualified identifier.
  *
  * <pre>
- *   qualifiedIdentifier ::= variable {DOT variable [LPAREN {expression {COMMA expression}} RPAREN]}
+ *   qualifiedIdentifier ::= variable {DOT variable [LPAREN [expression {COMMA expression}] RPAREN]}
  * </pre>
  *
  * @return an AST for a qualifiedIdentifier.
@@ -1526,7 +1529,7 @@ private Expression qualifiedIdentifier(): {
     int line = 0;
     Expression out = null;
     Variable var = null;
-    Variable var = null;
+    Variable var2 = null;
     Expression arg = null;
     ArrayList<Expression> args = new ArrayList<Expression>();
 }
@@ -1539,12 +1542,12 @@ private Expression qualifiedIdentifier(): {
             out = new ExpressionSelectionAttribute(line, var, var2); } //TODO actually, attributes are private in Oz
             [
                 <LPAREN>
-                (
+                [
                     arg = expression() { args.add(arg); }
                     (
                         <COMMA> arg = expression() { args.add(arg); }
                     )*
-                )*
+                ]
                 <RPAREN>
                 { out = new ExpressionSelectionMethod(line, var, var2, args); }
             ]
@@ -1562,7 +1565,7 @@ private Expression qualifiedIdentifier(): {
  * <pre>
  *   initializer ::= expression {HASHTAG expression}+
  *                  | LBRACK [expression {COMMA expression}] RBRACK
- *                  | expression {COLCOL expression} [NIL] //If ends with nil -> list of values. Else -> concat 2 lists
+ *                  | expression {COLCOL expression}+ [NIL] //If ends with nil -> list of values. Else -> concat 2 lists
  * </pre>
  *
  * @return an AST for an initializer.
@@ -1601,7 +1604,7 @@ private Expression initializer(): {
         (
             <COLCOL> { line = token.beginLine; }
             element = expression() { elements.add(element); }
-        )*
+        )+
         { out = new ExpressionListInit(line, elements, true); }
         [
             <NIL> { out = new ExpressionListInit(line, elements, false); }
@@ -1624,7 +1627,7 @@ private Expression initializer(): {
  */
 private Expression literal(): {
     int line = 0;
-    Expr out = null;
+    Expression out = null;
 }
 {
     try {
@@ -1656,14 +1659,11 @@ private Expression literal(): {
  */
 private Term term(): {
     int line = 0;
-    int lostLabelsCounter = 1;
-    Expression out = null;
-    boolean bool = true;
+    Term out = null;
     String value = null;
     Feature aFeature = null;
     Expression val = null;
     Map<Feature, Expression> map = new HashMap<Feature, Expression>();
-    ArrayList<Expression> args = new ArrayList<Expression>();
 }
 {
     try {
@@ -1694,7 +1694,7 @@ private Term term(): {
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
     }
-    { return statement; }
+    { return out; }
 }
 
 /**
@@ -1704,8 +1704,8 @@ private Term term(): {
  * <pre>
  *   pattern ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
  *            | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN
- *            | LPAREN pattern {HASHTAG pattern} RPAREN
- *            | LPAREN pattern {COLCOL pattern} RPAREN
+ *            | LPAREN pattern {HASHTAG pattern}+ RPAREN
+ *            | LPAREN pattern {COLCOL pattern}+ RPAREN
  *            | LBRACK [pattern {COMMA pattern}] RBRACK
  *            | LPAREN pattern RPAREN
  * </pre>
@@ -1714,7 +1714,6 @@ private Term term(): {
  */
 private Pattern pattern(): {
     int line = 0;
-    int lostLabelsCounter = 1;
     Pattern out = null;
     boolean bool = true;
     String value = null;
@@ -1772,17 +1771,13 @@ private Pattern pattern(): {
         | LOOKAHEAD( <LPAREN> pattern() <HASHTAG> pattern() )
           <LPAREN> { line = token.beginLine; }
           pat1 = pattern() { patterns.add(pat1); }
-          <HASHTAG>
-          pat2 = pattern() { patterns.add(pat2); }
-          (<HASHTAG> pat2 = pattern() { patterns.add(pat2); })*
+          (<HASHTAG> pat2 = pattern() { patterns.add(pat2); })+
           <RPAREN>
           { out = new PatternTuple(line, patterns); }
         | LOOKAHEAD( <LPAREN> pattern() <COLCOL> pattern() )
           <LPAREN> { line = token.beginLine; }
           pat1 = pattern() { patterns.add(pat1); }
-          <COLCOL>
-          pat2 = pattern() { patterns.add(pat2); }
-          (<COLCOL> pat2 = pattern() { patterns.add(pat2); })*
+          (<COLCOL> pat2 = pattern() { patterns.add(pat2); })+
           <RPAREN>
           { out = new PatternList(line, patterns); }
         | <LBRACK> { line = token.beginLine; }
@@ -1879,13 +1874,14 @@ private LoopDeclaration loopDeclaration(): {
     Variable var = null;
     Expression generator = null;
     Expression init = null;
-    Expression cond = true;
+    Expression cond = null;
     Expression step = 1;
     Expression end = null;
     Feature feat = null; //TODO implement loop features later
 }
 {
     try {
+        LOOKAHEAD(<VARIABLE> <IN> expression() <DOTDOT> )
         <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image); }
           <IN> init = expression()
           <DOTDOT> end = expression()
@@ -1893,7 +1889,8 @@ private LoopDeclaration loopDeclaration(): {
             <SEMI> step = expression()
           ]
           { out = new LoopDeclaration(line, var, init, cond, step, end); }
-        | <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image); }
+        | LOOKAHEAD( <VARIABLE> <IN> expression() <SEMI> )
+          <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image); }
           <IN> init = expression()
           <SEMI> step = expression()
           [

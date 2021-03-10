@@ -53,7 +53,7 @@ public class DeclarationPart extends Statement {
   public void codegen(Emitter output) {
     if (constant) {
       map.forEach((k, v) -> {
-        output.literal(k.name());
+        output.literal(k.ozFriendlyName());
         if (v != null) {
           output.token(TokenOz.ASSIGN);
           v.codegen(output);
@@ -62,7 +62,7 @@ public class DeclarationPart extends Statement {
       });
     } else {
       map.forEach((k, v) -> {
-        output.literal(k.name());
+        output.literal(k.ozFriendlyName());
         output.token(TokenOz.ASSIGN);
         output.token(TokenOz.LCURLY);
         output.literal(BuiltIns.newCell(true));

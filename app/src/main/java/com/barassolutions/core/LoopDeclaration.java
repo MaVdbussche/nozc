@@ -3,7 +3,7 @@ package com.barassolutions.core;
 import com.barassolutions.Emitter;
 import com.barassolutions.PrettyPrinter;
 import com.barassolutions.TokenOz;
-import java.beans.Expression;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A loop declaration can be an iterator or a feature declaration.
@@ -16,6 +16,8 @@ public class LoopDeclaration extends AST implements Declaration {
 
   private Expression initialValue;
 
+  // Default true if absent
+  @Nullable
   private Expression continuationCondition;
 
   private Expression stepValue;
@@ -36,7 +38,7 @@ public class LoopDeclaration extends AST implements Declaration {
    *             be applied at the end of each iteration
    * @param end  the upper bound of the iterator (included)
    */
-  public LoopDeclaration(int line, Variable var, Expression init, Expression cond, Expression step,
+  public LoopDeclaration(int line, Variable var, Expression init, @Nullable Expression cond, Expression step,
       Expression end) {
     super(line);
     this.iterator = var;
@@ -85,8 +87,12 @@ public class LoopDeclaration extends AST implements Declaration {
       initialValue = (Expression) initialValue.analyze(context);
       initialValue.type().mustMatchExpected(line, new Type[]{Type.INT, Type.FLOAT});
 
-      continuationCondition = (Expression) continuationCondition.analyze(context);
-      continuationCondition.type().mustMatchExpected(line, initialValue.type());
+      if(continuationCondition!=null) {
+        continuationCondition = (Expression) continuationCondition.analyze(context);
+        continuationCondition.type().mustMatchExpected(line, initialValue.type());
+      } else {
+        //TODO assign it to tru to avoid problems later
+      }
 
       stepValue = (Expression) stepValue.analyze(context);
       stepValue.type().mustMatchExpected(line, initialValue.type());

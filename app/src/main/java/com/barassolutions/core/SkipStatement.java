@@ -16,7 +16,7 @@ public class SkipStatement extends Statement {
    * @param line
    *            line in which the empty statement occurs in the source file.
    */
-  protected SkipStatement(int line) {
+  public SkipStatement(int line) {
     super(line);
   }
 

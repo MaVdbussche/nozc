@@ -2,6 +2,7 @@ package com.barassolutions.core;
 
 import com.barassolutions.Emitter;
 import com.barassolutions.PrettyPrinter;
+import com.barassolutions.TokenOz;
 import java.util.ArrayList;
 
 /**
@@ -11,12 +12,14 @@ import java.util.ArrayList;
 public class InterStatement extends AST {
 
   /**
-   * List of variables/values/procedures/functions/functors/classes declared in this block.
+   * List of statements forming the block body.
    */
-  private ArrayList<DeclarationPart> declarationParts;
-
-  /** List of statements forming the block body. */
   private ArrayList<Statement> statements;
+
+  /**
+   * Block in this declare structure
+   */
+  private InStatement statement;
 
   /**
    * The context represented by this block.
@@ -32,26 +35,25 @@ public class InterStatement extends AST {
    * Construct an AST node for an interactive statement given a line number, declaration parts, and
    * a possible child InterStatement.
    *
-   * @param line      line in which the compilation unit occurs in the source file.
-   * @param decls     an (optional list of declarations.
-   * @param statements a (optional) list of statements.
+   * @param line        line in which the compilation unit occurs in the source file.
+   * @param inStatement a block of statements.
    */
-  public InterStatement(int line, ArrayList<DeclarationPart> decls,
-      ArrayList<Statement> statements) {
+  public InterStatement(int line, InStatement inStatement) {
     this.line = line;
-    this.declarationParts = decls;
-    this.statements = statements;
+    this.statement = inStatement;
+    this.statements = null;
     AST.interStatement = this;
   }
 
   /**
    * Construct an AST node for an InterStatement given its line number.
    *
-   * @param line line in which the statement occurs in the source file.
+   * @param line       line in which the statement occurs in the source file.
+   * @param statements a list of statements.
    */
   public InterStatement(int line, ArrayList<Statement> statements) {
     this.line = line;
-    this.declarationParts = null;
+    this.statement = null;
     this.statements = statements;
     AST.interStatement = this;
   }
@@ -86,39 +88,35 @@ public class InterStatement extends AST {
     context.addMethod(); //TODO all implicit methods in Oz (Browse etc.)
     //TODO also add system calls etc, things directly available without imports
 
-    if (declarationParts != null) {
-      for (DeclarationPart decl : declarationParts) {
-        //TODO
-      }
-    }
-    for (Statement statement : statements) {
-      //TODO
-    }
-
+    //Launch recursive preAnalyze
   }
 
   @Override
   public AST analyze(Context context) {
-    if (declarationParts != null) {
-      declarationParts.forEach(dp -> dp = dp.analyze(this.context));
+    if (statements != null) {
+      statements.forEach(s -> s = (Statement) s.analyze(this.context));
+    } else if (statement != null) {
+      statement = (Statement) statement.analyze(this.context);
+    } else {
+      //TODO critical error
     }
-    statements.forEach(s -> s = s.analyze(this.context));
     return this;
   }
 
   @Override
   public void codegen(Emitter output) {
-    if (declarationParts != null) {
-      //TODO codegen DECLARE
-      for (DeclarationPart decl : declarationParts) {
-        decl.codegen(output);
-      }
-      //TODO codegen IN
-    }
-    for (Statement statement : statements) {
-        statement.codegen(output);
+    if (statement != null) {
+      output.token(TokenOz.DECLARE);
+      output.newLine();
+      output.indentRight();
+      statement.codegen(output);
+      output.newLine();
+      output.indentLeft();
+    } else if (statements != null) {
+      statements.forEach(s -> s.codegen(output));
     }
   }
+
 
   /**
    * @inheritDoc

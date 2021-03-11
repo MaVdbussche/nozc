@@ -7,6 +7,22 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * A loop declaration can be an iterator or a feature declaration.
+ * <p>Iterators :
+ * <p><code>X in L</code>
+ * <p>Iterates over the elements of list L. At each iteration, X is bound to the next element in L.
+ * The generator runs out when all elements in L have been consumed.
+ * <p><code>X in  E1;E2;E3</code>
+ * <p><code>X in (E1;E2;E3)</code>
+ * <p>This iterator is intended to have a C-like flavor. E1 is the initial value, E2 is the boolean
+ * condition, and E3 is the next value. The iterator runs out when E2 evaluates to false.
+ * <p><code>X in E1..E2;E3</code>
+ * <p>Iterate over the integers from E1 up to E2 inclusive, by increment of E3. E1, E2 and E3 are
+ * evaluated only once prior to starting the loop. Whether the loop is intended to count upward or
+ * downward is determined by the sign of E3.
+ * <code>X in E1..E2</code>
+ * <p>Same as above, but with increment of 1.
+ * <p><code>X in E1;E2</code>
+ * <p>Shorthand for <code>X in E1;true;E2</code>
  *
  * @see LoopStructure
  */
@@ -16,10 +32,10 @@ public class LoopDeclaration extends AST implements Declaration {
 
   private Expression initialValue;
 
-  // Default true if absent
   @Nullable
   private Expression continuationCondition;
 
+  @Nullable
   private Expression stepValue;
 
   private Expression endValue;
@@ -38,9 +54,11 @@ public class LoopDeclaration extends AST implements Declaration {
    *             be applied at the end of each iteration
    * @param end  the upper bound of the iterator (included)
    */
-  public LoopDeclaration(int line, Variable var, Expression init, @Nullable Expression cond, Expression step,
+  public LoopDeclaration(int line, Variable var, Expression init, @Nullable Expression cond,
+      @Nullable Expression step,
       Expression end) {
     super(line);
+    assert (cond != null || step != null);
     this.iterator = var;
     this.initialValue = init;
     this.continuationCondition = cond;
@@ -85,17 +103,17 @@ public class LoopDeclaration extends AST implements Declaration {
 
     if (!generatorMode) {
       initialValue = (Expression) initialValue.analyze(context);
-      initialValue.type().mustMatchExpected(line, new Type[]{Type.INT, Type.FLOAT});
+      initialValue.type().mustMatchExpected(line, Type.INT, Type.FLOAT);
 
-      if(continuationCondition!=null) {
+      if (continuationCondition != null) {
         continuationCondition = (Expression) continuationCondition.analyze(context);
         continuationCondition.type().mustMatchExpected(line, initialValue.type());
-      } else {
-        //TODO assign it to tru to avoid problems later
       }
 
-      stepValue = (Expression) stepValue.analyze(context);
-      stepValue.type().mustMatchExpected(line, initialValue.type());
+      if (stepValue != null) {
+        stepValue = (Expression) stepValue.analyze(context);
+        stepValue.type().mustMatchExpected(line, initialValue.type());
+      }
 
       endValue = (Expression) endValue.analyze(context);
       endValue.type().mustMatchExpected(line, initialValue.type());
@@ -125,16 +143,24 @@ public class LoopDeclaration extends AST implements Declaration {
         output.token(TokenOz.LPAREN);
         initialValue.codegen(output);
         output.token(TokenOz.SEMI);
-        continuationCondition.codegen(output);
+        if (continuationCondition != null) {
+          continuationCondition.codegen(output);
+        } else {
+          output.token(TokenOz.TRUE);
+        }
         output.token(TokenOz.SEMI);
-        stepValue.codegen(output);
+        stepValue.codegen(output); //In this case stepValue can't be null
         output.token(TokenOz.RPAREN);
       } else { //Form E1..E2[;E3]
         initialValue.codegen(output);
         output.token(TokenOz.DOTDOT);
         endValue.codegen(output);
         output.token(TokenOz.SEMI);
-        stepValue.codegen(output);
+        if(stepValue!=null) {
+          stepValue.codegen(output);
+        } else {
+          output.literal("1");
+        }
       }
     }
     output.space();

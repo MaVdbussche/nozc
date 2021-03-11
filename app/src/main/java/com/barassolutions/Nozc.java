@@ -171,14 +171,14 @@ public class Nozc implements Callable<Integer> {
 
     /* Generate Oz code */
     Emitter emitter;
+    String outPath;
     if (Arrays.asList(inputFiles).size() == 1) {
-      String outPath = destDirectory.getPath().concat(outputFile.getName());
-      emitter = new Emitter(new File(outPath));
+      outPath = destDirectory.getPath().concat(outputFile.getName());
     } else { //Ignore the -o option
-      String outPath = destDirectory.getPath().concat(
+      outPath = destDirectory.getPath().concat(
           inputFile.getName().substring(0, inputFile.getName().lastIndexOf('.')).concat(".ozf"));
-      emitter = new Emitter(new File(outPath));
     }
+    emitter = new Emitter(new File(outPath));
     ast.codegen(emitter);
     emitter.close();
     errorHasOccurred |= ast.errorHasOccurred();

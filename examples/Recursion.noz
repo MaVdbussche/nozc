@@ -1,0 +1,35 @@
+{
+  def acc(l, n) {
+    match l {
+      case l1|nil && true => {n+l1}
+      case l1|l2 => {acc(l2, n+l1)}
+      else {0}
+    }
+  }
+  def sumList(l) {
+    return acc(l, 0)
+  }
+  var list = 1::2::3::4::5::nil
+  var list = [1,2,3,4,5]
+  browse(sumList(lists))
+}
+
+///////////////////////////////////////////////
+Translates to
+///////////////////////////////////////////////
+local
+  fun{Acc L N}
+    case L
+    of L1|nil andthen true then N+L1
+    [] L1|L2 then {Acc L2 N+L1}
+    else 0
+    end
+  end
+  fun{SumList L}
+    {Acc L 0}
+  end
+  List = 1|2|3|4|5|nil
+  List = [1 2 3 4 5]
+in
+  {Browse {SumList List}}
+end

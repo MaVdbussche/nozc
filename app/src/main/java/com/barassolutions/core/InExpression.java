@@ -11,9 +11,10 @@ public class InExpression extends Expression {
   /**
    * List of variables/values/procedures/functions/functors/classes declared in this block.
    */
-  private ArrayList<DeclarationPart> declarationParts;
+  private final ArrayList<DeclarationPart> declarationParts;
 
   /** Optional statement. */
+  @Nullable
   private Statement statement;
 
   /**
@@ -38,7 +39,7 @@ public class InExpression extends Expression {
    * @param expression
    *            optional expression present in the block body.
    */
-  public InExpression(int line, ArrayList<DeclarationPart> decls, Statement statement, @Nullable Expression expression) {
+  public InExpression(int line, ArrayList<DeclarationPart> decls, @Nullable Statement statement, @Nullable Expression expression) {
     super(line);
     this.declarationParts = decls;
     this.statement = statement;
@@ -59,9 +60,9 @@ public class InExpression extends Expression {
 
     declarationParts.forEach(e -> e = (DeclarationPart) e.analyze(this.context));
 
-    statement = (Statement) statement.analyze(this.context);
-
-    if(expression!=null) {
+    if(statement!=null) {
+      statement = (Statement) statement.analyze(this.context);
+    } else if(expression!=null) {
       expression = (Expression) expression.analyze(this.context);
     }
     return this;
@@ -77,13 +78,16 @@ public class InExpression extends Expression {
    */
   @Override
   public void codegen(Emitter output) {
-    declarationParts.forEach(e -> e.codegen(output));
-    output.indentLeft();
-    output.token(TokenOz.IN);
-    output.newLine();
-    output.indentRight();
-    statement.codegen(output);
-    if(expression!=null) {
+    if(declarationParts.size()>0) { //TODO do this check everywhere !
+      declarationParts.forEach(e -> e.codegen(output));
+      output.indentLeft();
+      output.token(TokenOz.IN);
+      output.newLine();
+      output.indentRight();
+    }
+    if (statement!=null) {
+      statement.codegen(output);
+    } else if(expression!=null) {
       expression.codegen(output);
     }
   }
@@ -104,11 +108,11 @@ public class InExpression extends Expression {
       decl.writeToStdOut(p);
       p.indentLeft();
     }
-    p.indentRight();
-    statement.writeToStdOut(p);
-    p.indentLeft();
-
-    if(expression!=null) {
+    if(statement!=null) {
+      p.indentRight();
+      statement.writeToStdOut(p);
+      p.indentLeft();
+    } else if(expression!=null) {
       p.indentRight();
       expression.writeToStdOut(p);
       p.indentLeft();

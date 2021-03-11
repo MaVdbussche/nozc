@@ -20,4 +20,11 @@ public class Utils {
         escapedString = escapedString.replaceAll("'", "&#39;");
         return escapedString;
     }
+
+    /**
+   * To use in codegen() calls, as Oz variables should start with a capital letter.
+   */
+  public static String ozFriendlyName(String in) {
+    return in.substring(0,1).toUpperCase() + in.substring(1);
+  }
 }

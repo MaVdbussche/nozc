@@ -20,13 +20,6 @@ public class Variable extends Expression {
   }
 
   /**
-   * To use in codegen() calls, as Oz variables should start with a capital letter.
-   */
-  public String ozFriendlyName() {
-    return name.substring(0,1).toUpperCase() + name.substring(1);
-  }
-
-  /**
    * To use in places where we rather want to give faithful representation to the user.
    */
   public String name() {

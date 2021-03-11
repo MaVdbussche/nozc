@@ -5,10 +5,12 @@ package com.barassolutions.core;
 
 import com.barassolutions.BuiltIns;
 import com.barassolutions.TokenOz;
+import com.barassolutions.Utils;
 import java.util.Map;
 
 import com.barassolutions.Emitter;
 import com.barassolutions.PrettyPrinter;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The AST node for a local variable/method/etc. declaration. Local names are declared by analyze(),
@@ -20,7 +22,7 @@ public class DeclarationPart extends Statement {
   /**
    * Map holding declared variables and their optional assigned value.
    */
-  private final Map<Variable, Expression> map;
+  private Map<Variable, Expression> map;
 
   /**
    * Whether these variables are constants. Note that this concept is totally new to NewOz, since Oz
@@ -29,7 +31,7 @@ public class DeclarationPart extends Statement {
    */
   private boolean constant;
 
-  public DeclarationPart(int line, Map<Variable, Expression> map, boolean constant) {
+  public DeclarationPart(int line, @NotNull Map<Variable, Expression> map, boolean constant) {
     super(line);
     this.map = map;
     this.constant = constant;
@@ -53,7 +55,7 @@ public class DeclarationPart extends Statement {
   public void codegen(Emitter output) {
     if (constant) {
       map.forEach((k, v) -> {
-        output.literal(k.ozFriendlyName());
+        output.literal(Utils.ozFriendlyName(k.name()));
         if (v != null) {
           output.token(TokenOz.ASSIGN);
           v.codegen(output);
@@ -62,7 +64,7 @@ public class DeclarationPart extends Statement {
       });
     } else {
       map.forEach((k, v) -> {
-        output.literal(k.ozFriendlyName());
+        output.literal(Utils.ozFriendlyName(k.name()));
         output.token(TokenOz.ASSIGN);
         output.token(TokenOz.LCURLY);
         output.literal(BuiltIns.newCell(true));

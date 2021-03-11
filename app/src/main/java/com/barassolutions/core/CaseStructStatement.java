@@ -6,7 +6,7 @@ import com.barassolutions.TokenOz;
 import java.util.ArrayList;
 import org.jetbrains.annotations.Nullable;
 
-public class CaseStructure extends Statement {
+public class CaseStructStatement extends Statement {
 
   /**
    * Expression to be matched against.
@@ -23,7 +23,7 @@ public class CaseStructure extends Statement {
    */
   private InStatement defaultStatement;
 
-  public CaseStructure(int line, Expression expression, ArrayList<CaseStatementClause> clauses,
+  public CaseStructStatement(int line, Expression expression, ArrayList<CaseStatementClause> clauses,
       @Nullable InStatement statement) {
     super(line);
     this.expression = expression;

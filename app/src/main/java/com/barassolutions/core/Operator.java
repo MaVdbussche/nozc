@@ -17,13 +17,13 @@ public enum Operator {
     return this.image;
   }
 
-  public int getOzTokenInt() {
+  public TokenOz getOzToken() {
     switch (this) {
       case LAND -> {
-        return TokenOz.LAND;
+        return TokenOz.ANDTHEN;
       }
       case LOR -> {
-        return TokenOz.LOR;
+        return TokenOz.ORELSE;
       }
       case HASHTAG -> {
         return TokenOz.HASHTAG;
@@ -32,7 +32,7 @@ public enum Operator {
         return TokenOz.COLCOL;
       }
       default -> {
-        return -1;
+        return null;
       }
     }
   }

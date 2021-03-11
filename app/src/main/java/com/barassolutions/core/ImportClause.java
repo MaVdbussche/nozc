@@ -1,6 +1,7 @@
 package com.barassolutions.core;
 
 import com.barassolutions.TokenOz;
+import com.barassolutions.Utils;
 import java.util.Map;
 
 import com.barassolutions.Emitter;
@@ -56,7 +57,7 @@ public class ImportClause extends Statement implements Declaration {
         output.space();
         output.literal(s);
         output.token(TokenOz.COLON);
-        output.literal(v.ozFriendlyName());
+        output.literal(Utils.ozFriendlyName(v.name()));
       });
       output.token(TokenOz.RPAREN);
     }

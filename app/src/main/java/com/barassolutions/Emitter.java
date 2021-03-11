@@ -33,8 +33,8 @@ public class Emitter {
    * @param token the id of the token to generate.
    * @see TokenOz
    */
-  public void token(int token) {
-    out.print(TokenOz.tokenImage[token]);
+  public void token(TokenOz token) {
+    out.print(token.image());
   }
 
   /**

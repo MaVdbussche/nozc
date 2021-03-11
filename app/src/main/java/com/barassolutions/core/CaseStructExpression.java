@@ -6,7 +6,7 @@ import com.barassolutions.TokenOz;
 import java.util.ArrayList;
 import org.jetbrains.annotations.Nullable;
 
-public class CaseExpression extends Expression {
+public class CaseStructExpression extends Expression {
 
 
   /**
@@ -24,7 +24,7 @@ public class CaseExpression extends Expression {
    */
   private InExpression defaultExpression;
 
-  public CaseExpression(int line, Expression expression, ArrayList<CaseExpressionClause> clauses,
+  public CaseStructExpression(int line, Expression expression, ArrayList<CaseExpressionClause> clauses,
       @Nullable InExpression defaultExpression) {
     super(line);
     this.expression = expression;

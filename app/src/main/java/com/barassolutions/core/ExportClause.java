@@ -1,6 +1,7 @@
 package com.barassolutions.core;
 
 import com.barassolutions.TokenOz;
+import com.barassolutions.Utils;
 import java.util.Map;
 
 import com.barassolutions.Emitter;
@@ -39,7 +40,7 @@ public class ExportClause extends Statement {
       output.literal(name);
       output.token(TokenOz.COLON);
     }
-    output.literal(var.ozFriendlyName());
+    output.literal(Utils.ozFriendlyName(var.name()));
   }
 
   @Override

@@ -106,7 +106,7 @@ public class CaseStatementClause extends Statement {
     pattern.codegen(output);
     output.space();
     for (int i = 0; i < expressions.size(); i++) {
-      output.token(operators.get(i).getOzTokenInt()); //Avoiding an awkward switch here
+      output.token(operators.get(i).getOzToken()); //Avoiding an awkward switch here
       output.space();
       expressions.get(i).codegen(output);
       output.space();

@@ -10,4 +10,11 @@ public class BuiltIns {
     }
   }
 
+  public static String not(boolean capitalized) {
+    if(capitalized) {
+      return "Not";
+    } else {
+      return "not";
+    }
+  }
 }

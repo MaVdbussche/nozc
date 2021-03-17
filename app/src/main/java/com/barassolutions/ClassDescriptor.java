@@ -1,0 +1,121 @@
+package com.barassolutions;
+
+import java.util.ArrayList;
+import org.jetbrains.annotations.Nullable;
+
+public class ClassDescriptor extends Declaration implements ClassElement {
+
+  public enum SubType {
+    EXTENSION, ATTRIBUTE, PROPERTY, FEATURE //TODO add features
+  }
+
+  private final ArrayList<String> extendedClassesNames;
+
+  private final Variable attribute;
+
+  /**
+   * Optional default value given to the attribute. Will always be null for properties.
+   */
+  @Nullable
+  private final Expression defaultValue;
+
+  private final SubType type;
+
+  public ClassDescriptor(int line, SubType type, ArrayList<String> extensions) {
+    super(line);
+    assert type.equals(SubType.EXTENSION);
+    this.extendedClassesNames = extensions;
+    this.attribute = null;
+    this.defaultValue = null;
+    this.type = type;
+  }
+
+  public ClassDescriptor(int line, SubType type, Variable var, @Nullable Expression expression) {
+    super(line);
+    assert (type.equals(SubType.ATTRIBUTE) || type.equals(SubType.PROPERTY));
+    this.extendedClassesNames = null;
+    this.attribute = var;
+    if (type.equals(SubType.ATTRIBUTE)) {
+      this.defaultValue = expression;
+    } else { //This is a PROPERTY (see assertion above)
+      this.defaultValue = null;
+    }
+    this.type = type;
+  }
+
+  public Variable attribute() {
+    return this.attribute;
+  }
+
+  public Expression attributeValue() {
+    return this.defaultValue;
+  }
+
+  public ArrayList<String> extendedClasses() {
+    return this.extendedClassesNames;
+  }
+
+  public SubType type() {
+    return type;
+  }
+
+  @Override
+  public AST analyze(Context classContext) {
+    assert (classContext instanceof ClassContext);
+
+    if (type.equals(SubType.EXTENSION)) {
+      extendedClassesNames.forEach(e -> classContext.superClasses.add(e));
+    } else if (type.equals(SubType.ATTRIBUTE)) {
+      classContext.addVariable(attribute, defaultValue);
+    } else if (type.equals(SubType.PROPERTY)) {
+      //TODO not clear what properties are used for
+    }
+
+    return this;
+  }
+
+  @Override
+  public void codegen(Emitter output) {
+    if (type.equals(SubType.EXTENSION)) {
+      output.token(TokenOz.FROM);
+      extendedClassesNames.forEach(n -> {
+        output.space();
+        output.literal(n);
+      });
+    } else if (type.equals(SubType.ATTRIBUTE)) {
+      output.token(TokenOz.ATTR);
+      output.space();
+      output.literal(attribute.name());
+      if (defaultValue != null) {
+        output.token(TokenOz.COLON);
+        output.space();
+        defaultValue.codegen(output);
+      }
+    } else if (type.equals(SubType.PROPERTY)) {
+      //TODO
+    } else if (type.equals(SubType.FEATURE)) {
+      //TODO
+    }
+    output.newLine();
+  }
+
+  @Override
+  public void writeToStdOut(PrettyPrinter p) {
+    switch (type) {
+      case EXTENSION -> extendedClassesNames.forEach(n -> p.printf("<Extension superclassName=\"%s\">\n", n));
+      case ATTRIBUTE -> {
+        p.printf("<AttributeDefinition name=\"%s\">\n", attribute.name());
+        if (defaultValue != null) {
+          p.printf("<Default value:>\n");
+          p.indentRight();
+          defaultValue.writeToStdOut(p);
+          p.indentLeft();
+          p.printf("</Default value>\n");
+        }
+        p.printf("</AttributeDefinition>\n");
+      }
+      case PROPERTY -> {}//TODO
+      case FEATURE -> {} //TODO
+    }
+  }
+}

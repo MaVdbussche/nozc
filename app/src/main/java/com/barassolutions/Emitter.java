@@ -5,6 +5,7 @@ package com.barassolutions;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This class provides a high level interface for creating representation of Oz files.
@@ -33,7 +34,7 @@ public class Emitter {
    * @param token the id of the token to generate.
    * @see TokenOz
    */
-  public void token(TokenOz token) {
+  public void token(@NotNull TokenOz token) {
     out.print(token.image());
   }
 
@@ -43,7 +44,7 @@ public class Emitter {
    * @param literal the String to generate.
    * @see TokenOz
    */
-  public void literal(String literal) {
+  public void literal(@NotNull String literal) {
     out.print(literal);
   }
 

@@ -13,9 +13,7 @@ PARSER_BEGIN( JavaCCParser )
 
 package com.barassolutions;
 
-import com.barassolutions.core.*;
-import com.barassolutions.core.Record;
-import com.barassolutions.core.ClassDescriptor.SubType;
+import com.barassolutions.ClassDescriptor.SubType;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
@@ -1135,8 +1133,8 @@ private Expression assignmentExpression(): {
                 { lhs = new OperationPlusAssignment(line, lhs, rhs); }
              | <MINUSASS> rhs = assignmentExpression()
                 { lhs = new OperationMinusAssignment(line, lhs, rhs); }
-             | <DEFINE> rhs = assignmentExpression() //TODO when is this used ? Doesn't exist in NewOz !?
-                { lhs = new OperationAssignmentDefine(line, lhs, rhs); }
+             //| <DEFINE> rhs = assignmentExpression() //TODO when is this used ? Doesn't exist in NewOz !?
+             //   { lhs = new OperationAssignmentDefine(line, lhs, rhs); }
             )
         ]
     }
@@ -1271,10 +1269,10 @@ private Expression relationalExpression(): {
     try {
         lhs = additiveExpression() { line = token.beginLine; }
         [
-            <GT> rhs = additiveExpression() { lhs = new OperationLogicalGreaterThan(line, lhs, rhs); }
-            | <GE> rhs = additiveExpression() { lhs = new OperationLogicalGreaterEqual(line, lhs, rhs); }
-            | <LT> rhs = additiveExpression() { lhs = new OperationLogicalLessThan(line, lhs, rhs); }
-            | <LE> rhs = additiveExpression() { lhs = new OperationLogicalLessEqual(line, lhs, rhs); }
+            <GT> rhs = additiveExpression() { lhs = new OperationGreaterThan(line, lhs, rhs); }
+            | <GE> rhs = additiveExpression() { lhs = new OperationGreaterEqual(line, lhs, rhs); }
+            | <LT> rhs = additiveExpression() { lhs = new OperationSmallerThan(line, lhs, rhs); }
+            | <LE> rhs = additiveExpression() { lhs = new OperationSmallerEqual(line, lhs, rhs); }
         ]
     }
     catch ( ParseException e ) {
@@ -1351,7 +1349,7 @@ private Expression multiplicativeExpression(): {
  * Parse an unary expression.
  *
  * <pre>
- *   unaryExpression ::= (INC|DEC|MINUS|PLUS) unaryExpression
+ *   unaryExpression ::= (INC|DEC|MINUS|PLUS) unaryExpression //TODO we will not support all of these in the first release
  *                          | simpleUnaryExpression
  * </pre>
  *
@@ -1366,13 +1364,14 @@ private Expression unaryExpression(): {
     try {
         LOOKAHEAD( simpleUnaryExpression() )
         expr = simpleUnaryExpression()
-        | <INC> { line = token.beginLine; }
-        expr2 = unaryExpression()
-        { expr = new OperationPreIncr(line, expr2); }
-        | <DEC> { line = token.beginLine; }
-            expr2 = unaryExpression()
-            { expr = new OperationPreDecr(line, expr2); }
-        | <PLUS> { line = token.beginLine; }
+        //| <INC> { line = token.beginLine; }
+        //expr2 = unaryExpression()
+        //{ expr = new OperationPreIncr(line, expr2); }
+        //| <DEC> { line = token.beginLine; }
+        //    expr2 = unaryExpression()
+        //    { expr = new OperationPreDecr(line, expr2); }
+        //|
+         <PLUS> { line = token.beginLine; }
             expr2 = unaryExpression()
             { expr = new OperationValidate(line, expr2); }
         | <MINUS> { line = token.beginLine; }
@@ -1406,7 +1405,7 @@ private Expression simpleUnaryExpression(): {
         expr = postfixExpression()
         | <LNOT> { line = token.beginLine; }
         expr2 = unaryExpression()
-        { expr = new OperatorLogicalNot(line, expr2); }
+        { expr = new OperationLogicalNot(line, expr2); }
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
@@ -1418,7 +1417,7 @@ private Expression simpleUnaryExpression(): {
  * Parse a postfix expression.
  *
  * <pre>
- *   postfixExpression ::= primary {(DEC|INC)}
+ *   postfixExpression ::= primary {(DEC|INC)} //TODO we will not support these in the first release
  * </pre>
  *
  * @return an AST for a postfixExpression.
@@ -1431,12 +1430,12 @@ private Expression postfixExpression(): {
 {
     try {
         primaryExpr = primary() { line = primaryExpr.line(); }
-        ( LOOKAHEAD( <DEC>|<INC> )
-            (
-            <DEC> { primaryExpr = new OperationPostDecr(line, primaryExpr); }
-            | <INC> { primaryExpr = new OperationPostInc(line, primaryExpr); }
-            )
-        )*
+        //( LOOKAHEAD( <DEC>|<INC> )
+        //    (
+        //    <DEC> { primaryExpr = new OperationPostDecr(line, primaryExpr); }
+        //    | <INC> { primaryExpr = new OperationPostInc(line, primaryExpr); }
+        //    )
+        //)*
     }
     catch ( ParseException e ) {
         recoverFromError( new int[]{RCURLY}, e );
@@ -1650,7 +1649,7 @@ private Literal literal(): {
  *
  * <pre>
  *   term ::= atom
- *            | atomLisp LPAREN [[feature COLON]expression {COMMA [feature COLON]expression}] RPAREN
+ *            | variable LPAREN [[feature COLON]expression {COMMA [feature COLON]expression}] RPAREN
  * </pre>
 
  * @return an AST for a term.
@@ -1667,7 +1666,7 @@ private Term term(): {
 {
     try {
         <ATOM> {out = new Literal(token.beginLine, Type.ATOM, token.image); }
-        | <ATOMLISP> { line = token.beginLine; value = token.image; } //This is a record
+        | <VARIABLE> { line = token.beginLine; value = token.image; } //This is a record
           <LPAREN> [
           [ LOOKAHEAD( feature() )
             aFeature = feature() <COLON>
@@ -1949,6 +1948,8 @@ private Feature feature(): {
  *   classDescription ::= EXTENDS variableStrict {COMMA variableStrict}+
  *                        | ATTR variable [ASSIGN expression]
  *                        | PROP variable //TODO what are properties ? Maybe it is a constant (as opposed to attributes who are cells)
+
+ //TODO add features (they are public attributes if I understand correctly
  * </pre>
  *
  * @return an AST for a class descriptor.

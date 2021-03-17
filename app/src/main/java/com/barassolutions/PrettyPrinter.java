@@ -1,6 +1,7 @@
 package com.barassolutions;
 
 import java.io.PrintStream;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A utility class that allows pretty (indented) printing to a stream.
@@ -88,7 +89,7 @@ public class PrettyPrinter {
    * @param s
    *            string to print.
    */
-  public void println(String s) {
+  public void println(@NotNull String s) {
     doIndent();
     out.println(s);
   }
@@ -99,7 +100,7 @@ public class PrettyPrinter {
    * @param s
    *            string to print.
    */
-  public void print(String s) {
+  public void print(@NotNull String s) {
     doIndent();
     out.print(s);
   }
@@ -112,7 +113,7 @@ public class PrettyPrinter {
    * @param args
    *            values to print.
    */
-  public void printf(String format, Object... args) {
+  public void printf(@NotNull String format, Object... args) {
     doIndent();
     out.printf(format, args);
   }

@@ -5,12 +5,7 @@ import com.barassolutions.PrettyPrinter;
 import com.barassolutions.TokenOz;
 import java.util.ArrayList;
 
-public class ProcedureDef extends Declaration {
-
-  /**
-   * The procedure's name.
-   */
-  private final String name;
+public class ProcedureDefAnonym extends DeclarationAnonym {
 
   /**
    * The arguments of this procedure.
@@ -22,16 +17,14 @@ public class ProcedureDef extends Declaration {
    */
   private InStatement statement;
 
-  public ProcedureDef(int line, String name, ArrayList<Pattern> args, InStatement statement) {
+  public ProcedureDefAnonym(int line, ArrayList<Pattern> args, InStatement statement) {
     super(line);
-    this.name = name;
     this.args = args;
     this.statement = statement;
   }
 
   @Override
-  public AST analyze(Context context) {
-    //TODO declare name in the context if it doesn't exist yet
+  public Expression analyze(Context context) {
     // TODO create this procedure's inner context and add args to it (shadow if necessary)
     // TODO create a Method instance (17/03 WHY ?)
     args.forEach(a -> a = (Pattern) a.analyze(context));
@@ -47,7 +40,7 @@ public class ProcedureDef extends Declaration {
   public void codegen(Emitter output) {
     output.token(TokenOz.PROC);
     output.token(TokenOz.LCURLY); //TODO see if we couldn't merge FunctionDef & ProcedureDef (see MethodDef for reference)
-    output.literal(name);
+    output.token(TokenOz.DOLLAR);
     args.forEach(a -> {
       output.space();
       a.codegen(output);
@@ -65,7 +58,7 @@ public class ProcedureDef extends Declaration {
 
   @Override
   public void writeToStdOut(PrettyPrinter p) {
-    p.printf("<ProcedureDeclaration line=\"%d\" name=\"%s\">\n", line(), name);
+    p.printf("<ProcedureDeclaration line=\"%d\" Anonym>\n", line(),);
     p.indentRight();
     args.forEach(a -> {
       p.printf("<Argument>\n");
@@ -81,3 +74,4 @@ public class ProcedureDef extends Declaration {
     p.printf("</ProcedureDeclaration>\n");
   }
 }
+

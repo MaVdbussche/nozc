@@ -14,13 +14,14 @@ public class Variable extends Expression {
   }
 
   public Variable(int line, String name, boolean constant) {
-     super(line);
-     this.name = name;
-     this.constant = constant;
+    super(line);
+    this.name = name;
+    this.constant = constant;
   }
 
   /**
-   * To use in places where we rather want to give faithful representation to the user.
+   * To use in places where we rather want to give faithful representation to the user. In other
+   * words, places where we don't want things like first letter capitalization.
    */
   public String name() {
     return name;

@@ -10,10 +10,12 @@ public class InStatement extends Statement {
   /**
    * List of variables/values/procedures/functions/functors/classes declared in this block.
    */
-  private ArrayList<DeclarationPart> declarationParts;
+  protected final ArrayList<Declaration> declarations;
 
-  /** List of statements forming the block body. */
-  private ArrayList<Statement> statements;
+  /**
+   * List of statements forming the block body.
+   */
+  protected final ArrayList<Statement> statements;
 
   /**
    * The context represented by this block.
@@ -21,35 +23,31 @@ public class InStatement extends Statement {
   private LocalContext context;
 
   /**
-   * Construct an AST node for a block given its line number, and the list of
-   * statements forming the block body.
+   * Construct an AST node for a block given its line number, and the list of statements forming the
+   * block body.
    *
-   * @param line
-   *            line in which the block occurs in the source file.
-   * @param decls
-   *            declarations appearing in the block body
-   * @param statements
-   *            list of statements forming the block body.
+   * @param line       line in which the block occurs in the source file.
+   * @param decls      declarations appearing in the block body
+   * @param statements list of statements forming the block body.
    */
-  public InStatement(int line, ArrayList<DeclarationPart> decls, ArrayList<Statement> statements) {
+  public InStatement(int line, ArrayList<Declaration> decls, ArrayList<Statement> statements) {
     super(line);
-    this.declarationParts = decls;
+    this.declarations = decls;
     this.statements = statements;
   }
 
   /**
-   * Analyzing a block consists of creating a new nested context for that
-   * block and analyzing each of its statements within that context.
+   * Analyzing a block consists of creating a new nested context for that block and analyzing each
+   * of its statements within that context.
    *
-   * @param context
-   *            context in which names are resolved.
+   * @param context context in which names are resolved.
    * @return the analyzed (and possibly rewritten) AST subtree.
    */
   @Override
   public AST analyze(Context context) {
     this.context = new LocalContext(context);
 
-    declarationParts.forEach(e -> e = (DeclarationPart) e.analyze(this.context));
+    declarations.forEach(e -> e = (Declaration) e.analyze(this.context));
 
     statements.forEach(e -> e = (Statement) e.analyze(this.context));
 
@@ -60,13 +58,11 @@ public class InStatement extends Statement {
    * Generating code for a block consists of generating code for each of its declarations and
    * statements.
    *
-   * @param output
-   *            the code emitter (basically an abstraction for producing the
-   *            Oz file).
+   * @param output the code emitter (basically an abstraction for producing the Oz file).
    */
   @Override
   public void codegen(Emitter output) {
-    declarationParts.forEach(e -> e.codegen(output));
+    declarations.forEach(e -> e.codegen(output));
     output.indentLeft();
     output.token(TokenOz.IN);
     output.newLine();
@@ -85,7 +81,7 @@ public class InStatement extends Statement {
       context.writeToStdOut(p);
       p.indentLeft();
     }
-    for (DeclarationPart decl : declarationParts) {
+    for (Declaration decl : declarations) {
       p.indentRight();
       decl.writeToStdOut(p);
       p.indentLeft();

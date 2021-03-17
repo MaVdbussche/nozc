@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @see LoopStructure
  */
-public class LoopDeclaration extends AST implements Declaration {
+public class LoopDeclaration extends AST implements DeclarationToDeleteMaybe {
 
   private Variable iterator;
 

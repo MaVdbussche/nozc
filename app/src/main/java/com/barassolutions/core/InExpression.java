@@ -11,7 +11,7 @@ public class InExpression extends Expression {
   /**
    * List of variables/values/procedures/functions/functors/classes declared in this block.
    */
-  private final ArrayList<DeclarationPart> declarationParts;
+  private final ArrayList<Declaration> declarations;
 
   /** Optional statement. */
   @Nullable
@@ -39,9 +39,9 @@ public class InExpression extends Expression {
    * @param expression
    *            optional expression present in the block body.
    */
-  public InExpression(int line, ArrayList<DeclarationPart> decls, @Nullable Statement statement, @Nullable Expression expression) {
+  public InExpression(int line, ArrayList<Declaration> decls, @Nullable Statement statement, @Nullable Expression expression) {
     super(line);
-    this.declarationParts = decls;
+    this.declarations = decls;
     this.statement = statement;
     this.expression = expression;
   }
@@ -58,7 +58,7 @@ public class InExpression extends Expression {
   public Expression analyze(Context context) {
     this.context = new LocalContext(context);
 
-    declarationParts.forEach(e -> e = (DeclarationPart) e.analyze(this.context));
+    declarations.forEach(e -> e = (Declaration) e.analyze(this.context));
 
     if(statement!=null) {
       statement = (Statement) statement.analyze(this.context);
@@ -78,8 +78,8 @@ public class InExpression extends Expression {
    */
   @Override
   public void codegen(Emitter output) {
-    if(declarationParts.size()>0) { //TODO do this check everywhere !
-      declarationParts.forEach(e -> e.codegen(output));
+    if(declarations.size()>0) { //TODO do this check everywhere !
+      declarations.forEach(e -> e.codegen(output));
       output.indentLeft();
       output.token(TokenOz.IN);
       output.newLine();
@@ -103,7 +103,7 @@ public class InExpression extends Expression {
       context.writeToStdOut(p);
       p.indentLeft();
     }
-    for (DeclarationPart decl : declarationParts) {
+    for (Declaration decl : declarations) {
       p.indentRight();
       decl.writeToStdOut(p);
       p.indentLeft();

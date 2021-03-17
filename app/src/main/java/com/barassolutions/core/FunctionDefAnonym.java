@@ -5,37 +5,30 @@ import com.barassolutions.PrettyPrinter;
 import com.barassolutions.TokenOz;
 import java.util.ArrayList;
 
-public class FunctionDef extends Declaration {
-
-  /**
-   * The procedure's name.
-   */
-  private final String name;
+public class FunctionDefAnonym extends DeclarationAnonym {
 
   /**
    * The arguments of this procedure.
    */
-  private ArrayList<Pattern> args;
+  private final ArrayList<Pattern> args;
 
   /**
    * The expression constituting the procedure's body.
    */
   private InExpression expression;
 
-  private boolean lazy;
+  private final boolean lazy;
 
-  public FunctionDef(int line, String name, ArrayList<Pattern> args, InExpression expression,
+  public FunctionDefAnonym(int line, ArrayList<Pattern> args, InExpression expression,
       boolean lazy) {
     super(line);
-    this.name = name;
     this.args = args;
     this.expression = expression;
     this.lazy = lazy;
   }
 
   @Override
-  public AST analyze(Context context) {
-    //TODO declare name in the context if it doesn't exist yet
+  public Expression analyze(Context context) {
     // TODO create this function's inner context and add args to it if they don't already exist
     // TODO compute the return type
     // TODO create a Method instance
@@ -58,7 +51,7 @@ public class FunctionDef extends Declaration {
       output.space();
     }
     output.token(TokenOz.LCURLY);
-    output.literal(name);
+    output.token(TokenOz.DOLLAR);
     args.forEach(a -> {
       output.space();
       a.codegen(output);
@@ -77,9 +70,9 @@ public class FunctionDef extends Declaration {
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     if (lazy) {
-      p.printf("<FunctionDeclaration line=\"%d\" name=\"%s\" lazy>\n", line(), name);
+      p.printf("<FunctionDeclaration line=\"%d\" Anonym lazy>\n", line());
     } else {
-      p.printf("<FunctionDeclaration line=\"%d\" name=\"%s\">\n", line(), name);
+      p.printf("<FunctionDeclaration line=\"%d\" Anonym>\n", line());
     }
     p.indentRight();
     args.forEach(a -> {

@@ -8,7 +8,7 @@ import com.barassolutions.Emitter;
 import com.barassolutions.PrettyPrinter;
 import org.jetbrains.annotations.Nullable;
 
-public class ImportClause extends Statement implements Declaration {
+public class ImportClause extends Statement implements DeclarationToDeleteMaybe {
 
   /**
    * Name of the variable to import.
@@ -16,7 +16,7 @@ public class ImportClause extends Statement implements Declaration {
   private final String name;
 
   /**
-   * Map of the feature to import and to name to give them in this context.
+   * Map of the feature to import and the name to give them in this context.
    */
   private final Map<String, Variable> map;
 
@@ -51,7 +51,7 @@ public class ImportClause extends Statement implements Declaration {
   @Override
   public void codegen(Emitter output) {
     output.literal(name);
-    if (map.size() != 0) {
+    if (map.size() > 0) {
       output.token(TokenOz.LPAREN);
       map.forEach((s, v) -> {
         output.space();
@@ -61,9 +61,9 @@ public class ImportClause extends Statement implements Declaration {
       });
       output.token(TokenOz.RPAREN);
     }
-    output.space();
 
     if (source != null) {
+      output.space();
       output.token(TokenOz.AT);
       output.space();
       output.literal(source);
@@ -73,5 +73,6 @@ public class ImportClause extends Statement implements Declaration {
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<Import name=\"%s\"/>\n", name);
+    //TODO come on, you know there is more to it
   }
 }

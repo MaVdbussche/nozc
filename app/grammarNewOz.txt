@@ -176,7 +176,7 @@ classDescription ::= EXTENDS variableStrict {COMMA variableStrict}+
             | PROP variable
 
 methHead ::= (variableStrict | atomLisp) //variableStrict => private, atomLisp => public
-              [LPAREN methArg {COMMA methArg} [COMMA ELLIPSIS] [DOLLAR] RPAREN]
+              LPAREN [methArg {COMMA methArg} [COMMA ELLIPSIS] ] [DOLLAR] RPAREN
 
 methArg ::= [feature COLON] (variable | UNDERSCORE) [LE expression]
 

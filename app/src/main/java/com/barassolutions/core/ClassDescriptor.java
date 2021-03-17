@@ -19,7 +19,6 @@ public class ClassDescriptor implements ClassElement {
 
 
   public ClassDescriptor(int line, SubType type, ArrayList<String> extensions) {
-    super(line);
     assert type.equals(SubType.EXTENSION);
     this.extendedClassesNames = extensions;
     this.attribute = null;
@@ -27,7 +26,6 @@ public class ClassDescriptor implements ClassElement {
   }
 
   public ClassDescriptor(int line, SubType type, Variable var, @Nullable Expression expression) {
-    super(line);
     assert (type.equals(SubType.ATTRIBUTE) || type.equals(SubType.PROPERTY));
     this.extendedClassesNames = null;
     this.attribute = var;
@@ -36,5 +34,17 @@ public class ClassDescriptor implements ClassElement {
     } else { //This is a PROPERTY (see assertion above)
       this.value = null;
     }
+  }
+
+  public Variable attribute() {
+    return this.attribute;
+  }
+
+  public Expression attributeValue() {
+    return this.value;
+  }
+
+  public ArrayList<String> extendedClasses() {
+    return this.extendedClassesNames;
   }
 }

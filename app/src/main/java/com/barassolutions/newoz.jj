@@ -14,8 +14,8 @@ PARSER_BEGIN( JavaCCParser )
 package com.barassolutions;
 
 import com.barassolutions.core.*;
-import com.barassolutions.core.ClassDescriptor.SubType;
 import com.barassolutions.core.Record;
+import com.barassolutions.core.ClassDescriptor.SubType;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
@@ -106,7 +106,7 @@ class JavaCCParser {
      */
     public boolean errorHasOccurred() {
         return errorHasOccurred;
-        }
+    }
 }
 
 PARSER_END( JavaCCParser )
@@ -454,8 +454,8 @@ private Expression parExpression(): {
  */
 private InStatement inStatement(): {
     int line = 0;
-    DeclarationPart aDecl = null;
-    ArrayList<DeclarationPart> decls = new ArrayList<DeclarationPart>();
+    Declaration aDecl = null;
+    ArrayList<Declaration> decls = new ArrayList<Declaration>();
     Statement aStatement = null;
     ArrayList<Statement> statements = new ArrayList<Statement>();
     //Expression expression = null;
@@ -489,8 +489,8 @@ private InStatement inStatement(): {
  */
 private InExpression inExpression(): {
     int line = 0;
-    DeclarationPart aDecl = null;
-    ArrayList<DeclarationPart> decls = new ArrayList<DeclarationPart>();
+    Declaration aDecl = null;
+    ArrayList<Declaration> decls = new ArrayList<Declaration>();
     Statement statement = null;
     Expression expression = null;
 }
@@ -746,9 +746,9 @@ private Expression nestConExpression(): {
  *
  * @return an AST for a nestDecVariable.
  */
-private DeclarationPart nestDecVariable(): {
+private Declaration nestDecVariable(): {
     int line = 0;
-    DeclarationPart out = null;
+    Declaration out = null;
     InStatement statement = null;
     InExpression expression = null;
     String name = null;
@@ -762,7 +762,7 @@ private DeclarationPart nestDecVariable(): {
     ClassDescriptor aDescriptor = null;
     ArrayList<ClassDescriptor> descriptors = new ArrayList<ClassDescriptor>();
     ClassElement classElement = null;
-    ArrayList<Method> methods = new ArrayList<Method>();
+    ArrayList<MethodDef> methods = new ArrayList<MethodDef>();
 }
 {
     try {
@@ -803,7 +803,7 @@ private DeclarationPart nestDecVariable(): {
             )
           )*
           statement = inStatement()
-          { out = new Functor(line, name, imports, exports, statement); }
+          { out = new FunctorDef(line, name, imports, exports, statement); }
         | <CLASS> { line = token.beginLine; }
           <VARIABLESTRICT> { name = token.image; }
           (
@@ -812,8 +812,8 @@ private DeclarationPart nestDecVariable(): {
           <LCURLY>
           (
             classElement = classElementDef()
-            { if(classElement instanceof Method){
-                methods.add((Method) classElement);
+            { if(classElement instanceof MethodDef){
+                methods.add((MethodDef) classElement);
               } else if(classElement instanceof ClassDescriptor) {
                 descriptors.add((ClassDescriptor) classElement);
               }
@@ -859,7 +859,7 @@ private Expression nestDecAnonym(): {
     ClassDescriptor aDescriptor = null;
     ArrayList<ClassDescriptor> descriptors = new ArrayList<ClassDescriptor>();
     ClassElement classElement = null;
-    ArrayList<Method> methods = new ArrayList<Method>();
+    ArrayList<MethodDef> methods = new ArrayList<MethodDef>();
 }
 {
     try {
@@ -870,7 +870,7 @@ private Expression nestDecAnonym(): {
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )* <RPAREN>
           statement = inStatement()
-          { out = new ProcedureDefAnonym(line, null, args, statement); }
+          { out = new ProcedureDefAnonym(line, args, statement); }
         | <DEF> { line = token.beginLine; }
           [<LAZY> { lazy = true; }]
           <DOLLAR> <LPAREN>
@@ -879,8 +879,7 @@ private Expression nestDecAnonym(): {
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )* <RPAREN>
           expression = inExpression()
-          { out = new FunctionDefAnonym(
-          line, null, args, expression, lazy); }
+          { out = new FunctionDefAnonym(line, args, expression, lazy); }
         | <FUNCTOR> { line = token.beginLine; }
           [ <DOLLAR> ]
           (
@@ -897,7 +896,7 @@ private Expression nestDecAnonym(): {
             )
           )*
           statement = inStatement()
-          { out = new FunctorAnonym(line, null, imports, exports, statement); }//TODO keyword IMPORT/EXPORT has to be generated there
+          { out = new FunctorDefAnonym(line, imports, exports, statement); }//TODO keyword IMPORT/EXPORT has to be generated there
         | <CLASS> { line = token.beginLine; }
           <DOLLAR>
           (
@@ -906,14 +905,14 @@ private Expression nestDecAnonym(): {
           <LCURLY>
           (
             classElement = classElementDef()
-            { if(classElement instanceof Method){
-                methods.add((Method) classElement);
+            { if(classElement instanceof MethodDef){
+                methods.add((MethodDef) classElement);
               } else if(classElement instanceof ClassDescriptor) {
                 descriptors.add((ClassDescriptor) classElement);
               }
             }
           )* <RCURLY>
-          { out = new ClassDefAnonym(line, null, descriptors, methods); }
+          { out = new ClassDefAnonym(line, descriptors, methods); }
     }
     catch ( ParseException e ) {
        recoverFromError(new int[]{RCURLY}, e);
@@ -1026,7 +1025,7 @@ private Expression nestDecAnonym(): {
             LOOKAHEAD( inStatement() )
             statement = inStatement()
           )
-          { out = new Method(line, aMethodHead, name, expression, statement); }
+          { out = new MethodDef(line, aMethodHead, name, expression, statement); }
         | LOOKAHEAD( classDescriptor() )
           descriptor = classDescriptor()
           { out = descriptor; }
@@ -1823,10 +1822,10 @@ private Pattern pattern(): {
  *
  * @return an AST for a declarationPart.
  */
-private DeclarationPart declarationPart(): {
+private Declaration declarationPart(): {
     int line = 0;
     boolean constant;
-    DeclarationPart out = null;
+    Declaration out = null;
     Variable variable = null;
     Expression value = null;
     Map<Variable, Expression> map = new HashMap<Variable, Expression>();
@@ -1846,7 +1845,7 @@ private DeclarationPart declarationPart(): {
             [<ASSIGN> value = expression()
             { map.put(variable, value); }]
           )*
-          { out = new DeclarationPart(line, map, constant); }
+          { out = new Declaration(line, map, constant); }
 
         |
         out = nestDecVariable()
@@ -1990,8 +1989,8 @@ private ClassDescriptor classDescriptor(): {
  * Parse a method head. This can be seen as its signature
  *
  * <pre>
- *   methHead ::= (variableStrict | atomLisp ) //variableStrict => private, atomLisp => public
- *                  [LPAREN methArg {COMMA methArg} [COMMA ELLIPSIS] [DOLLAR] RPAREN]
+ *   methHead ::= (variableStrict | variable ) //variableStrict => private, variable => public
+ *                  LPAREN [methArg {COMMA methArg} [COMMA ELLIPSIS] ] [DOLLAR] RPAREN //TODO we might be able to remove $ since block will be an inExpression -> recognizable
  * </pre>
  *
  * @return an AST for a MethHead.
@@ -2009,10 +2008,10 @@ private MethodHead methHead(): {
     try {
         (
           <VARIABLESTRICT> { line = token.beginLine; priv = true; name = token.image; }
-          | <ATOMLISP> { line = token.beginLine; priv = false; name = token.image; }
+          | <VARIABLE> { line = token.beginLine; priv = false; name = token.image; }
         )
+        <LPAREN>
         [
-          <LPAREN>
           arg = methArg() { args.add(arg); }
           ( LOOKAHEAD( <COMMA> methArg() )
             <COMMA> arg = methArg() { args.add(arg); }
@@ -2021,16 +2020,16 @@ private MethodHead methHead(): {
             <COMMA> <ELLIPSIS>
             { moreArgs = true; }
           ]
-          [
-            <DOLLAR> { isAFunction = true; }
-          ]
-          <RPAREN>
         ]
+        [
+          <DOLLAR> { isAFunction = true; }
+        ]
+        <RPAREN>
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
     }
-    { return new MethodHead(line, name, priv, args, moreArgs, isAFunction); }
+    { return new MethodHead(line, name, priv, args, moreArgs); }
 }
 
 /**
@@ -2051,8 +2050,10 @@ private MethodArg methArg(): {
 }
 {
     try {
+        [
         feature = feature() { feature.line(); }
         <COLON>
+        ]
         (
           <VARIABLE> { name = token.image; }
           | <UNDERSCORE> { name = token.image; }

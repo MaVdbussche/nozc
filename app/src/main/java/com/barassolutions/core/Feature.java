@@ -13,4 +13,8 @@ public class Feature extends Expression {
     super(line);
     this.image = image;
   }
+
+  public String image() {
+    return image;
+  }
 }

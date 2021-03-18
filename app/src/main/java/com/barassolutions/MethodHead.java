@@ -15,11 +15,14 @@ public class MethodHead {
 
   private final boolean hasMoreArgs;
 
-  public MethodHead(int line, String name, boolean isPrivate, ArrayList<MethodArg> args, boolean moreArgs) {
+  private final boolean isAFunction;
+
+  public MethodHead(int line, String name, boolean isPrivate, ArrayList<MethodArg> args, boolean moreArgs, boolean isAFunction) {
     this.name = name;
     this.isPrivate = isPrivate;
     this.args = args;
     this.hasMoreArgs = moreArgs;
+    this.isAFunction = isAFunction;
   }
 
   public String name() {
@@ -38,4 +41,7 @@ public class MethodHead {
     return isPrivate;
   }
 
+  public boolean isAFunction() {
+    return  isAFunction;
+  }
 }

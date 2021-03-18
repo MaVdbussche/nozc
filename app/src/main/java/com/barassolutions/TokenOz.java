@@ -105,6 +105,7 @@ public enum TokenOz {
 
   COMMA(","),
   DOT("."),
+  SEMI(";"),
   LBRACK("["),
   LCURLY("{"),
   LPAREN("("),

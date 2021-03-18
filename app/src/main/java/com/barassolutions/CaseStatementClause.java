@@ -69,7 +69,7 @@ public class CaseStatementClause extends Statement {
 
     operators.forEach(o -> {
       if (!(o == Operator.LAND || o == Operator.LOR)) {
-        interStatement.reportSemanticError(line,
+        interStatement.reportSemanticError(line(),
             "Invalid operator %s : expected a logical operator instead.",
             o.image());
       } // This should probably be picked up by the Scanner instead tbh

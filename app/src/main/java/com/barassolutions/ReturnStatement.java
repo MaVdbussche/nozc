@@ -27,13 +27,11 @@ public class ReturnStatement extends Statement {
    */
   @Override
   public AST analyze(Context context) {
-    MethodContext methodContext = context
-        .methodContext(); //TODO Go up until you find the MethodContext
+    FunctionDef methodContext = context.functionDef(); //TODO Go up until you find the closest FunctionDef
 
     Type returnType = methodContext.returnType();
-    methodContext.confirmMethodHasReturn(); //Might not be necessary
     if (expr != null) {
-      if (returnType == Type.ANY) { //TODO maybe not ANY here
+      if (returnType == Type.ANY) {
         // Can't return a value from void method
         interStatement.reportSemanticError(line(),
             "cannot return a value from a procedure");

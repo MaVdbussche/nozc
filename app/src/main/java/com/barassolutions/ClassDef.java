@@ -27,7 +27,7 @@ public class ClassDef extends Declaration {
     descriptors.forEach(d -> d = (ClassDescriptor) d.analyze(classContext));
     //TODO check we only have 1 EXTENSION descriptor
 
-    methods.forEach(m -> (MethodDef) m.analyze(classContext));
+    methods.forEach(m -> m = (MethodDef) m.analyze(classContext));
 
     return this;
   }

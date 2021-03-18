@@ -32,6 +32,8 @@ public class FunctionDefAnonym extends DeclarationAnonym {
 
   @Override
   public Expression analyze(Context context) {
+    context.addFunction(new FunctionDef(this, name)); //TODO we need the name of the variable on lhs (since this is $)
+
     // TODO create this function's inner context and add args to it if they don't already exist
     // TODO create a Method instance (17/03 WHY ?)
     args.forEach(a -> a = (Pattern) a.analyze(context)); //TODO add them to methContext

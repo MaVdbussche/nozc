@@ -2,18 +2,23 @@ package com.barassolutions;
 
 import java.util.ArrayList;
 
-public class PatternList extends Pattern {
+public class Tuple extends Pattern {
 
-  private final ArrayList<Pattern> args;
+  private final ArrayList<Expression> args;
 
-  public PatternList(int line, ArrayList<Pattern> patterns) {
+  public Tuple(int line, ArrayList<Pattern> expressions, boolean patterns) {
     super(line);
-    this.args = patterns;
+    this.args = new ArrayList<>(expressions);
+  }
+
+  public Tuple(int line, ArrayList<Expression> expressions) {
+    super(line);
+    this.args = expressions;
   }
 
   @Override
   public Expression analyze(Context context) {
-    args.forEach(p -> p = (Pattern) p.analyze(context));
+    args.forEach(p -> p = (Expression) p.analyze(context));
 
     return this;
   }
@@ -23,17 +28,17 @@ public class PatternList extends Pattern {
     for (int i=0; i<args.size(); i++) {
       args.get(i).codegen(output);
       if(i!=args.size()-1) {
-        output.token(TokenOz.PIPE);
+        output.token(TokenOz.HASHTAG);
       }
     }
   }
 
   @Override
   public void writeToStdOut(PrettyPrinter p) {
-    p.printf("<PatternList>\n");
+    p.printf("<Tuple>\n");
     p.indentRight();
     args.forEach(pat -> pat.writeToStdOut(p));
     p.indentLeft();
-    p.printf("</PatternList>\n");
+    p.printf("</Tuple>\n");
   }
 }

@@ -100,23 +100,23 @@ public class LoopDeclaration extends AST implements DeclarationToDeleteMaybe {
 
     if (!generatorMode) {
       initialValue = (Expression) initialValue.analyze(context);
-      initialValue.type().mustMatchExpected(line, Type.INT, Type.FLOAT);
+      initialValue.type().mustMatchExpected(line(), Type.INT, Type.FLOAT);
 
       if (continuationCondition != null) {
         continuationCondition = (Expression) continuationCondition.analyze(context);
-        continuationCondition.type().mustMatchExpected(line, initialValue.type());
+        continuationCondition.type().mustMatchExpected(line(), initialValue.type());
       }
 
       if (stepValue != null) {
         stepValue = (Expression) stepValue.analyze(context);
-        stepValue.type().mustMatchExpected(line, initialValue.type());
+        stepValue.type().mustMatchExpected(line(), initialValue.type());
       }
 
       endValue = (Expression) endValue.analyze(context);
-      endValue.type().mustMatchExpected(line, initialValue.type());
+      endValue.type().mustMatchExpected(line(), initialValue.type());
     } else {
       generator = (Expression) generator.analyze(context);
-      generator.type().mustMatchExpected(line, Type.LIST);
+      generator.type().mustMatchExpected(line(), Type.LIST);
     }
 
     return this;
@@ -146,7 +146,9 @@ public class LoopDeclaration extends AST implements DeclarationToDeleteMaybe {
           output.token(TokenOz.TRUE);
         }
         output.token(TokenOz.SEMI);
-        stepValue.codegen(output); //In this case stepValue can't be null
+        if(stepValue!=null) {
+          stepValue.codegen(output);
+        }
         output.token(TokenOz.RPAREN);
       } else { //Form E1..E2[;E3]
         initialValue.codegen(output);

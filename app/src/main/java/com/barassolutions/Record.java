@@ -1,5 +1,6 @@
 package com.barassolutions;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Record extends Term {
@@ -8,10 +9,20 @@ public class Record extends Term {
 
   private final Map<Feature, Expression> members;
 
-  public Record(int line, String name, Map<Feature, Expression> map) {
+  private final boolean hasMoreFeatures;
+
+  public Record(int line, String name, Map<Feature, Pattern> map, boolean hasMore, boolean patterns) {
+    super(line);
+    this.name = name;
+    this.members = new HashMap<>(map);
+    this.hasMoreFeatures = hasMore;
+  }
+
+  public Record(int line, String name, Map<Feature, Expression> map, boolean hasMore) {
     super(line);
     this.name = name;
     this.members = map;
+    this.hasMoreFeatures = hasMore;
   }
 
   @Override
@@ -33,6 +44,9 @@ public class Record extends Term {
       v.codegen(output);
       output.space();
     });
+    if(hasMoreFeatures) {
+      output.token(TokenOz.ELLIPSIS);
+    }
     output.token(TokenOz.RPAREN);
   }
 
@@ -45,6 +59,9 @@ public class Record extends Term {
       v.writeToStdOut(p);
       p.println();
     });
+    if(hasMoreFeatures) {
+      p.println("...");
+    }
     p.indentLeft();
     p.printf("</Record>\n");
   }

@@ -45,11 +45,11 @@ public class CallFunction extends Expression {
 
     //Find appropriate method in the context, given the name and the nb of arguments.
     //We could check the type to allow overloading, but Oz does not allow so. Instead, it will produce an error at runtime
-    Method method = context.methodFor(name, argTypes.length);
+    FunctionDef method = context.functionFor(name, argTypes.length);
     if (method == null) {
-      interStatement.reportSemanticError(line,
-          "Could not find function for: " + Type.signatureFor(name, argTypes.length));
-      this.type = Type.NONE;
+      interStatement.reportSemanticError(line(),
+          "Could not find function for: <name:"+name+" args:"+argTypes.length);
+      this.type = Type.ANY;
     } else {
       this.type = method.returnType();
     }

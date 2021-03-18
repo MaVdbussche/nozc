@@ -38,6 +38,8 @@ public class FunctorDef extends Declaration {
   @Override
   public AST analyze(Context context) {
     //TODO analyze the name in parent context and shadow in this one if necessary
+    context.addFunctor(this);
+
     imports.forEach(i -> i = (ImportClause) i.analyze(context)); //TODO add imports to FunctorContext
     exports.forEach(e -> e = (ExportClause) e.analyze(context)); //TODO make sure exported vars exist in FunctorContext
 

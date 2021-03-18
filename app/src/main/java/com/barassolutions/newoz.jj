@@ -382,6 +382,7 @@ private Statement statement(): {
  * <pre>
  *   expression ::= nestConExpression
  *                  | nestDecAnonym
+ *                  | parExpression()
  *                  | DOLLAR
  *                  | term
  *                  | THIS
@@ -400,6 +401,8 @@ private Expression expression(): {
           expression = nestConExpression()
         | LOOKAHEAD( nestDecAnonym() )
           expression = nestDecAnonym()
+        | LOOKAHEAD( parExpression() )
+          expression = parExpression()
         | <DOLLAR>
           { line = token.beginLine;
             expression = new AnonymExpression(line); }
@@ -480,7 +483,7 @@ private InStatement inStatement(): {
  *
  * <pre>
  *   inExpression ::= LCURLY {declarationPart} expression RCURLY
- *                    | LCURLY {declarationPart} statement RCURLY //TODO This encapsulates statements like "i++"
+ *                    | LCURLY {declarationPart} statement RCURLY //TODO This encapsulates statements like "i++" -> remove since not supported in 1st release ?
  * </pre>
  *
  * @return an AST for an inExpression.
@@ -499,7 +502,7 @@ private InExpression inExpression(): {
           aDecl = declarationPart() { decls.add(aDecl); }
         )*
         ( LOOKAHEAD( statement() )
-        statement = statement() //TODO this doesn't follow EBNF above ?
+        statement = statement()
         | LOOKAHEAD( expression() )
         expression = expression()
         )
@@ -517,7 +520,6 @@ private InExpression inExpression(): {
  * <pre>
  *   nestConStatement ::= assignmentExpression
  *                    | variable LPAREN {expression {COMMA expression}} RPAREN
- *                    | {LCURLY}+ expression {expression} {RCURLY}+ //TODO create curledExpression instead
  *                    | inStatement
  *                    | IF parExpression inStatement
  *                      {ELSE IF LPAREN expression RPAREN inStatement}
@@ -547,7 +549,7 @@ private Statement nestConStatement(): {
     InStatement statement2 = null;
     Expression expression = null;
     Expression expression2 = null;
-    ArrayList<Expression> args = new ArrayList<Expression>(); //TODO move to a map instead
+    ArrayList<Expression> args = new ArrayList<Expression>();
     ArrayList<Expression> conds = new ArrayList<Expression>();
     ArrayList<InStatement> consq = new ArrayList<InStatement>();
     boolean firstClausePassed = false;
@@ -636,7 +638,6 @@ private Statement nestConStatement(): {
  *
  * <pre>
  *   nestConExpression ::= variable LPAREN {expression {COMMA expression}} RPAREN
- *                    | LPAREN expression RPAREN
  *                    | IF parExpression inExpression
  *                      {ELSE IF LPAREN expression RPAREN inExpression}
  *                      [ELSE inExpression]
@@ -678,9 +679,6 @@ private Expression nestConExpression(): {
             <COMMA> expression = expression() { args.add(expression); }
           )* <RPAREN>
           { out = new CallFunction(line, name, args); }
-        | LOOKAHEAD( <LPAREN> expression() <RPAREN> )
-          <LPAREN> expression = expression() <RPAREN>
-          { out = expression; }
         | <IF> { line = token.beginLine; }
           expression = parExpression() expression2 = inExpression()
           { conds.add(expression); consq.add(expression2); }
@@ -767,7 +765,7 @@ private Declaration nestDecVariable(): {
         <DEFPROC> { line = token.beginLine; }
           <VARIABLE> { name = token.image; }
           <LPAREN>
-          aPattern = pattern() { args.add(aPattern); } //TODO not all kinds of patterns are allowed here -> filter in ProcedureDef#analyze()
+          aPattern = pattern() { args.add(aPattern); }
           (
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )*
@@ -778,7 +776,7 @@ private Declaration nestDecVariable(): {
           [<LAZY> { lazy = true; }]
           <VARIABLE> { name = token.image; }
           <LPAREN>
-          aPattern = pattern() { args.add(aPattern); } //TODO not all kinds of patterns are allowed here -> filter in ProcedureDef#analyze()
+          aPattern = pattern() { args.add(aPattern); }
           (
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )*
@@ -863,7 +861,7 @@ private Expression nestDecAnonym(): {
     try {
         <DEFPROC> { line = token.beginLine; }
           <DOLLAR> <LPAREN>
-          aPattern = pattern() { args.add(aPattern); } //TODO not all kinds of patterns are allowed here -> filter in ProcedureDef#analyze()
+          aPattern = pattern() { args.add(aPattern); }
           (
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )* <RPAREN>
@@ -872,7 +870,7 @@ private Expression nestDecAnonym(): {
         | <DEF> { line = token.beginLine; }
           [<LAZY> { lazy = true; }]
           <DOLLAR> <LPAREN>
-          aPattern = pattern() { args.add(aPattern); } //TODO not all kinds of patterns are allowed here -> filter in ProcedureDef#analyze()
+          aPattern = pattern() { args.add(aPattern); }
           (
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )* <RPAREN>
@@ -894,7 +892,7 @@ private Expression nestDecAnonym(): {
             )
           )*
           statement = inStatement()
-          { out = new FunctorDefAnonym(line, imports, exports, statement); }//TODO keyword IMPORT/EXPORT has to be generated there
+          { out = new FunctorDefAnonym(line, imports, exports, statement); }
         | <CLASS> { line = token.beginLine; }
           <DOLLAR>
           (
@@ -1429,7 +1427,7 @@ private Expression postfixExpression(): {
 }
 {
     try {
-        primaryExpr = primary() { line = primaryExpr.line(); }
+        primaryExpr = primary() //{ line = primaryExpr.line(); }
         //( LOOKAHEAD( <DEC>|<INC> )
         //    (
         //    <DEC> { primaryExpr = new OperationPostDecr(line, primaryExpr); }
@@ -1447,13 +1445,11 @@ private Expression postfixExpression(): {
  * Parse a primary expression.
  *
  * <pre>
- *   primary ::= parExpression
- *             | THIS DOT variable [LPAREN [expression {COMMA expression}] RPAREN]
- *             | SUPER LPAREN variableStrict RPAREN
- *                      DOT variable [LPAREN [expression {COMMA expression}] RPAREN]
- *             | literal
- *             | qualifiedIdentifier
- *             | initializer
+ *   primary ::= {LNOT} variable | int | float | character | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
+ *             | THIS DOT variable LPAREN [expression {COMMA expression}] RPAREN
+ *             | SUPER [LPAREN variableStrict RPAREN]
+ *                      DOT variable LPAREN [expression {COMMA expression}] RPAREN
+ *             | variable DOT variable [LPAREN [expression {COMMA expression}] RPAREN]
  * </pre>
  *
  * @return an AST for a primaryExpression.
@@ -1461,170 +1457,12 @@ private Expression postfixExpression(): {
 private Expression primary(): {
     int line = 0;
     Expression out = null;
-    //Expression expr = null;
     Variable variable = null;
-    String name = null;
-    Expression arg = null;
-    ArrayList<Expression> args = new ArrayList<Expression>();
-}
-{
-    try {
-          LOOKAHEAD( parExpression() )
-          out = parExpression()
-        | LOOKAHEAD( literal() )
-          out = literal()
-        | LOOKAHEAD( qualifiedIdentifier() )
-          out = qualifiedIdentifier()
-        | LOOKAHEAD( initializer() )
-          out = initializer()
-        | <THIS> { line = token.beginLine; }
-            <DOT> <VARIABLE> { variable = new Variable(line, token.image);
-            out = new ExpressionThisAttribute(line, variable); } //TODO actually, attributes are private in Oz
-            [ LOOKAHEAD( <LPAREN> )
-                <LPAREN>
-                [
-                    arg = expression() { args.add(arg); }
-                    (
-                        <COMMA> arg = expression() { args.add(arg); }
-                    )*
-                ]
-                <RPAREN>
-                { out = new ExpressionThisMethod(line, variable, args); }
-            ]
-        | <SUPER> { line = token.beginLine; }
-            <LPAREN> <VARIABLESTRICT> { name = token.image; } <RPAREN>
-            <DOT> <VARIABLE> { variable = new Variable(token.beginLine, token.image);
-            out = new ExpressionSuperAttribute(line, name, variable); } //TODO actually, attributes are private in Oz
-            [ LOOKAHEAD( <LPAREN> )
-                <LPAREN>
-                [
-                    arg = expression() { args.add(arg); }
-                    (
-                        <COMMA> arg = expression() { args.add(arg); }
-                    )*
-                ]
-                <RPAREN>
-                { out = new ExpressionSuperMethod(line, variable, args); }
-            ]
-    }
-    catch ( ParseException e ) {
-        recoverFromError( new int[]{RCURLY}, e );
-    }
-    { return out; }
-}
-
-/**
- * Parse a qualified identifier.
- *
- * <pre>
- *   qualifiedIdentifier ::= variable {DOT variable [LPAREN [expression {COMMA expression}] RPAREN]}
- * </pre>
- *
- * @return an AST for a qualifiedIdentifier.
- */
-private Expression qualifiedIdentifier(): {
-    int line = 0;
-    Expression out = null;
-    Variable var = null;
     Variable var2 = null;
+    String name = null;
+    boolean bool = true;
     Expression arg = null;
     ArrayList<Expression> args = new ArrayList<Expression>();
-}
-{
-    try {
-        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image); out = var; }
-        (
-            <DOT> <VARIABLE>
-            { var2 = new Variable(token.beginLine, token.image);
-            out = new ExpressionSelectionAttribute(line, var, var2); } //TODO actually, attributes are private in Oz
-            [ LOOKAHEAD( <LPAREN> )
-                <LPAREN>
-                [
-                    arg = expression() { args.add(arg); }
-                    (
-                        <COMMA> arg = expression() { args.add(arg); }
-                    )*
-                ]
-                <RPAREN>
-                { out = new ExpressionSelectionMethod(line, var, var2, args); }
-            ]
-        )*
-    }
-    catch ( ParseException e ) {
-        recoverFromError( new int[]{RCURLY}, e );
-    }
-    { return out; }
-}
-
-/**
- * Parse an initializer, which creates a tuple or a list.
- *
- * <pre>
- *   initializer ::= expression {HASHTAG expression}+
- *                  | LBRACK [expression {COMMA expression}] RBRACK
- *                  | expression {COLCOL expression}+ [NIL] //If ends with nil -> list of values. Else -> concat 2 lists
- * </pre>
- *
- * @return an AST for an initializer.
- */
-private Expression initializer(): {
-    int line = 0;
-    Expression out = null;
-    Expression element = null;
-    ArrayList<Expression> elements = new ArrayList<Expression>();
-}
-{
-    try {
-        LOOKAHEAD( expression() <HASHTAG> expression() )
-        element = expression()
-        { line = element.line(); elements.add(element); }
-        (
-            <HASHTAG> element = expression()
-            { elements.add(element); }
-        )+
-        { out = new ExpressionTupleInit(line, elements); }
-        |
-        <LBRACK> { line = token.beginLine; }
-            [
-                element = expression()
-                { elements.add(element); }
-                (
-                    <COMMA> element = expression()
-                    { elements.add(element); }
-                )*
-            ]
-        <RBRACK>
-        { out = new ExpressionListInit(line, elements); }
-        |
-        LOOKAHEAD( expression() <COLCOL> expression() )
-        element = expression() { elements.add(element); }
-        (
-            <COLCOL> { line = token.beginLine; }
-            element = expression() { elements.add(element); }
-        )+
-        { out = new ExpressionListInit(line, elements, true); }
-        [ LOOKAHEAD( <NIL> )
-            <NIL> { out = new ExpressionListInit(line, elements, false); }
-        ]
-    }
-    catch ( ParseException e ) {
-        recoverFromError( new int[]{RCURLY}, e );
-    }
-    { return out; }
-}
-
-/**
- * Parse a literal.
- *
- * <pre>
- *   literal ::= UNIT | TRUE | FALSE | UNDERSCORE | NIL | int | float | string | character
- * </pre>
- *
- * @return an AST for a literal.
- */
-private Literal literal(): {
-    //int line = 0;
-    Literal out = null;
 }
 {
     try {
@@ -1635,8 +1473,54 @@ private Literal literal(): {
         | <NIL> { out = new Literal(token.beginLine, Type.NIL); }
         | <INT> { out = new Literal(token.beginLine, Type.INT, token.image); }
         | <FLOAT> { out = new Literal(token.beginLine, Type.FLOAT, token.image); }
-        | <STRING> { out = new Literal(token.beginLine, Type.STRING, token.image); }
         | <CHARACTER> { out = new Literal(token.beginLine, Type.CHAR, token.image); }
+        | <STRING> { out = new Literal(token.beginLine, Type.STRING, token.image); }
+        | LOOKAHEAD( <VARIABLE> <DOT> <VARIABLE> )
+          <VARIABLE> { line = token.beginLine; variable = new Variable(line, token.image); out = variable; }
+          <DOT> <VARIABLE>
+          { var2 = new Variable(token.beginLine, token.image);
+          out = new ExpressionSelectionFeature(line, variable, var2); }
+          [ LOOKAHEAD( <LPAREN> )
+              <LPAREN>
+              [
+                  arg = expression() { args.add(arg); }
+                  (
+                      <COMMA> arg = expression() { args.add(arg); }
+                  )*
+              ]
+              <RPAREN>
+              { out = new ExpressionSelectionMethod(line, variable, var2, args); }
+          ]
+        | (
+          <LNOT> {bool = !bool; } //TODO I don't think this "!" is a boolean operator in this case...
+          )*
+          <VARIABLE> { line = token.beginLine; name = token.image;
+          out = new Literal(line, Type.UNKNOWN, name, bool); } //TODO if bool is false, we must ensure type is BOOLEAN
+        | <THIS> { line = token.beginLine; }
+            <DOT> <VARIABLE> { variable = new Variable(line, token.image);}
+            <LPAREN>
+            [
+                arg = expression() { args.add(arg); }
+                (
+                    <COMMA> arg = expression() { args.add(arg); }
+                )*
+            ]
+            <RPAREN>
+            { out = new Call(line, variable, args, "this"); }
+        | <SUPER> { line = token.beginLine; }
+            [ LOOKAHEAD( <LPAREN> <VARIABLESTRICT> <RPAREN> )
+              <LPAREN> <VARIABLESTRICT> { name = token.image; } <RPAREN>
+            ]
+            <DOT> <VARIABLE> { variable = new Variable(token.beginLine, token.image);}
+            <LPAREN>
+            [ LOOKAHEAD( expression() )
+                arg = expression() { args.add(arg); }
+                (
+                    <COMMA> arg = expression() { args.add(arg); }
+                )*
+            ]
+            <RPAREN>
+            { out = new Call(line, variable, args, "super", name); }
     }
     catch ( ParseException e ) {
         recoverFromError( new int[]{RCURLY}, e );
@@ -1645,28 +1529,37 @@ private Literal literal(): {
 }
 
 /**
- * Parse a term.
+ * Parse a term (Used in functions/procedures/methods calls, but also in many other places as a term to an operation).
  *
  * <pre>
- *   term ::= atom
- *            | variable LPAREN [[feature COLON]expression {COMMA [feature COLON]expression}] RPAREN
+ *   term ::= assignmentExpression
+ *            | variable LPAREN [expression {COMMA expression}] RPAREN //TODO we need to differentiate function/proc calls
+ *            | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN //TODO enforce atomLisp for records
+ *            | LPAREN expression {HASHTAG expression}+ RPAREN
+ *            | LPAREN expression {COLCOL expression}+ RPAREN
+ *            | LBRACK [expression {COMMA expression}] RBRACK
+ *            | LPAREN term RPAREN
  * </pre>
 
  * @return an AST for a term.
  */
-private Term term(): {
+private Expression term(): {
     int line = 0;
-    Term out = null;
+    Expression out = null;
     String value = null;
     Feature aFeature = null;
     Expression val = null;
     Map<Feature, Expression> map = new HashMap<Feature, Expression>();
     int lostLabelsCounter = 0;
+    boolean more = false;
+    ArrayList<Expression> args = new ArrayList<Expression>();
 }
 {
     try {
-        <ATOM> {out = new Literal(token.beginLine, Type.ATOM, token.image); }
-        | <VARIABLE> { line = token.beginLine; value = token.image; } //This is a record
+        LOOKAHEAD( assignmentExpression() )
+          out = assignmentExpression()
+        | LOOKAHEAD( <ATOMLISP> <LPAREN> )
+          <ATOMLISP> { line = token.beginLine; value = token.image; }
           <LPAREN> [
           [ LOOKAHEAD( feature() )
             aFeature = feature() <COLON>
@@ -1679,7 +1572,7 @@ private Term term(): {
             } else {
               map.put(aFeature, val);
             }}
-          (
+          ( LOOKAHEAD( <COMMA> )
             <COMMA>
             [ LOOKAHEAD( feature() )
               aFeature = feature() <COLON>
@@ -1692,8 +1585,44 @@ private Term term(): {
               } else {
                 map.put(aFeature, val);
               }}
-          )* ] <RPAREN>
-          { out = new Record(line, value, map); }
+          )*
+          [
+            <COMMA> <ELLIPSIS> { more = true; }
+          ]
+          ] <RPAREN>
+          { out = new Record(line, value, map, more); }
+        | LOOKAHEAD( <VARIABLE> <LPAREN> )
+          <VARIABLE> { line = token.beginLine; value = token.image; }
+          <LPAREN> val = expression() { args.add(val); }
+          (
+            <COMMA> val = expression() { args.add(val); }
+          )* <RPAREN>
+          { out = new Call(line, value, args); }
+        | LOOKAHEAD( <LPAREN> expression() <HASHTAG> expression() )
+          <LPAREN> { line = token.beginLine; }
+          val = expression() { args.add(val); }
+          (<HASHTAG> val = expression() { args.add(val); })+
+          <RPAREN>
+          { out = new Tuple(line, args); }
+        | LOOKAHEAD( <LPAREN> expression() <COLCOL> expression() )
+          <LPAREN> { line = token.beginLine; }
+          val = expression() { args.add(val); }
+          (<COLCOL> val = expression() { args.add(val); })+
+          <RPAREN>
+          { out = new List(line, args, true); }
+        | <LBRACK> { line = token.beginLine; }
+          val = expression() { args.add(val); }
+          (
+            <COMMA>
+            val = expression() { args.add(val); }
+          )*
+          <RBRACK>
+         { out = new List(line, args, false); }
+        | LOOKAHEAD( <LPAREN> term() <RPAREN> )
+          <LPAREN>
+          val = term() { out = val; }
+          <RPAREN>
+
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
@@ -1703,10 +1632,10 @@ private Term term(): {
 
 /**
 /**
- * Parse a pattern.
+ * Parse a pattern (Used in functions/procedures/methods signatures and match blocks).
  *
  * <pre>
- *   pattern ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
+ *   pattern ::= {LNOT} variable | int | float | character | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
  *            | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN
  *            | LPAREN pattern {HASHTAG pattern}+ RPAREN
  *            | LPAREN pattern {COLCOL pattern}+ RPAREN
@@ -1714,7 +1643,7 @@ private Term term(): {
  *            | LPAREN pattern RPAREN
  * </pre>
 
- * @return an AST for a term.
+ * @return an AST for a patern.
  */
 private Pattern pattern(): {
     int line = 0;
@@ -1725,8 +1654,6 @@ private Pattern pattern(): {
     Pattern val = null;
     Map<Feature, Pattern> map = new HashMap<Feature, Pattern>();
     boolean more = false;
-    Pattern pat1 = null;
-    Pattern pat2 = null;
     ArrayList<Pattern> patterns = new ArrayList<Pattern>();
     int lostLabelsCounter = 0;
 }
@@ -1740,14 +1667,13 @@ private Pattern pattern(): {
         | <INT> { out = new Literal(token.beginLine, Type.INT, token.image); }
         | <FLOAT> { out = new Literal(token.beginLine, Type.FLOAT, token.image); }
         | <CHARACTER> { out = new Literal(token.beginLine, Type.CHAR, token.image); }
-        | <ATOM> {out = new Literal(token.beginLine, Type.ATOM, token.image); }
         | <STRING> { out = new Literal(token.beginLine, Type.STRING, token.image); }
         | (
           <LNOT> {bool = !bool; } //TODO I don't think this "!" is a boolean operator in this case...
           )*
           <VARIABLE> { line = token.beginLine; value = token.image;
           out = new Literal(line, Type.UNKNOWN, value, bool); } //TODO if bool is false, we must ensure type is BOOLEAN
-        | <ATOMLISP> { line = token.beginLine; value = token.image; } //This is a pattern record
+        | <ATOMLISP> { line = token.beginLine; value = token.image; } //This is a record pattern
           <LPAREN> [
           [ LOOKAHEAD( feature() )
             aFeature = feature() <COLON>
@@ -1777,31 +1703,30 @@ private Pattern pattern(): {
            )*
            [<COMMA> <ELLIPSIS> { more = true; }]
            ] <RPAREN>
-           { out = new PatternRecord(line, value, map, more); }
+           { out = new Record(line, value, map, more, true); }
         | LOOKAHEAD( <LPAREN> pattern() <HASHTAG> pattern() )
           <LPAREN> { line = token.beginLine; }
-          pat1 = pattern() { patterns.add(pat1); }
-          (<HASHTAG> pat2 = pattern() { patterns.add(pat2); })+
+          val = pattern() { patterns.add(val); }
+          (<HASHTAG> val = pattern() { patterns.add(val); })+
           <RPAREN>
-          { out = new PatternTuple(line, patterns); }
+          { out = new Tuple(line, patterns, true); }
         | LOOKAHEAD( <LPAREN> pattern() <COLCOL> pattern() )
           <LPAREN> { line = token.beginLine; }
-          pat1 = pattern() { patterns.add(pat1); }
-          (<COLCOL> pat2 = pattern() { patterns.add(pat2); })+
+          val = pattern() { patterns.add(val); }
+          (<COLCOL> val = pattern() { patterns.add(val); })+
           <RPAREN>
-          { out = new PatternList(line, patterns); }
+          { out = new List(line, patterns, true, true); }
         | <LBRACK> { line = token.beginLine; }
-          [
-            pat1 = pattern() { patterns.add(pat1); }
-            (
-              <COMMA>
-              pat1 = pattern() { patterns.add(pat1); }
-            )*
-          ] <RBRACK>
-          { out = new PatternListInit(line, patterns); }
+          val = pattern() { patterns.add(val); }
+          (
+            <COMMA>
+            val = pattern() { patterns.add(val); }
+          )*
+         <RBRACK>
+          { out = new List(line, patterns, false, true); }
         | LOOKAHEAD( <LPAREN> pattern() <RPAREN> )
           <LPAREN>
-          pat1 = pattern() { out = pat1; }
+          val = pattern() { out = val; }
           <RPAREN>
     }
     catch ( ParseException e ) {
@@ -1814,8 +1739,8 @@ private Pattern pattern(): {
  * Parse a variables declaration group.
  *
  * <pre>
- *   declarationPart ::= (VAL|VAR) (variable|pattern) [ASSIGN (expression|statement)] //TODO why statement ? => because of statements like i++
- *                        {COMMA (variable|pattern) [ASSIGN (expression|statement)]} //TODO why pattern ?
+ *   declarationPart ::= (VAL|VAR) variable [ASSIGN (expression|statement)] //TODO why statement ? => because of statements like i++
+ *                        {COMMA variable [ASSIGN (expression|statement)]} //TODO why pattern ?
  *                      | nestDecVariable
  * </pre>
  *
@@ -2030,7 +1955,7 @@ private MethodHead methHead(): {
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
     }
-    { return new MethodHead(line, name, priv, args, moreArgs); }
+    { return new MethodHead(line, name, priv, args, moreArgs, isAFunction); }
 }
 
 /**

@@ -3,7 +3,7 @@ package com.barassolutions;
 public class InStatementFunctor extends InStatement {
 
   public InStatementFunctor(InStatement statement) {
-    super(statement.line, statement.declarations, statement.statements);
+    super(statement.line(), statement.declarations, statement.statements);
     assert statement.declarations.size() > 0;
   }
 

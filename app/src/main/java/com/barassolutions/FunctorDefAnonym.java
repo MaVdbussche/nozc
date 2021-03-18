@@ -29,6 +29,8 @@ public class FunctorDefAnonym extends DeclarationAnonym {
 
   @Override
   public Expression analyze(Context context) {
+    context.addFunctor(new FunctorDef(this, name)); //TODO we need the name of the variable on lhs (since this is $)
+
     imports.forEach(i -> i = (ImportClause) i.analyze(context)); //TODO add imports to FunctorContext
     exports.forEach(e -> e = (ExportClause) e.analyze(context)); //TODO make sure exported vars exist in FunctorContext
 

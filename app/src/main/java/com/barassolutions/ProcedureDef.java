@@ -29,6 +29,8 @@ public class ProcedureDef extends Declaration {
   @Override
   public AST analyze(Context context) {
     //TODO declare name in the context if it doesn't exist yet
+    context.addProcedure(this);
+
     // TODO create this procedure's inner context and add args to it (shadow if necessary)
     // TODO create a Method instance (17/03 WHY ?)
     args.forEach(a -> a = (Pattern) a.analyze(context));

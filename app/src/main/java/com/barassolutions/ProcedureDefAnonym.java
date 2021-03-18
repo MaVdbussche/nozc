@@ -22,6 +22,8 @@ public class ProcedureDefAnonym extends DeclarationAnonym {
 
   @Override
   public Expression analyze(Context context) {
+    context.addProcedure(new ProcedureDef(this, name)); //TODO we need the name of the variable on lhs (since this is $)
+
     // TODO create this procedure's inner context and add args to it (shadow if necessary)
     // TODO create a Method instance (17/03 WHY ?)
     args.forEach(a -> a = (Pattern) a.analyze(context));
@@ -55,7 +57,7 @@ public class ProcedureDefAnonym extends DeclarationAnonym {
 
   @Override
   public void writeToStdOut(PrettyPrinter p) {
-    p.printf("<ProcedureDeclaration line=\"%d\" Anonym>\n", line(),);
+    p.printf("<ProcedureDeclaration line=\"%d\" Anonym>\n", line());
     p.indentRight();
     args.forEach(a -> {
       p.printf("<Argument>\n");

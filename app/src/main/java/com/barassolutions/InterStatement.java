@@ -11,7 +11,7 @@ public class InterStatement extends AST {
   /**
    * List of statements forming the block body.
    */
-  private ArrayList<Statement> statements;
+  private final ArrayList<Statement> statements;
 
   /**
    * Block in this declare structure
@@ -93,7 +93,7 @@ public class InterStatement extends AST {
     if (statements != null) {
       statements.forEach(s -> s = (Statement) s.analyze(this.context));
     } else if (statement != null) {
-      statement = (Statement) statement.analyze(this.context);
+      statement = (InStatement) statement.analyze(this.context);
     }
     return this;
   }

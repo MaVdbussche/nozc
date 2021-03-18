@@ -12,12 +12,12 @@ public class ConditionalStruct extends Statement {
   /**
    * Test expressions.
    */
-  private ArrayList<Expression> conditions;
+  private final ArrayList<Expression> conditions;
 
   /**
    * Then clauses. There might be one more if there is an "else" clause
    */
-  private ArrayList<InStatement> consequences;
+  private final ArrayList<InStatement> consequences;
 
   private boolean elsePart;
 
@@ -86,19 +86,19 @@ public class ConditionalStruct extends Statement {
     for (int i = 0; i < conditions.size(); i++) {
       p.printf("<TestExpression>\n");
       p.indentRight();
-      conditions.get(i).writeOut(p);
+      conditions.get(i).writeToStdOut(p);
       p.indentLeft();
       p.printf("</TestExpression>\n");
       p.printf("<ThenClause>\n");
       p.indentRight();
-      consequences.get(i).writeOut(p);
+      consequences.get(i).writeToStdOut(p);
       p.indentLeft();
       p.printf("</ThenClause>\n");
     }
     if (elsePart) {
       p.printf("<ElseClause>\n");
       p.indentRight();
-      consequences.get(consequences.size() - 1).writeOut(p);
+      consequences.get(consequences.size() - 1).writeToStdOut(p);
       p.indentLeft();
       p.printf("</ElseClause>\n");
     }

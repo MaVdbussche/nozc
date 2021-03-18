@@ -45,10 +45,10 @@ public class CallProcedure extends Statement {
 
     //Find appropriate method in the context, given the name and the nb of arguments.
     //We could check the type to allow overloading, but Oz does not allow so. Instead, it will produce an error at runtime
-    Method method = context.methodFor(name, argTypes.length);
+    ProcedureDef method = context.procedureFor(name, argTypes.length);
     if (method == null) {
-      interStatement.reportSemanticError(line,
-          "Could not find procedure for: " + Type.signatureFor(name, argTypes.length));
+      interStatement.reportSemanticError(line(),
+          "Could not find procedure for: <name:"+name+" args:"+argTypes.length);
     }
     //No return type for procedures
 

@@ -13,9 +13,9 @@ public class MethodDef extends Declaration implements ClassElement {
    * The statement/expression constituting the method's body.
    */
   @Nullable
-  private final InStatement statement;
+  private InStatement statement;
   @Nullable
-  private final InExpression expression;
+  private InExpression expression;
 
   private final boolean isAFunction;
 
@@ -23,7 +23,7 @@ public class MethodDef extends Declaration implements ClassElement {
       @Nullable InExpression expression, @Nullable InStatement statement) {
     super(line);
     assert (expression != null || statement != null);
-    isAFunction = statement == null;
+    isAFunction = head.isAFunction();
 
     this.head = head;
     this.statement = statement;

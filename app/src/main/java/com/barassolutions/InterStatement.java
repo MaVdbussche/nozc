@@ -82,7 +82,9 @@ public class InterStatement extends AST {
   public void preAnalyze() {
     context = new GlobalContext();
 
-    context.addMethod(); //TODO all implicit methods in Oz (Browse etc.)
+    context.addFunction(null, null);
+    context.addProcedure(null, null);
+    //TODO all implicit functions/procs in Oz (Browse etc.)
     //TODO also add system calls etc, things directly available without imports
 
     //Launch recursive preAnalyze

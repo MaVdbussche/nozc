@@ -2,24 +2,32 @@ package com.barassolutions;
 
 import com.barassolutions.ClassDescriptor.SubType;
 import java.util.ArrayList;
+import org.jetbrains.annotations.Nullable;
 
 public class ClassDefAnonym extends DeclarationAnonym {
+
+  private final String name;
 
   private final ArrayList<ClassDescriptor> descriptors;
 
   private final ArrayList<MethodDef> methods;
 
   public ClassDefAnonym(int line, ArrayList<ClassDescriptor> descriptors,
-      ArrayList<MethodDef> methods) {
+      ArrayList<MethodDef> methods, @Nullable String name) {
     super(line);
     Utils.sortDescriptors(descriptors);
     this.descriptors = descriptors;
     this.methods = methods;
+    this.name = name;
+  }
+
+  public String name() {
+    return name;
   }
 
   @Override
   public Expression analyze(Context context) {
-    ClassContext classContext = new ClassContext(context);
+    ClassContext classContext = new ClassContext(context, "name"); //TODO Need name from lhs
 
     descriptors.forEach(d -> d = (ClassDescriptor) d.analyze(classContext));
     //TODO check we only have 1 EXTENSION descriptor

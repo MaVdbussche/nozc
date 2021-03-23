@@ -7,17 +7,12 @@ public class CallFunction extends Expression {
   /**
    * The name of the function being called
    */
-  private String name;
+  private final String name;
 
   /**
    * The arguments to the call.
    */
-  private ArrayList<Expression> args;
-
-  /**
-   * Types of arguments.
-   */
-  private Type[] argTypes;
+  private final ArrayList<Expression> args;
 
   public CallFunction(int line, String name, ArrayList<Expression> args) {
     super(line);
@@ -37,18 +32,14 @@ public class CallFunction extends Expression {
   @Override
   public Expression analyze(Context context) {
     // Analyzing the arguments
-    argTypes = new Type[args.size()];
-    for (int i = 0; i < argTypes.length; i++) {
-      args.set(i, (Expression) args.get(i).analyze(context));
-      argTypes[i] = args.get(i).type();
-    }
+    args.forEach(a -> a = (Expression) a.analyze(context));
 
     //Find appropriate method in the context, given the name and the nb of arguments.
     //We could check the type to allow overloading, but Oz does not allow so. Instead, it will produce an error at runtime
-    FunctionDef method = context.functionFor(name, argTypes.length);
+    FunctionDef method = context.functionFor(name, args.size());
     if (method == null) {
       interStatement.reportSemanticError(line(),
-          "Could not find function for: <name:"+name+" args:"+argTypes.length);
+          "Could not find function for: <name:"+name+" args:"+args.size()+">");
       this.type = Type.ANY;
     } else {
       this.type = method.returnType();

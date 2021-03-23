@@ -3,8 +3,10 @@ package com.barassolutions;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -59,6 +61,7 @@ public class Nozc implements Callable<Integer> {
   @Option(names = {"-d",
       "--directory"}, description = "output directory for compiled and/or translated files, relative to the current folder (default: ${DEFAULT_VALUE})", arity = "1", defaultValue = ".")
   private File destDirectory;
+
   private boolean errorHasOccurred;
 
   public static void main(String[] args) {
@@ -80,6 +83,7 @@ public class Nozc implements Callable<Integer> {
   public Integer call() throws Exception {
     //TODO for each input file : (think about exact loop placement)
     File inputFile = inputFiles[0];
+    errorHasOccurred = false;
 
     /* Create the Scanner */
     JavaCCParserTokenManager scanner;
@@ -197,8 +201,13 @@ public class Nozc implements Callable<Integer> {
   static class VersionProvider implements IVersionProvider {
 
     public String[] getVersion() throws Exception {
-      //TODO get it from Gradle build config ?
-      return new String[]{"@|yellow ${COMMAND-FULL-NAME} 0.1|@",
+
+      InputStream in = getClass().getClassLoader().getResourceAsStream("../../../resources/app.properties");
+      Properties props = new Properties();
+      props.load(in);
+      String version = props.get("version").toString();
+
+      return new String[]{"@|yellow ${COMMAND-FULL-NAME} "+version+"|@",
           "(c) COPYRIGHT INFO HERE 2021",
           "Picocli " + CommandLine.VERSION,
           "JVM: ${java.version} (${java.vendor} ${java.vm.name} ${java.vm.version})",

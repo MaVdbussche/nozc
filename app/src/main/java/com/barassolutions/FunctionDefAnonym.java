@@ -1,8 +1,11 @@
 package com.barassolutions;
 
 import java.util.ArrayList;
+import org.jetbrains.annotations.Nullable;
 
 public class FunctionDefAnonym extends DeclarationAnonym {
+
+  private final String name;
 
   /**
    * The arguments of this procedure.
@@ -16,34 +19,45 @@ public class FunctionDefAnonym extends DeclarationAnonym {
 
   private final boolean lazy;
 
-  private Type returnType;
-
   public FunctionDefAnonym(int line, ArrayList<Pattern> args, InExpression expression,
-      boolean lazy) {
+      boolean lazy, @Nullable String name) {
     super(line);
     this.args = args;
     this.expression = expression;
     this.lazy = lazy;
+    this.name = name;
   }
 
-  public Type returnType() {
-    return returnType;
+  public String name() {
+    return name;
+  }
+
+  public ArrayList<Pattern> args() {
+    return args;
+  }
+
+  public InExpression expression() {
+    return expression;
+  }
+
+  public boolean lazy() {
+    return lazy;
   }
 
   @Override
   public Expression analyze(Context context) {
-    context.addFunction(new FunctionDef(this, name)); //TODO we need the name of the variable on lhs (since this is $)
-
-    // TODO create this function's inner context and add args to it if they don't already exist
-    // TODO create a Method instance (17/03 WHY ?)
-    args.forEach(a -> a = (Pattern) a.analyze(context)); //TODO add them to methContext
-
     MethodContext methContext = new MethodContext(context);
+    context.addFunction(new FunctionDef(this), methContext);
+
+    args.forEach(a -> {
+      a = (Pattern) a.analyze(context);
+      methContext.addArgument(a);
+    });
 
     expression = (InExpression) expression.analyze(methContext);
 
-    returnType = this.expression.type();
-    methContext.returnType = returnType;
+    Type returnType = this.expression.type();
+    methContext.setReturnType(returnType);
     return this;
   }
 

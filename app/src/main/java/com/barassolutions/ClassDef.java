@@ -22,7 +22,7 @@ public class ClassDef extends Declaration {
 
   @Override
   public AST analyze(Context context) {
-    ClassContext classContext = new ClassContext(context);
+    ClassContext classContext = new ClassContext(context, className);
 
     descriptors.forEach(d -> d = (ClassDescriptor) d.analyze(classContext));
     //TODO check we only have 1 EXTENSION descriptor

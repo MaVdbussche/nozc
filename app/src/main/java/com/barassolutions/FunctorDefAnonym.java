@@ -1,8 +1,11 @@
 package com.barassolutions;
 
 import java.util.ArrayList;
+import org.jetbrains.annotations.Nullable;
 
 public class FunctorDefAnonym extends DeclarationAnonym {
+
+  private final String name;
 
   /**
    * Elements imported by this functor.
@@ -20,23 +23,46 @@ public class FunctorDefAnonym extends DeclarationAnonym {
   private final InStatementFunctor statement;
 
   public FunctorDefAnonym(int line, ArrayList<ImportClause> imports,
-      ArrayList<ExportClause> exports, InStatement statement) {
+      ArrayList<ExportClause> exports, InStatement statement, @Nullable String name) {
     super(line);
     this.imports = imports;
     this.exports = exports;
     this.statement = new InStatementFunctor(statement);
+    this.name = name;
+  }
+
+  public String name() {
+    return name;
+  }
+
+  public ArrayList<ImportClause> imports() {
+    return imports;
+  }
+
+  public ArrayList<ExportClause> exports() {
+    return exports;
+  }
+
+  public InStatementFunctor statement() {
+    return statement;
   }
 
   @Override
   public Expression analyze(Context context) {
-    context.addFunctor(new FunctorDef(this, name)); //TODO we need the name of the variable on lhs (since this is $)
-
-    imports.forEach(i -> i = (ImportClause) i.analyze(context)); //TODO add imports to FunctorContext
-    exports.forEach(e -> e = (ExportClause) e.analyze(context)); //TODO make sure exported vars exist in FunctorContext
-
     FunctorContext fContext = new FunctorContext(context);
+    context.addFunctor(new FunctorDef(this), fContext);
 
-    statement.analyze(fcontext);
+    imports.forEach(i -> {
+      i = (ImportClause) i.analyze(context);
+      fContext.addImport(i);
+    });
+
+    statement.analyze(fContext);
+
+    exports.forEach(e -> {
+      e = (ExportClause) e.analyze(context);
+      fContext.ensureExistsHere(line(), e.exportedValue().name());
+    });
 
     return this;
   }

@@ -35,17 +35,30 @@ public class FunctorDef extends Declaration {
     this.statement = new InStatementFunctor(statement);
   }
 
+  public FunctorDef(FunctorDefAnonym f) {
+    this(f.line(), f.name(), f.imports(), f.exports(), f.statement());
+  }
+
+  public String name() {
+    return name;
+  }
+
   @Override
   public AST analyze(Context context) {
-    //TODO analyze the name in parent context and shadow in this one if necessary
-    context.addFunctor(this);
-
-    imports.forEach(i -> i = (ImportClause) i.analyze(context)); //TODO add imports to FunctorContext
-    exports.forEach(e -> e = (ExportClause) e.analyze(context)); //TODO make sure exported vars exist in FunctorContext
-
     FunctorContext fContext = new FunctorContext(context);
+    context.addFunctor(this, fContext);
+
+    imports.forEach(i -> {
+      i = (ImportClause) i.analyze(context);
+      fContext.addImport(i);
+    });
 
     statement.analyze(fContext);
+
+    exports.forEach(e -> {
+      e = (ExportClause) e.analyze(context);
+      fContext.ensureExistsHere(line(), e.exportedValue().name());
+    });
 
     return this;
   }
@@ -53,7 +66,7 @@ public class FunctorDef extends Declaration {
   @Override
   public void codegen(Emitter output) {
     output.token(TokenOz.FUNCTOR);
-    if(name!=null) {
+    if (name != null) {
       output.space();
       output.literal(name);
     }

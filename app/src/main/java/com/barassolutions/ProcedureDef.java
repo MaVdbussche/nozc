@@ -26,26 +26,35 @@ public class ProcedureDef extends Declaration {
     this.statement = statement;
   }
 
+  public ProcedureDef(ProcedureDefAnonym f) {
+    this(f.line(), f.name(), f.args(), f.statement());
+  }
+
+  public String name() {
+    return name;
+  }
+
   @Override
   public AST analyze(Context context) {
-    //TODO declare name in the context if it doesn't exist yet
-    context.addProcedure(this);
-
-    // TODO create this procedure's inner context and add args to it (shadow if necessary)
-    // TODO create a Method instance (17/03 WHY ?)
-    args.forEach(a -> a = (Pattern) a.analyze(context));
-
     MethodContext methContext = new MethodContext(context);
+    context.addProcedure(this, methContext);
+
+    args.forEach(a -> {
+      a = (Pattern) a.analyze(context);
+      methContext.addArgument(a);
+    });
 
     statement = (InStatement) statement
         .analyze(methContext);
+
     return this;
   }
 
   @Override
   public void codegen(Emitter output) {
     output.token(TokenOz.PROC);
-    output.token(TokenOz.LCURLY); //TODO see if we couldn't merge FunctionDef & ProcedureDef (see MethodDef for reference)
+    output.token(
+        TokenOz.LCURLY); //TODO see if we couldn't merge FunctionDef & ProcedureDef (see MethodDef for reference)
     output.literal(name);
     args.forEach(a -> {
       output.space();

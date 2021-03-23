@@ -36,14 +36,26 @@ public class MethodDef extends Declaration implements ClassElement {
     }
   }
 
+  public String name() {
+    return head.name();
+  }
+
   @Override
   public AST analyze(Context context) {
-    //TODO declare name in the context (shadow it if needed)
-
-    head.args().forEach(a -> a = a.analyze(context));
-
     MethodContext methContext = new MethodContext(context);
-    // TODO create this method's inner context and add args to it (shadow if necessary)
+    //TODO declare name in the context (shadow it if needed) check we are in a class context
+    ClassContext classContext = context.asClassContext();
+    if (classContext == null) {
+      interStatement.reportSemanticError(line(),
+          "Definition of a method is only allowed in the context of a Class.");
+    } else {
+      classContext.addMethod(this, methContext);
+    }
+
+    head.args().forEach(a -> {
+      a = a.analyze(context);
+      methContext.addArgument(a);
+    });
 
     if (statement != null) {
       statement = (InStatement) statement
@@ -51,6 +63,7 @@ public class MethodDef extends Declaration implements ClassElement {
     } else if (expression != null) {
       expression = (InExpression) expression.analyze(methContext);
     }
+
     return this;
   }
 
@@ -64,7 +77,7 @@ public class MethodDef extends Declaration implements ClassElement {
       a.codegen(output);
       output.space();
     });
-    if(head.hasMorArgs()) {
+    if (head.hasMorArgs()) {
       output.token(TokenOz.ELLIPSIS);
       output.space();
     }
@@ -73,8 +86,8 @@ public class MethodDef extends Declaration implements ClassElement {
     }
     output.token(TokenOz.RPAREN);
 
-    if(aliasName!=null) {
-
+    if (aliasName != null) {
+      //TODO what is this actually ?
     }
 
     output.newLine();
@@ -91,7 +104,8 @@ public class MethodDef extends Declaration implements ClassElement {
 
   @Override
   public void writeToStdOut(PrettyPrinter p) {
-    p.printf("<MethodDeclaration line=\"%d\" name=\"%s\" alias=\"%s\" function?=\"%b\" procedure?=\"%b\">\n",
+    p.printf(
+        "<MethodDeclaration line=\"%d\" name=\"%s\" alias=\"%s\" function?=\"%b\" procedure?=\"%b\">\n",
         line(), head.name(), aliasName, isAFunction, !isAFunction);
     p.indentRight();
     head.args().forEach(a -> {

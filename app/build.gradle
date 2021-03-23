@@ -17,8 +17,15 @@ java {
 }
 
 group 'com.barassolutions'
-version '0.1'
+version = project.property("version")
 
+processResources {
+    filesMatching('**/app.properties') {
+        filter {
+            it.replace('%APP_VERSION_TOKEN%', version)
+        }
+    }
+}
 
 application {
     mainClass = 'com.barassolutions.Nozc'

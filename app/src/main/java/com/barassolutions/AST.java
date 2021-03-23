@@ -6,7 +6,7 @@ package com.barassolutions;
 abstract class AST {
 
   /** Current interactive statement (set in InterStatement() constructor). */
-  public static InterStatement interStatement;
+  protected static InterStatement interStatement;
 
   protected String fileName;
 

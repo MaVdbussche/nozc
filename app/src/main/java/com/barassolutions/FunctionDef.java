@@ -12,7 +12,7 @@ public class FunctionDef extends Declaration {
   /**
    * The arguments of this procedure.
    */
-  private ArrayList<Pattern> args;
+  private final ArrayList<Pattern> args;
 
   /**
    * The expression constituting the procedure's body.
@@ -32,25 +32,33 @@ public class FunctionDef extends Declaration {
     this.lazy = lazy;
   }
 
+  public FunctionDef(FunctionDefAnonym f) {
+    this(f.line(), f.name(), f.args(), f.expression(), f.lazy());
+  }
+
   public Type returnType() {
     return returnType;
   }
 
+  public String name() {
+    return name;
+  }
+
+
   @Override
   public AST analyze(Context context) {
-    //TODO declare name in the context if it doesn't exist yet
-    context.addFunction(this);
-
-    // TODO create this function's inner context and add args to it (shadow if necessary)
-    // TODO create a Method instance (17/03 WHY ?)
-    args.forEach(a -> a = (Pattern) a.analyze(context)); //TODO add them to methContext
-
     MethodContext methContext = new MethodContext(context);
+    context.addFunction(this, methContext);
+
+    args.forEach(a -> {
+      a = (Pattern) a.analyze(context);
+      methContext.addArgument(a);
+    });
 
     expression = (InExpression) expression.analyze(methContext);
 
     returnType = this.expression.type();
-    methContext.returnType = returnType;
+    methContext.setReturnType(returnType);
     return this;
   }
 

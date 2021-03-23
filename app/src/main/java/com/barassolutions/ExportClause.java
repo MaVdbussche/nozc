@@ -8,17 +8,21 @@ public class ExportClause extends Statement {
    * Optional name under which the variable will be made available.
    */
   @Nullable
-  private String name;
+  private final String name;
 
   /**
    * Variable to export.
    */
-  private Variable var;
+  private final Variable var;
 
   public ExportClause(int line, @Nullable String label, Variable var) {
     super(line);
     this.name = label;
     this.var = var;
+  }
+
+  public Variable exportedValue() {
+    return var;
   }
 
   //TODO we don't actually check for presence the variable in the context, since it probably hasn't been declared at this time.

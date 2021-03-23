@@ -1,8 +1,11 @@
 package com.barassolutions;
 
 import java.util.ArrayList;
+import org.jetbrains.annotations.Nullable;
 
 public class ProcedureDefAnonym extends DeclarationAnonym {
+
+  private final String name;
 
   /**
    * The arguments of this procedure.
@@ -14,31 +17,47 @@ public class ProcedureDefAnonym extends DeclarationAnonym {
    */
   private InStatement statement;
 
-  public ProcedureDefAnonym(int line, ArrayList<Pattern> args, InStatement statement) {
+  public ProcedureDefAnonym(int line, ArrayList<Pattern> args, InStatement statement,
+      @Nullable String name) {
     super(line);
     this.args = args;
     this.statement = statement;
+    this.name = name;
+  }
+
+  public String name() {
+    return name;
+  }
+
+  public ArrayList<Pattern> args() {
+    return args;
+  }
+
+  public InStatement statement() {
+    return statement;
   }
 
   @Override
   public Expression analyze(Context context) {
-    context.addProcedure(new ProcedureDef(this, name)); //TODO we need the name of the variable on lhs (since this is $)
-
-    // TODO create this procedure's inner context and add args to it (shadow if necessary)
-    // TODO create a Method instance (17/03 WHY ?)
-    args.forEach(a -> a = (Pattern) a.analyze(context));
-
     MethodContext methContext = new MethodContext(context);
+    context.addProcedure(new ProcedureDef(this), methContext);
+
+    args.forEach(a -> {
+      a = (Pattern) a.analyze(context); //TODO actually we don't need to analyze args in the top context ? Since we will either shadow, or we just don't care if they don't exist ?! [!!!! applicable for all 25 classes that use this mehtContext]
+      methContext.addArgument(a);
+    });
 
     statement = (InStatement) statement
         .analyze(methContext);
+
     return this;
   }
 
   @Override
   public void codegen(Emitter output) {
     output.token(TokenOz.PROC);
-    output.token(TokenOz.LCURLY); //TODO see if we couldn't merge FunctionDef & ProcedureDef (see MethodDef for reference)
+    output.token(
+        TokenOz.LCURLY); //TODO see if we couldn't merge FunctionDef & ProcedureDef (see MethodDef for reference)
     output.token(TokenOz.DOLLAR);
     args.forEach(a -> {
       output.space();

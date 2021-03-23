@@ -27,7 +27,7 @@ public class ReturnStatement extends Statement {
    */
   @Override
   public AST analyze(Context context) {
-    FunctionDef methodContext = context.functionDef(); //TODO Go up until you find the closest FunctionDef
+    MethodContext methodContext = context.findMethodContext();
 
     Type returnType = methodContext.returnType();
     if (expr != null) {

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 public class ClassDescriptor extends Declaration implements ClassElement {
 
   public enum SubType {
-    EXTENSION, ATTRIBUTE, PROPERTY, FEATURE //TODO add features
+    EXTENSION, ATTRIBUTE, PROPERTY, FEATURE //TODO add features in future release
   }
 
   private final ArrayList<String> extendedClassesNames;
@@ -60,13 +60,13 @@ public class ClassDescriptor extends Declaration implements ClassElement {
   }
 
   @Override
-  public AST analyze(Context classContext) {
-    assert (classContext instanceof ClassContext);
+  public AST analyze(Context context) {
+    ClassContext classContext = (ClassContext) context;
 
     if (type.equals(SubType.EXTENSION)) {
-      extendedClassesNames.forEach(e -> classContext.superClasses.add(e));
+      classContext.superClasses.addAll(extendedClassesNames);
     } else if (type.equals(SubType.ATTRIBUTE)) {
-      classContext.addVariable(attribute, defaultValue);
+      classContext.addAttribute(attribute, defaultValue);
     } else if (type.equals(SubType.PROPERTY)) {
       //TODO not clear what properties are used for
     }

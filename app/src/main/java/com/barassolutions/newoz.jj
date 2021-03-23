@@ -866,7 +866,7 @@ private Expression nestDecAnonym(): {
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )* <RPAREN>
           statement = inStatement()
-          { out = new ProcedureDefAnonym(line, args, statement); }
+          { out = new ProcedureDefAnonym(line, args, statement, null); }
         | <DEF> { line = token.beginLine; }
           [<LAZY> { lazy = true; }]
           <DOLLAR> <LPAREN>
@@ -875,7 +875,7 @@ private Expression nestDecAnonym(): {
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )* <RPAREN>
           expression = inExpression()
-          { out = new FunctionDefAnonym(line, args, expression, lazy); }
+          { out = new FunctionDefAnonym(line, args, expression, lazy, null); }
         | <FUNCTOR> { line = token.beginLine; }
           [ <DOLLAR> ]
           (
@@ -892,7 +892,7 @@ private Expression nestDecAnonym(): {
             )
           )*
           statement = inStatement()
-          { out = new FunctorDefAnonym(line, imports, exports, statement); }
+          { out = new FunctorDefAnonym(line, imports, exports, statement, null); }
         | <CLASS> { line = token.beginLine; }
           <DOLLAR>
           (
@@ -908,7 +908,7 @@ private Expression nestDecAnonym(): {
               }
             }
           )* <RCURLY>
-          { out = new ClassDefAnonym(line, descriptors, methods); }
+          { out = new ClassDefAnonym(line, descriptors, methods, null); }
     }
     catch ( ParseException e ) {
        recoverFromError(new int[]{RCURLY}, e);
@@ -1446,10 +1446,11 @@ private Expression postfixExpression(): {
  *
  * <pre>
  *   primary ::= {LNOT} variable | int | float | character | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
+ *             | variable DOT variable [LPAREN [expression {COMMA expression}] RPAREN]
+ *             | variable DOT expression
  *             | THIS DOT variable LPAREN [expression {COMMA expression}] RPAREN
  *             | SUPER [LPAREN variableStrict RPAREN]
  *                      DOT variable LPAREN [expression {COMMA expression}] RPAREN
- *             | variable DOT variable [LPAREN [expression {COMMA expression}] RPAREN]
  * </pre>
  *
  * @return an AST for a primaryExpression.
@@ -1457,10 +1458,9 @@ private Expression postfixExpression(): {
 private Expression primary(): {
     int line = 0;
     Expression out = null;
+    Expression expr = null;
     Variable variable = null;
-    Variable var2 = null;
     String name = null;
-    boolean bool = true;
     Expression arg = null;
     ArrayList<Expression> args = new ArrayList<Expression>();
 }
@@ -1475,11 +1475,11 @@ private Expression primary(): {
         | <FLOAT> { out = new Literal(token.beginLine, Type.FLOAT, token.image); }
         | <CHARACTER> { out = new Literal(token.beginLine, Type.CHAR, token.image); }
         | <STRING> { out = new Literal(token.beginLine, Type.STRING, token.image); }
-        | LOOKAHEAD( <VARIABLE> <DOT> <VARIABLE> )
-          <VARIABLE> { line = token.beginLine; variable = new Variable(line, token.image); out = variable; }
+        | LOOKAHEAD( <VARIABLE> <DOT> expression() )
+          <VARIABLE> { variable = new Variable(token.beginLine, token.image);}
           <DOT> <VARIABLE>
-          { var2 = new Variable(token.beginLine, token.image);
-          out = new ExpressionSelectionFeature(line, variable, var2); }
+          { name = token.image;
+            out = new ExpressionSelectionFeature(line, variable, name); }
           [ LOOKAHEAD( <LPAREN> )
               <LPAREN>
               [
@@ -1489,13 +1489,13 @@ private Expression primary(): {
                   )*
               ]
               <RPAREN>
-              { out = new ExpressionSelectionMethod(line, variable, var2, args); }
+              { out = new ExpressionSelectionMethod(line, variable, name, args); }
           ]
-        | (
-          <LNOT> {bool = !bool; } //TODO I don't think this "!" is a boolean operator in this case...
-          )*
-          <VARIABLE> { line = token.beginLine; name = token.image;
-          out = new Literal(line, Type.UNKNOWN, name, bool); } //TODO if bool is false, we must ensure type is BOOLEAN
+        | <VARIABLE> { out = new Variable(token.beginLine, token.image); }
+          [
+            <DOT> expr = expression()
+            { out = new ExpressionSelectionList(line, (Variable) out, expr); }
+          ]
         | <THIS> { line = token.beginLine; }
             <DOT> <VARIABLE> { variable = new Variable(line, token.image);}
             <LPAREN>
@@ -1506,7 +1506,7 @@ private Expression primary(): {
                 )*
             ]
             <RPAREN>
-            { out = new Call(line, variable, args, "this"); }
+            { out = new Call(line, variable, args); }
         | <SUPER> { line = token.beginLine; }
             [ LOOKAHEAD( <LPAREN> <VARIABLESTRICT> <RPAREN> )
               <LPAREN> <VARIABLESTRICT> { name = token.image; } <RPAREN>
@@ -1520,7 +1520,7 @@ private Expression primary(): {
                 )*
             ]
             <RPAREN>
-            { out = new Call(line, variable, args, "super", name); }
+            { out = new Call(line, variable, args, name); }
     }
     catch ( ParseException e ) {
         recoverFromError( new int[]{RCURLY}, e );

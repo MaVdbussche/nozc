@@ -29,6 +29,10 @@ public class ImportClause extends Statement implements DeclarationToDeleteMaybe 
     this.source = source;
   }
 
+  public Map<String, Variable> getValues() {
+    return map;
+  }
+
   @Override
   public void preAnalyze(Context context, Emitter partial) {
     //TODO ensure newly declared names do not already exist in this context.

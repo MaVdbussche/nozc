@@ -17,7 +17,7 @@ public class InStatement extends Statement {
   /**
    * The context represented by this block.
    */
-  private LocalContext context;
+  private Context context;
 
   /**
    * Construct an AST node for a block given its line number, and the list of statements forming the
@@ -42,7 +42,7 @@ public class InStatement extends Statement {
    */
   @Override
   public AST analyze(Context context) {
-    this.context = new LocalContext(context);
+    this.context = new Context(context);
 
     declarations.forEach(e -> e = (Declaration) e.analyze(this.context));
 

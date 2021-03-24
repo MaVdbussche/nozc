@@ -941,11 +941,11 @@ private Expression nestDecAnonym(): {
         <VARIABLE> { line = token.beginLine; name = token.image; }
         [
           <LPAREN> (<ATOM>|<INT>) { label = token.image; }
-            [<COLON> <VARIABLE> { var = new Variable(token.beginLine, token.image); }]
+            [<COLON> <VARIABLE> { var = new Variable(token.beginLine, token.image, true); }]
             { map.put(label, var); } //var will be null most of the time
           ( LOOKAHEAD( <COMMA> (<ATOM>|<INT>) )
             <COMMA> (<ATOM>|<INT>) { label = token.image; var = null; } //reset the previous values !
-            [<COLON> <VARIABLE> { var = new Variable(token.beginLine, token.image); }]
+            [<COLON> <VARIABLE> { var = new Variable(token.beginLine, token.image, true); }]
             { map.put(label, var); } //var will be null most of the time
           )*
         ]
@@ -981,7 +981,7 @@ private Expression nestDecAnonym(): {
         ]
         <VARIABLE>
         { line = (line!=0 ? line : token.beginLine);
-          var = new Variable(token.beginLine, token.image); }
+          var = new Variable(token.beginLine, token.image, false); }
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
@@ -1014,7 +1014,7 @@ private Expression nestDecAnonym(): {
           LOOKAHEAD( <DEF> methHead() )
           <DEF> { line = token.beginLine; }
           aMethodHead = methHead()
-          [<ASSIGN> <VARIABLE> { name = new Variable(line, token.image); }]
+          [<ASSIGN> <VARIABLE> { name = new Variable(line, token.image, true); }]
           ( LOOKAHEAD( inExpression() )
             expression = inExpression()
           |
@@ -1445,7 +1445,7 @@ private Expression postfixExpression(): {
  * Parse a primary expression.
  *
  * <pre>
- *   primary ::= {LNOT} variable | int | float | character | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
+ *   primary ::= variable | int | float | character | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
  *             | variable DOT variable [LPAREN [expression {COMMA expression}] RPAREN]
  *             | variable DOT expression
  *             | THIS DOT variable LPAREN [expression {COMMA expression}] RPAREN
@@ -1466,17 +1466,17 @@ private Expression primary(): {
 }
 {
     try {
-        <UNIT> { out = new Literal(token.beginLine, Type.UNIT); }
-        | <TRUE> { out = new Literal(token.beginLine, Type.BOOLEAN, true); }
-        | <FALSE> { out = new Literal(token.beginLine, Type.BOOLEAN, false); }
-        | <UNDERSCORE> { out = new Literal(token.beginLine, Type.UNDERSCORE); }
-        | <NIL> { out = new Literal(token.beginLine, Type.NIL); }
-        | <INT> { out = new Literal(token.beginLine, Type.INT, token.image); }
-        | <FLOAT> { out = new Literal(token.beginLine, Type.FLOAT, token.image); }
-        | <CHARACTER> { out = new Literal(token.beginLine, Type.CHAR, token.image); }
-        | <STRING> { out = new Literal(token.beginLine, Type.STRING, token.image); }
+        <UNIT> { out = new Literal(token.beginLine, Type.UNIT, false); }
+        | <TRUE> { out = new Literal(token.beginLine, Type.BOOLEAN, true, false); }
+        | <FALSE> { out = new Literal(token.beginLine, Type.BOOLEAN, false, false); }
+        | <UNDERSCORE> { out = new Literal(token.beginLine, Type.UNDERSCORE, false); }
+        | <NIL> { out = new Literal(token.beginLine, Type.NIL, false); }
+        | <INT> { out = new Literal(token.beginLine, Type.INT, token.image, false); }
+        | <FLOAT> { out = new Literal(token.beginLine, Type.FLOAT, token.image, false); }
+        | <CHARACTER> { out = new Literal(token.beginLine, Type.CHAR, token.image, false); }
+        | <STRING> { out = new Literal(token.beginLine, Type.STRING, token.image, false); }
         | LOOKAHEAD( <VARIABLE> <DOT> expression() )
-          <VARIABLE> { variable = new Variable(token.beginLine, token.image);}
+          <VARIABLE> { variable = new Variable(token.beginLine, token.image, false);}
           <DOT> <VARIABLE>
           { name = token.image;
             out = new ExpressionSelectionFeature(line, variable, name); }
@@ -1491,13 +1491,13 @@ private Expression primary(): {
               <RPAREN>
               { out = new ExpressionSelectionMethod(line, variable, name, args); }
           ]
-        | <VARIABLE> { out = new Variable(token.beginLine, token.image); }
+        | <VARIABLE> { out = new Variable(token.beginLine, token.image, false); }
           [
             <DOT> expr = expression()
             { out = new ExpressionSelectionList(line, (Variable) out, expr); }
           ]
         | <THIS> { line = token.beginLine; }
-            <DOT> <VARIABLE> { variable = new Variable(line, token.image);}
+            <DOT> <VARIABLE> { variable = new Variable(line, token.image, false);}
             <LPAREN>
             [
                 arg = expression() { args.add(arg); }
@@ -1511,7 +1511,7 @@ private Expression primary(): {
             [ LOOKAHEAD( <LPAREN> <VARIABLESTRICT> <RPAREN> )
               <LPAREN> <VARIABLESTRICT> { name = token.image; } <RPAREN>
             ]
-            <DOT> <VARIABLE> { variable = new Variable(token.beginLine, token.image);}
+            <DOT> <VARIABLE> { variable = new Variable(token.beginLine, token.image, false);}
             <LPAREN>
             [ LOOKAHEAD( expression() )
                 arg = expression() { args.add(arg); }
@@ -1597,7 +1597,7 @@ private Expression term(): {
           (
             <COMMA> val = expression() { args.add(val); }
           )* <RPAREN>
-          { out = new Call(line, value, args); }
+          { out = new CallFunction(line, value, args); }
         | LOOKAHEAD( <LPAREN> expression() <HASHTAG> expression() )
           <LPAREN> { line = token.beginLine; }
           val = expression() { args.add(val); }
@@ -1635,7 +1635,7 @@ private Expression term(): {
  * Parse a pattern (Used in functions/procedures/methods signatures and match blocks).
  *
  * <pre>
- *   pattern ::= {LNOT} variable | int | float | character | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
+ *   pattern ::= variable | int | float | character | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
  *            | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN
  *            | LPAREN pattern {HASHTAG pattern}+ RPAREN
  *            | LPAREN pattern {COLCOL pattern}+ RPAREN
@@ -1659,20 +1659,17 @@ private Pattern pattern(): {
 }
 {
     try {
-        <UNIT> { out = new Literal(token.beginLine, Type.UNIT); }
-        | <TRUE> { out = new Literal(token.beginLine, Type.BOOLEAN, true); }
-        | <FALSE> { out = new Literal(token.beginLine, Type.BOOLEAN, false); }
-        | <UNDERSCORE> { out = new Literal(token.beginLine, Type.UNDERSCORE); }
-        | <NIL> { out = new Literal(token.beginLine, Type.NIL); }
-        | <INT> { out = new Literal(token.beginLine, Type.INT, token.image); }
-        | <FLOAT> { out = new Literal(token.beginLine, Type.FLOAT, token.image); }
-        | <CHARACTER> { out = new Literal(token.beginLine, Type.CHAR, token.image); }
-        | <STRING> { out = new Literal(token.beginLine, Type.STRING, token.image); }
-        | (
-          <LNOT> {bool = !bool; } //TODO I don't think this "!" is a boolean operator in this case...
-          )*
-          <VARIABLE> { line = token.beginLine; value = token.image;
-          out = new Literal(line, Type.UNKNOWN, value, bool); } //TODO if bool is false, we must ensure type is BOOLEAN
+        <UNIT> { out = new Literal(token.beginLine, Type.UNIT, true); }
+        | <TRUE> { out = new Literal(token.beginLine, Type.BOOLEAN, true, true); }
+        | <FALSE> { out = new Literal(token.beginLine, Type.BOOLEAN, false, true); }
+        | <UNDERSCORE> { out = new Literal(token.beginLine, Type.UNDERSCORE, true); }
+        | <NIL> { out = new Literal(token.beginLine, Type.NIL, true); }
+        | <INT> { out = new Literal(token.beginLine, Type.INT, token.image, true); }
+        | <FLOAT> { out = new Literal(token.beginLine, Type.FLOAT, token.image, true); }
+        | <CHARACTER> { out = new Literal(token.beginLine, Type.CHAR, token.image, true); }
+        | <STRING> { out = new Literal(token.beginLine, Type.STRING, token.image, true); }
+        | <VARIABLE> { line = token.beginLine; value = token.image;
+          out = new Literal(line, Type.UNKNOWN, value, true); }
         | <ATOMLISP> { line = token.beginLine; value = token.image; } //This is a record pattern
           <LPAREN> [
           [ LOOKAHEAD( feature() )
@@ -1817,7 +1814,7 @@ private LoopDeclaration loopDeclaration(): {
 {
     try {
         LOOKAHEAD(<VARIABLE> <IN> expression() <DOTDOT> )
-        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image); }
+        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true); }
           <IN> init = expression()
           <DOTDOT> end = expression()
           [
@@ -1825,7 +1822,7 @@ private LoopDeclaration loopDeclaration(): {
           ]
           {out = new LoopDeclaration(line, var, init, null, step, end); }
         | LOOKAHEAD( <VARIABLE> <IN> expression() <SEMI> )
-          <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image); }
+          <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true); }
           <IN> init = expression()
           <SEMI> step = expression()
           [
@@ -1833,7 +1830,7 @@ private LoopDeclaration loopDeclaration(): {
             { cond=step; step=end; }
           ]
           { out = new LoopDeclaration(line, var, init, cond, step, null); }
-        | <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image); }
+        | <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true); }
           <IN> generator = expression()
           { out = new LoopDeclaration(line, var, generator); }
     }
@@ -1872,9 +1869,9 @@ private Feature feature(): {
  * <pre>
  *   classDescription ::= EXTENDS variableStrict {COMMA variableStrict}+
  *                        | ATTR variable [ASSIGN expression]
- *                        | PROP variable //TODO what are properties ? Maybe it is a constant (as opposed to attributes who are cells)
+ *                        | PROP variable //TODO properties will not be supported in the first release
 
- //TODO add features (they are public attributes if I understand correctly
+ //TODO add features (they are public attributes if I understand correctly) [not for the first release]
  * </pre>
  *
  * @return an AST for a class descriptor.
@@ -1896,14 +1893,14 @@ private ClassDescriptor classDescriptor(): {
           )*
           { out = new ClassDescriptor(line, SubType.EXTENSION, extensions); }
         | <ATTR> { line = token.beginLine; }
-          <VARIABLE> { var = new Variable(line, token.image); }
+          <VARIABLE> { var = new Variable(line, token.image, true); }
           [
             <ASSIGN> expr = expression()
           ]
           { out = new ClassDescriptor(line, SubType.ATTRIBUTE, var, expr); }
         | <PROP> { line = token.beginLine; }
           <VARIABLE>
-          { var = new Variable(line, token.image);
+          { var = new Variable(line, token.image, true);
             out = new ClassDescriptor(line, SubType.PROPERTY, var, null); }
     } catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);

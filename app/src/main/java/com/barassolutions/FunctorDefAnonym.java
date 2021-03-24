@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class FunctorDefAnonym extends DeclarationAnonym {
 
-  private final String name;
+  private String name;
 
   /**
    * Elements imported by this functor.
@@ -45,6 +45,10 @@ public class FunctorDefAnonym extends DeclarationAnonym {
 
   public InStatementFunctor statement() {
     return statement;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   @Override

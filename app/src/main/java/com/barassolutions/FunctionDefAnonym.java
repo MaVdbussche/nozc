@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class FunctionDefAnonym extends DeclarationAnonym {
 
-  private final String name;
+  private String name;
 
   /**
    * The arguments of this procedure.
@@ -42,6 +42,10 @@ public class FunctionDefAnonym extends DeclarationAnonym {
 
   public boolean lazy() {
     return lazy;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   @Override

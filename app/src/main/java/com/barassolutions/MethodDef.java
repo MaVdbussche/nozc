@@ -19,6 +19,10 @@ public class MethodDef extends Declaration implements ClassElement {
 
   private final boolean isAFunction;
 
+  /** Only makes sense if this is a function, of course. */
+  @Nullable
+  private Type returnType;
+
   public MethodDef(int line, MethodHead head, @Nullable Variable name,
       @Nullable InExpression expression, @Nullable InStatement statement) {
     super(line);
@@ -40,6 +44,18 @@ public class MethodDef extends Declaration implements ClassElement {
     return head.name();
   }
 
+  public int nbArgs() {
+    return head.args().size();
+  }
+
+  public boolean isAFunction() {
+    return isAFunction;
+  }
+
+  public Type returnType() {
+    return returnType;
+  }
+
   @Override
   public AST analyze(Context context) {
     MethodContext methContext = new MethodContext(context);
@@ -57,11 +73,13 @@ public class MethodDef extends Declaration implements ClassElement {
       methContext.addArgument(a);
     });
 
-    if (statement != null) {
+    if (statement != null && !isAFunction) {
       statement = (InStatement) statement
           .analyze(methContext);
-    } else if (expression != null) {
+    } else if (expression != null && isAFunction) {
       expression = (InExpression) expression.analyze(methContext);
+      returnType = expression.type();
+      methContext.setReturnType(returnType);
     }
 
     return this;

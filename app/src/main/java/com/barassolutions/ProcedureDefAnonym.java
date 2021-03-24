@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ProcedureDefAnonym extends DeclarationAnonym {
 
-  private final String name;
+  private String name;
 
   /**
    * The arguments of this procedure.
@@ -35,6 +35,10 @@ public class ProcedureDefAnonym extends DeclarationAnonym {
 
   public InStatement statement() {
     return statement;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   @Override

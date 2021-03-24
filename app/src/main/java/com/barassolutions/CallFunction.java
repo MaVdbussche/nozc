@@ -2,7 +2,8 @@ package com.barassolutions;
 
 import java.util.ArrayList;
 
-public class CallFunction extends Expression {
+public class CallFunction extends
+    Expression { //TODO make sure Call, CallFunction & CallProcedure match
 
   /**
    * The name of the function being called
@@ -31,19 +32,18 @@ public class CallFunction extends Expression {
   //TODO we are always static here, method calls on object are in another class
   @Override
   public Expression analyze(Context context) {
-    // Analyzing the arguments
-    args.forEach(a -> a = (Expression) a.analyze(context));
-
-    //Find appropriate method in the context, given the name and the nb of arguments.
+    //Find appropriate function in the context, given the name and the nb of arguments.
     //We could check the type to allow overloading, but Oz does not allow so. Instead, it will produce an error at runtime
     FunctionDef method = context.functionFor(name, args.size());
     if (method == null) {
       interStatement.reportSemanticError(line(),
-          "Could not find function for: <name:"+name+" args:"+args.size()+">");
-      this.type = Type.ANY;
+          "Could not find function for: <name:" + name + " args:" + args.size() + ">");
     } else {
       this.type = method.returnType();
     }
+
+    // Analyzing the arguments
+    args.forEach(a -> a = (Expression) a.analyze(context));
 
     return this;
   }

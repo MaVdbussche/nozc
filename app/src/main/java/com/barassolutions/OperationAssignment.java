@@ -16,8 +16,14 @@ public class OperationAssignment extends Expression {
     super(line);
     this.lhs = (Variable) lhs; //TODO cast probably won't work
     this.rhs = rhs;
-    if (rhs instanceof FunctorDefAnonym || rhs instanceof ClassDefAnonym || rhs instanceof FunctionDefAnonym || rhs instanceof ProcedureDefAnonym) {
-      rhs.name = this.lhs.name(); //Store the name of anonym definitions in them directly
+    if (rhs instanceof FunctorDefAnonym fda) {
+      fda.setName(this.lhs.name());
+    } else if (rhs instanceof ClassDefAnonym cda) {
+      cda.setName(this.lhs.name());
+    } else if (rhs instanceof FunctionDefAnonym fda) {
+      fda.setName(this.lhs.name());
+    } else if (rhs instanceof ProcedureDefAnonym pda) {
+      pda.setName(this.lhs.name()); //Store the name of anonym definitions in them directly
     }
   }
 

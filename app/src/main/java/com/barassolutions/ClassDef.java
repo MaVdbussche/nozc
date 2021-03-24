@@ -3,7 +3,7 @@ package com.barassolutions;
 import com.barassolutions.ClassDescriptor.SubType;
 import java.util.ArrayList;
 
-public class ClassDef extends Declaration {
+public class ClassDef extends Declaration { //TODO make sure this follows new format (see FunctionDef & ProcedureDef & FunctorDef & MethodDef)
 
   private final String className;
 

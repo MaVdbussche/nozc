@@ -11,7 +11,7 @@ package com.barassolutions;
 public abstract class Expression extends Statement {
 
   /** Expression type. */
-  protected Type type;
+  public Type type;
 
   /** Whether or not this expression is a statement. */
   protected boolean isStatementExpression;

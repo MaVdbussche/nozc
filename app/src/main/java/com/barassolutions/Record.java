@@ -3,19 +3,23 @@ package com.barassolutions;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Record extends Term {
+public class Record extends Pattern {
 
   private final String name;
 
-  private final Map<Feature, Expression> members;
+  private Map<Feature, Expression> members;
+  private Map<Feature, Pattern> patterns;
 
   private final boolean hasMoreFeatures;
 
-  public Record(int line, String name, Map<Feature, Pattern> map, boolean hasMore, boolean patterns) {
+  private final boolean usedAsPattern; //TODO use this
+
+  public Record(int line, String name, Map<Feature, Pattern> map, boolean hasMore, boolean isAPattern) {
     super(line);
     this.name = name;
-    this.members = new HashMap<>(map);
+    this.patterns = map;
     this.hasMoreFeatures = hasMore;
+    this.usedAsPattern = isAPattern;
   }
 
   public Record(int line, String name, Map<Feature, Expression> map, boolean hasMore) {
@@ -23,13 +27,26 @@ public class Record extends Term {
     this.name = name;
     this.members = map;
     this.hasMoreFeatures = hasMore;
+    this.usedAsPattern = false;
+  }
+
+  public String name() {
+    return name;
   }
 
   @Override
   public Expression analyze(Context context) {
-    //TODO make sure this name does not exist in this context. If it exists in parent context, shadow it.
-
-    members.values().forEach(v -> v = (Expression) v.analyze(context));
+    if(!usedAsPattern) {
+      Record var = context.recordFor(name);
+      if(var==null) {
+        interStatement.reportSemanticError(line(),
+            "Could not find record for: <name:"+name+">");
+      } else {
+        members.values().forEach(v -> v = (Expression) v.analyze(context));
+      }
+    } else {
+      patterns.values().forEach(p -> p = (Pattern) p.analyze(context));
+    }
 
     return this;
   }

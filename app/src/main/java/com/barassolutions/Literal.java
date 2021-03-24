@@ -2,12 +2,14 @@ package com.barassolutions;
 
 import org.jetbrains.annotations.NotNull;
 
-public class Literal extends Term {
+public class Literal extends Pattern {
 
   @NotNull
   private String image = "<image>";
 
-  public Literal(int line, Type type) {
+  private final boolean usedAsPattern;
+
+  public Literal(int line, Type type, boolean isAPattern) {
     super(line);
     this.type = type;
     switch (type) {
@@ -15,24 +17,22 @@ public class Literal extends Term {
       case UNIT -> this.image = TokenOz.UNIT.image();
       case UNDERSCORE -> this.image = TokenOz.UNDERSCORE.image();
     }
+    this.usedAsPattern = isAPattern;
   }
 
-  public Literal(int line, Type type, boolean value) {
+  public Literal(int line, Type type, boolean value, boolean isAPattern) {
     super(line);
+    assert type==Type.BOOLEAN;
     this.type = type;
     this.image = String.valueOf(value);
+    this.usedAsPattern = isAPattern;
   }
 
-  public Literal(int line, Type type, @NotNull String image) {
+  public Literal(int line, Type type, @NotNull String image, boolean isAPattern) {
     super(line);
     this.type = type;
     this.image = image;
-  }
-
-  public Literal(int line, Type type, @NotNull String image, boolean bool) {
-    super(line);
-    this.type = type;
-    this.image = image;
+    this.usedAsPattern = isAPattern;
   }
 
   public String image() {

@@ -4,21 +4,30 @@ import java.util.ArrayList;
 
 public class Tuple extends Pattern {
 
-  private final ArrayList<Expression> args;
+  private ArrayList<Expression> args;
+  private ArrayList<Pattern> patterns;
 
-  public Tuple(int line, ArrayList<Pattern> expressions, boolean patterns) {
+  private final boolean usedAsPattern;
+
+  public Tuple(int line, ArrayList<Pattern> patterns, boolean isAPattern) {
     super(line);
-    this.args = new ArrayList<>(expressions);
+    this.patterns = patterns;
+    this.usedAsPattern = isAPattern;
   }
 
   public Tuple(int line, ArrayList<Expression> expressions) {
     super(line);
     this.args = expressions;
+    this.usedAsPattern = false;
   }
 
   @Override
   public Expression analyze(Context context) {
-    args.forEach(p -> p = (Expression) p.analyze(context));
+    if(!usedAsPattern) {
+      args.forEach(a -> a = (Expression) a.analyze(context));
+    } else {
+      patterns.forEach(p -> p = (Pattern) p.analyze(context));
+    }
 
     return this;
   }

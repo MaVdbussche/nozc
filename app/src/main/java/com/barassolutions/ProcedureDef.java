@@ -34,6 +34,10 @@ public class ProcedureDef extends Declaration {
     return name;
   }
 
+  public int nbArgs() {
+    return args.size();
+  }
+
   @Override
   public AST analyze(Context context) {
     MethodContext methContext = new MethodContext(context);

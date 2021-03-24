@@ -5,17 +5,17 @@ import java.util.ArrayList;
 public class FunctionDef extends Declaration {
 
   /**
-   * The procedure's name.
+   * The function's name.
    */
   private final String name;
 
   /**
-   * The arguments of this procedure.
+   * The arguments of this function.
    */
   private final ArrayList<Pattern> args;
 
   /**
-   * The expression constituting the procedure's body.
+   * The expression constituting the function's body.
    */
   private InExpression expression;
 
@@ -44,6 +44,9 @@ public class FunctionDef extends Declaration {
     return name;
   }
 
+  public int nbArgs() {
+    return args.size();
+  }
 
   @Override
   public AST analyze(Context context) {
@@ -57,7 +60,7 @@ public class FunctionDef extends Declaration {
 
     expression = (InExpression) expression.analyze(methContext);
 
-    returnType = this.expression.type();
+    returnType = expression.type();
     methContext.setReturnType(returnType);
     return this;
   }

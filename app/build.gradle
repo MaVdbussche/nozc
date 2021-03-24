@@ -4,11 +4,12 @@ plugins {
 }
 
 compileJava {
-    options.release = 15
+    it.options.release = 15
+    it.options.compilerArgs.add('--enable-preview')
 }
 
 compileTestJava {
-    options.release = 15
+    it.options.release = 15
 }
 
 java {

@@ -1,6 +1,6 @@
 package com.barassolutions;
 
-public class Variable extends Expression implements Lhs {
+public class Variable extends Pattern implements Lhs {
 
   private final String name;
 
@@ -8,14 +8,17 @@ public class Variable extends Expression implements Lhs {
 
   private boolean isAssigned;
 
-  public Variable(int line, String name) {
-    this(line, name, true);
+  private final boolean usedAsPattern;
+
+  public Variable(int line, String name, boolean isAPattern) {
+    this(line, name, true, isAPattern);
   }
 
-  public Variable(int line, String name, boolean constant) {
+  public Variable(int line, String name, boolean constant, boolean isAPattern) {
     super(line);
     this.name = name;
     this.constant = constant;
+    this.usedAsPattern = isAPattern;
   }
 
   /**
@@ -101,8 +104,17 @@ public class Variable extends Expression implements Lhs {
 
   @Override
   public Expression analyze(Context context) {
-    //TODO resolve name in context, then "shadow" it if necessary
-    return null;
+    if(!usedAsPattern) {
+      Variable var = context.variableFor(this.name);
+      if(var==null) {
+        interStatement.reportSemanticError(line(),
+            "Could not find variable for: <name:"+name+">");
+      }
+    } else {
+      //Nothing to do here (it is added to the method context in MethodDef#analyze())
+    }
+
+    return this;
   }
 
   /**

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ClassDefAnonym extends DeclarationAnonym {
 
-  private final String name;
+  private String name;
 
   private final ArrayList<ClassDescriptor> descriptors;
 
@@ -23,6 +23,10 @@ public class ClassDefAnonym extends DeclarationAnonym {
 
   public String name() {
     return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   @Override

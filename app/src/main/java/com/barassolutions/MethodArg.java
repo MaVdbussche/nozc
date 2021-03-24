@@ -2,7 +2,7 @@ package com.barassolutions;
 
 import org.jetbrains.annotations.Nullable;
 
-public class MethodArg {
+public class MethodArg extends Pattern {
 
   @Nullable
   private Feature feature;
@@ -14,6 +14,7 @@ public class MethodArg {
 
   public MethodArg(int line, @Nullable Feature feature, String name,
       @Nullable Expression defaultValue) {
+    super(line);
     this.feature = feature;
     this.name = name;
     this.defaultValue = defaultValue;

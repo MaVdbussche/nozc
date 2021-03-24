@@ -40,9 +40,6 @@ public class RaiseStructure extends Statement {
     output.newLine();
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<RaiseStatement line=\"%d\">\n", line());

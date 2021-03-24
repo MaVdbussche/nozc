@@ -66,9 +66,6 @@ public class ReturnStatement extends Statement {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     if (expr != null) {

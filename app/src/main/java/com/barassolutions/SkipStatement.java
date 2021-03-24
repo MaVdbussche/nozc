@@ -17,24 +17,14 @@ public class SkipStatement extends Statement {
     super(line);
   }
 
-  /**
-   * @inheritDoc
-   */
   public AST analyze(Context context) {
     // Nothing to do.
     return this;
   }
 
-  /**
-   * @inheritDoc
-   */
   public void codegen(Emitter output) {
     // Nothing to do.
   }
-
-  /**
-   * @inheritDoc
-   */
 
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<SkipStatement line=\"%d\"/>\n", line());

@@ -45,9 +45,6 @@ public class RaiseExpression extends Expression {
     output.newLine();
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<RaiseStatement(expression) line=\"%d\">\n", line());

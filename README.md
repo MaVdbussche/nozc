@@ -4,3 +4,6 @@ A newOz to Oz compiler developed in the context of my master thesis.
 
 Heavily inspired by the works of Bill Campbell, Swami Iyer and Bahar Akbal-Delibas on the j-- compiler.
 Their work is published under the GPL license.
+
+
+You have to run "javacc -static=false newoz.jj" to generate/update JavaCC parser and scanner files

@@ -36,9 +36,6 @@ public class ThreadExpression extends Expression {
     output.token(TokenOz.END);
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<ThreadExpression line=\"%d\">\n", line());

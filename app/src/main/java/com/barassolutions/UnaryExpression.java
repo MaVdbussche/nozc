@@ -29,9 +29,6 @@ public abstract class UnaryExpression extends Expression {
     this.arg = arg;
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<UnaryExpression line=\"%d\" type=\"%s\" operator=\"%s\">\n", line(), ((type == null) ? "" : type

@@ -72,9 +72,6 @@ public class ConditionalExpression extends Expression {
     //TODO
   }
 
-  /**
-   * @inheritDoc
-   */
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<IfExpression line=\"%d\">\n", line());
     p.indentRight();

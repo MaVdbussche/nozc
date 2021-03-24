@@ -67,9 +67,6 @@ public class InStatement extends Statement {
     statements.forEach(e -> e.codegen(output));
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<StatementBlock line=\"%d\">\n", line());

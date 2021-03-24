@@ -113,9 +113,6 @@ public class CaseExpressionClause extends Expression {
     output.newLine();
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<CaseStatementClause line=\"%d\">\n", line());

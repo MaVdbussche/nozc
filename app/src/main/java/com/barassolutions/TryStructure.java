@@ -70,9 +70,6 @@ public class TryStructure extends Statement {
     output.token(TokenOz.END);
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<TryStatement line=\"%d\">\n", line());

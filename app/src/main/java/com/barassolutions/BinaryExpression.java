@@ -34,9 +34,6 @@ public abstract class BinaryExpression extends Expression {
     this.rhs = rhs;
   }
 
-  /**
-   * @inheritDoc
-   */
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<BinaryExpression line=\"%d\" type=\"%s\" "
             + "operator=\"%s\">\n", line(), ((type == null) ? "" : type.toString()),

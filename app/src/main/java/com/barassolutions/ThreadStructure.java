@@ -36,9 +36,6 @@ public class ThreadStructure extends Statement {
     output.token(TokenOz.END);
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<ThreadStatement line=\"%d\">\n", line());

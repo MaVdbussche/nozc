@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * In Oz, loops have the following form :
  * <code>
- * for <it>Declarations</it> do ... end
+ * for <i>Declarations</i> do ... end
  * </code>
  * where Declarations is a sequence of 0 or more iterator and feature declarations. An iterator has
  * the form: <code>Pat in Generator</code> where Generator describes how to generate the successive
@@ -73,9 +73,6 @@ public class LoopStructure extends Statement {
     output.newLine();
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<LoopStatement line=\"%d\">\n", line());

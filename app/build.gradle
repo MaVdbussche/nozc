@@ -3,18 +3,30 @@ plugins {
     id 'java-library'
 }
 
-compileJava {
-    it.options.release = 15
-    it.options.compilerArgs.add('--enable-preview')
-}
-
-compileTestJava {
-    it.options.release = 15
-}
-
 java {
-    withJavadocJar()
+    //withJavadocJar()
     withSourcesJar()
+}
+
+tasks.withType(JavaCompile).all {
+    options.compilerArgs += ['--enable-preview']
+    options.release = 15
+}
+tasks.withType(JavaExec) {
+    jvmArgs += '--enable-preview'
+}
+tasks.withType(Test) {
+    jvmArgs += '--enable-preview'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.barassolutions.Nozc'
+    }
+}
+javadoc.options {
+    addBooleanOption('-enable-preview', true)
+    addStringOption('-release', '15')
 }
 
 group 'com.barassolutions'

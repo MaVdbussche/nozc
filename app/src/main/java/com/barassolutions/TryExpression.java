@@ -70,9 +70,6 @@ public class TryExpression extends Expression {
     output.token(TokenOz.END);
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<TryExpression line=\"%d\">\n", line());

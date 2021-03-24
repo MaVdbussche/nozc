@@ -114,10 +114,6 @@ public class InterStatement extends AST {
     }
   }
 
-
-  /**
-   * @inheritDoc
-   */
   public void writeToStdOut(PrettyPrinter printer) {
     //TODO
   }

@@ -69,9 +69,6 @@ public class CaseStructExpression extends Expression {
     output.newLine();
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<CaseExpression line=\"%d\">\n", line());

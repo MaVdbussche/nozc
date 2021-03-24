@@ -76,9 +76,6 @@ public class ConditionalStruct extends Statement {
     //TODO
   }
 
-  /**
-   * @inheritDoc
-   */
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<IfStatement line=\"%d\">\n", line());
     p.indentRight();

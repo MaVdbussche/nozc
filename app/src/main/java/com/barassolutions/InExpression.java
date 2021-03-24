@@ -89,9 +89,6 @@ public class InExpression extends Expression {
     }
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<ExpressionBlock line=\"%d\">\n", line());

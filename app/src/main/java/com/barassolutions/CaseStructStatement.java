@@ -68,9 +68,6 @@ public class CaseStructStatement extends Statement {
     output.newLine();
   }
 
-  /**
-   * @inheritDoc
-   */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<CaseStatement line=\"%d\">\n", line());

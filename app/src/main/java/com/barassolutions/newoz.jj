@@ -56,7 +56,7 @@ class JavaCCParser {
      * @param e exception that is raised by JavaCC in the event
      * of a parser error.
      */
-    private static void recoverFromError(int[] skipTo, ParseException e) {
+    private void recoverFromError(int[] skipTo, ParseException e) {
         // Get the possible expected tokens
         StringBuffer expected = new StringBuffer();
         for (int i = 0; i < e.expectedTokenSequences.length; i++) {
@@ -311,7 +311,7 @@ TOKEN:
  *
  * @return an AST for an interStatement.
  */
-public InterStatement interStatement(): {
+InterStatement interStatement(): {
     int line = 0;
     InStatement statement = null;
     Statement aStatement = null;

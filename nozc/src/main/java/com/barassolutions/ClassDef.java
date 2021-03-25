@@ -2,39 +2,61 @@ package com.barassolutions;
 
 import com.barassolutions.ClassDescriptor.SubType;
 import java.util.ArrayList;
-import org.jetbrains.annotations.Nullable;
 
-public class ClassDefAnonym extends DeclarationAnonym {
+public class ClassDef extends Declaration {
 
-  private String name;
+  /**
+   * The class' name.
+   */
+  private final String className;
 
+  /**
+   * The descriptors of this class.
+   */
   private final ArrayList<ClassDescriptor> descriptors;
 
+  /**
+   * The methods defined in this class.
+   */
   private final ArrayList<MethodDef> methods;
 
-  public ClassDefAnonym(int line, ArrayList<ClassDescriptor> descriptors,
-      ArrayList<MethodDef> methods, @Nullable String name) {
+  public ClassDef(int line, String name, ArrayList<ClassDescriptor> descriptors,
+      ArrayList<MethodDef> methods) {
     super(line);
+    this.className = name;
     Utils.sortDescriptors(descriptors);
     this.descriptors = descriptors;
     this.methods = methods;
-    this.name = name;
+  }
+
+  public ClassDef(ClassDefAnonym c) {
+    this(c.line(), c.name(), c.descriptors(), c.methods());
   }
 
   public String name() {
-    return name;
+    return className;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public ArrayList<String> superClassesNames() {
+    ArrayList<String> out = new ArrayList<>();
+    descriptors.forEach(d -> out.addAll(d.extendedClasses()));
+    return out;
   }
 
   @Override
-  public Expression analyze(Context context) {
-    ClassContext classContext = new ClassContext(context, "name"); //TODO Need name from lhs
+  public AST analyze(Context context) {
+    ClassContext classContext = new ClassContext(context, className);
+    context.addClass(this, classContext);
 
-    descriptors.forEach(d -> d = (ClassDescriptor) d.analyze(classContext));
-    //TODO check we only have 1 EXTENSION descriptor
+    // Stream are fun ! (maybe not for the next reader...)
+    int extensionsFound = (int) descriptors.stream()
+        .map(d -> (ClassDescriptor) d.analyze(classContext)) //Analyze each of them
+        .filter(d -> d.type() == SubType.EXTENSION)
+        .count(); //Find the number of extension "statements"
+    if (extensionsFound > 1) {
+      interStatement.reportSemanticError(line(),
+          "Only one class extension is allowed. To use multiple inheritance, separate the classes names with commas instead.");
+    }
 
     methods.forEach(m -> m = (MethodDef) m.analyze(classContext));
 
@@ -45,7 +67,7 @@ public class ClassDefAnonym extends DeclarationAnonym {
   public void codegen(Emitter output) {
     output.token(TokenOz.CLASS);
     output.space();
-    output.token(TokenOz.DOLLAR);
+    output.literal(Utils.ozFriendlyName(className));
     output.space();
     //The following piece of codes relies on the fact that the list is sorted according to
     // the ClassDescriptor.SubType enum.
@@ -63,17 +85,17 @@ public class ClassDefAnonym extends DeclarationAnonym {
         output.space();
         output.literal(descriptor.attribute().name());
       } else if (descriptor.type().equals(SubType.PROPERTY)) {
-        //TODO
+        //TODO not supported in the first release
       } else if (descriptor.type().equals(SubType.FEATURE)) {
         output.token(TokenOz.FEAT);
-        //TODO
+        //TODO not supported in the first release
       }
     }
   }
 
   @Override
   public void writeToStdOut(PrettyPrinter p) {
-    p.printf("<ClassDeclaration line=\"%d\" Anonym>\n", line());
+    p.printf("<ClassDeclaration line=\"%d\" name=\"%s\">\n", line(), className);
     p.indentRight();
     descriptors.forEach(a -> {
       a.writeToStdOut(p);

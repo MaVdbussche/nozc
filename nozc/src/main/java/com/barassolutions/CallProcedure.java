@@ -7,17 +7,12 @@ public class CallProcedure extends Statement {
   /**
    * The name of the procedure being called
    */
-  private String name;
+  private final String name;
 
   /**
    * The arguments to the call.
    */
-  private ArrayList<Expression> args;
-
-  /**
-   * Types of arguments.
-   */
-  private Type[] argTypes;
+  private final ArrayList<Expression> args;
 
   public CallProcedure(int line, String name, ArrayList<Expression> args) {
     super(line);
@@ -33,30 +28,25 @@ public class CallProcedure extends Statement {
    * @param context context in which names are resolved.
    * @return the analyzed (and possibly rewritten) AST subtree.
    */
-  //TODO we are always static here, method calls on object are in another class
   @Override
   public AST analyze(Context context) {
-    // Analyzing the arguments
-    argTypes = new Type[args.size()];
-    for (int i = 0; i < argTypes.length; i++) {
-      args.set(i, (Expression) args.get(i).analyze(context));
-      argTypes[i] = args.get(i).type();
-    }
-
     //Find appropriate method in the context, given the name and the nb of arguments.
     //We could check the type to allow overloading, but Oz does not allow so. Instead, it will produce an error at runtime
-    ProcedureDef method = context.procedureFor(name, argTypes.length);
+    ProcedureDef method = context.procedureFor(name, args.size());
     if (method == null) {
       interStatement.reportSemanticError(line(),
-          "Could not find procedure for: <name:"+name+" args:"+argTypes.length);
+          "Could not find procedure for: <name:" + name + " args:" + args.size() + ">");
     }
     //No return type for procedures
+
+    // Analyzing the arguments
+    args.forEach(a -> a = (Expression) a.analyze(context));
 
     return this;
   }
 
   /**
-   * Perform code generation for a call, given the code emitter.
+   * Perform code generation for a procedure call, given the code emitter.
    *
    * @param output the code emitter (basically an abstraction for producing the .oz file).
    */

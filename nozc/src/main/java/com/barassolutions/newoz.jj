@@ -584,7 +584,7 @@ private Statement nestConStatement(): {
             <ELSE> statement2 = inStatement()
             { consq.add(statement2); }
           ]
-          { out = new ConditionalStruct(line, conds, consq); }
+          { out = new ConditionalStatement(line, conds, consq); }
         | <MATCH> { line = token.beginLine; }
           expression = expression() <LCURLY>
           (

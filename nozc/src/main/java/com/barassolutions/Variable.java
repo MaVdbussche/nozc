@@ -111,7 +111,7 @@ public class Variable extends Pattern implements Lhs {
             "Could not find variable for: <name:"+name+">");
       }
     } else {
-      //Nothing to do here (it is added to the method context in MethodDef#analyze())
+      //Nothing to do here (it is added to the inner context in analyze() mthod of all encapsulating AST nodes, like MethodDef or CaseExpressionClause)
     }
 
     return this;

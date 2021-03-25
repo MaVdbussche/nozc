@@ -9,24 +9,28 @@ java {
 }
 
 tasks.withType(JavaCompile).all {
-    options.compilerArgs += ['--enable-preview']
-    options.release = 15
+    options.warnings=true
+    options.deprecation=true
+    options.debug=true
+    options.incremental=false
+    //options.compilerArgs += ['--enable-preview']
+    //options.release = 16
 }
 tasks.withType(JavaExec) {
-    jvmArgs += '--enable-preview'
+    //jvmArgs += '--enable-preview'
 }
 tasks.withType(Test) {
-    jvmArgs += '--enable-preview'
+    //jvmArgs += '--enable-preview'
 }
 
 jar {
-    manifest {
+    it.manifest {
         attributes 'Main-Class': 'com.barassolutions.Nozc'
     }
 }
 javadoc.options {
-    addBooleanOption('-enable-preview', true)
-    addStringOption('-release', '15')
+    //addBooleanOption('-enable-preview', true)
+    //addStringOption('-release', '16')
 }
 
 group 'com.barassolutions'

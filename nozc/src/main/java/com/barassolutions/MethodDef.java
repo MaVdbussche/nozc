@@ -126,9 +126,7 @@ public class MethodDef extends Declaration implements ClassElement {
         "<MethodDeclaration line=\"%d\" name=\"%s\" alias=\"%s\" function?=\"%b\" procedure?=\"%b\">\n",
         line(), head.name(), aliasName, isAFunction, !isAFunction);
     p.indentRight();
-    head.args().forEach(a -> {
-      a.writeToStdOut(p);
-    });
+    head.args().forEach(a -> a.writeToStdOut(p));
 
     if (statement != null) {
       statement.writeToStdOut(p);

@@ -1,7 +1,6 @@
 package com.barassolutions;
 
-import com.barassolutions.JavaCCParserConstants;
-import com.barassolutions.TokenOz;
+import org.jetbrains.annotations.NotNull;
 
 public enum Operator {
   LAND(JavaCCParserConstants.tokenImage[JavaCCParserConstants.LAND]),
@@ -17,6 +16,7 @@ public enum Operator {
     return this.image;
   }
 
+  @NotNull
   public TokenOz getOzToken() {
     switch (this) {
       case LAND -> {
@@ -31,7 +31,7 @@ public enum Operator {
       case COLCOL -> {
         return TokenOz.COLCOL;
       }
-      default -> {
+      default -> { //Literally can't happen
         return null;
       }
     }

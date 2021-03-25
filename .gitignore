@@ -6,7 +6,7 @@
 .gradle/
 
 # Gradle build output
-app/build/
+nozc/build/
 
 # Latex compilation files
 report/build_latex/

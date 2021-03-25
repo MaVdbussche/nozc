@@ -17,13 +17,13 @@ import picocli.CommandLine.Parameters;
 /* Read the Picocli documentation at https://picocli.info/ */
 //TODO generate specific exit codes for custom exceptions ? https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
 //TODO customize standard help message color scheme ? https://picocli.info/#_configuring_fixed_elements
-@Command(name = "main/java/nozc",
+@Command(name="nozc",//name = "main/java/nozc",
     synopsisHeading = "@|bold,underline Usage:|@%n%n",
     descriptionHeading = "%n@|bold,underline Description:|@%n%n",
     description = "Compiles a NewOz program file, or translate it to a valid equivalent Oz program file.",
     parameterListHeading = "%n@|bold,underline Parameters:|@%n",
     optionListHeading = "%n@|bold,underline Options:|@%n",
-    exitCodeListHeading = "%n@|bold, underline Exit codes:|@%n",
+    exitCodeListHeading = "%n@|bold,underline Exit codes:|@%n",
     exitCodeList = {"0:Successful program execution", "1:something", "24:something bad"},
     mixinStandardHelpOptions = true,
     versionProvider = Nozc.VersionProvider.class,
@@ -40,26 +40,26 @@ public class Nozc implements Callable<Integer> {
       "--no-keep"}, negatable = true, description = "Keep the intermediary Oz files in the output folder. True by default")
   boolean keepOzFiles;
   @Option(names = {"-t",
-      "--tokenize"}, description = "tokenize the NewOz input, print the tokens to STDOUT, and then stop the compilation")
+      "--tokenize"}, description = "Tokenize the NewOz input, print the tokens to STDOUT, and then stop the compilation")
   boolean stopAtTokenizer;
   @Option(names = {"-s",
-      "--scan"}, description = "scan/parse the NewOz input, print the AST to STDOUT, and then stop the compilation")
+      "--scan"}, description = "Scan/parse the NewOz input, print the AST to STDOUT, and then stop the compilation")
   boolean stopAtParser;
   @Option(names = {"-p",
-      "--preAnalyze"}, description = "pre-analyze the NewOz input, print the AST to STDOUT, and then stop the compilation")
+      "--preAnalyze"}, description = "Pre-analyze the NewOz input, print the AST to STDOUT, and then stop the compilation")
   boolean stopAtPreAnalysis;
   @Option(names = {"-a",
-      "--analyze"}, description = "analyze the NewOz input, print the AST to STDOUT, and then stop the compilation")
+      "--analyze"}, description = "Analyze the NewOz input, print the AST to STDOUT, and then stop the compilation")
   boolean stopAtAnalysis;
   @Option(names = {"-v", "--verbose"})
   boolean verbose;
   @Parameters(description = "The .noz file(s) to compile or translate.", paramLabel = "FILE", arity = "1..*")
   private File[] inputFiles;
   @Option(names = {"-o",
-      "--out"}, description = "name of the output file. This option will be ignored if you pass more than one input file.")
+      "--out"}, description = "Name of the output file. This option will be ignored if you pass more than one input file.")
   private File outputFile;
   @Option(names = {"-d",
-      "--directory"}, description = "output directory for compiled and/or translated files, relative to the current folder (default: ${DEFAULT_VALUE})", arity = "1", defaultValue = ".")
+      "--directory"}, description = "Output directory for compiled and/or translated files, relative to the current folder (default: ${DEFAULT_VALUE})", arity = "1", defaultValue = ".")
   private File destDirectory;
 
   private boolean errorHasOccurred;
@@ -70,8 +70,8 @@ public class Nozc implements Callable<Integer> {
     //Ansi ansi = Ansi.AUTO;
 
     CommandLine cmd = new CommandLine(new Nozc())
-        .setOut(out)
-        .setErr(err);
+        .setOut(new PrintWriter(System.out))
+        .setErr(new PrintWriter(System.err));
     //.setColorScheme(Help.defaultColorScheme(ansi));
 
     cmd.printVersionHelp(System.out);
@@ -202,7 +202,7 @@ public class Nozc implements Callable<Integer> {
 
     public String[] getVersion() throws Exception {
 
-      InputStream in = getClass().getClassLoader().getResourceAsStream("../../../resources/app.properties");
+      InputStream in = getClass().getClassLoader().getResourceAsStream("app.properties");
       Properties props = new Properties();
       props.load(in);
       String version = props.get("version").toString();

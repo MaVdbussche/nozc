@@ -12,7 +12,7 @@ public class Record extends Pattern {
 
   private final boolean hasMoreFeatures;
 
-  private final boolean usedAsPattern; //TODO use this
+  private final boolean usedAsPattern;
 
   public Record(int line, String name, Map<Feature, Pattern> map, boolean hasMore, boolean isAPattern) {
     super(line);

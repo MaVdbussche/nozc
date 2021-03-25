@@ -149,7 +149,7 @@ literal ::= UNIT | TRUE | FALSE | UNDERSCORE | NIL | int | float | string | char
 term ::= atom
             | atomLisp LPAREN [[feature COLON]expression {COMMA [feature COLON]expression}] RPAREN
 
-pattern ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL //TODO we can remove character bcs of int representation ?
+pattern ::= {LNOT} variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
             | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN
             | LPAREN pattern {HASHTAG pattern} RPAREN
             | LPAREN pattern {COLCOL pattern} RPAREN

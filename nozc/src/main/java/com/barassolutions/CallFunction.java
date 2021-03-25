@@ -3,7 +3,7 @@ package com.barassolutions;
 import java.util.ArrayList;
 
 public class CallFunction extends
-    Expression { //TODO make sure Call, CallFunction & CallProcedure match
+    Expression {
 
   /**
    * The name of the function being called
@@ -29,7 +29,6 @@ public class CallFunction extends
    * @param context context in which names are resolved.
    * @return the analyzed (and possibly rewritten) AST subtree.
    */
-  //TODO we are always static here, method calls on object are in another class
   @Override
   public Expression analyze(Context context) {
     //Find appropriate function in the context, given the name and the nb of arguments.
@@ -49,7 +48,7 @@ public class CallFunction extends
   }
 
   /**
-   * Perform code generation for a call, given the code emitter.
+   * Perform code generation for a function call, given the code emitter.
    *
    * @param output the code emitter (basically an abstraction for producing the .oz file).
    */

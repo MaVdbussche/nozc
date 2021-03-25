@@ -411,7 +411,7 @@ class JavaCCParser implements JavaCCParserConstants {
             jj_la1[5] = jj_gen;
             ;
           }
-            out = new ConditionalStruct(line, conds, consq);
+            out = new ConditionalStatement(line, conds, consq);
           break;
         case MATCH:
           jj_consume_token(MATCH);

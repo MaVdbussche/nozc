@@ -18,7 +18,7 @@ WHITESPACE ::= (" "|"\t"|"\n"|"\r"|"\f")
 // Comments - ignored
 ("%" {CHAR - ("\n"|"\r")} ("\n"|"\r"["\n"])) | "?"
 
-// Multi-line comments - ignored TODO these comments should be nestable -> wrong definition here
+// Multi-line comments - ignored
 "/*" {CHAR - "*/"} "*/"
 
 // Reserved keywords

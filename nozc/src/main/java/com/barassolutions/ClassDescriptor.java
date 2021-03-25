@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 public class ClassDescriptor extends Declaration implements ClassElement {
 
   public enum SubType {
-    EXTENSION, ATTRIBUTE, PROPERTY, FEATURE //TODO add features in future release
+    EXTENSION, ATTRIBUTE, PROPERTY, FEATURE //TODO add properties & features in future release
   }
 
   private final ArrayList<String> extendedClassesNames;
@@ -33,7 +33,7 @@ public class ClassDescriptor extends Declaration implements ClassElement {
   public ClassDescriptor(int line, SubType type, Variable var, @Nullable Expression expression) {
     super(line);
     assert (type.equals(SubType.ATTRIBUTE) || type.equals(SubType.PROPERTY));
-    this.extendedClassesNames = null;
+    this.extendedClassesNames = new ArrayList<>();
     this.attribute = var;
     if (type.equals(SubType.ATTRIBUTE)) {
       this.defaultValue = expression;
@@ -68,7 +68,11 @@ public class ClassDescriptor extends Declaration implements ClassElement {
     } else if (type.equals(SubType.ATTRIBUTE)) {
       classContext.addAttribute(attribute, defaultValue);
     } else if (type.equals(SubType.PROPERTY)) {
-      //TODO not clear what properties are used for
+      interStatement.reportSemanticError(line(), "Class properties are not supported in this release.");
+      //TODO add properties & features in future release
+    } else if (type.equals(SubType.FEATURE)) {
+      interStatement.reportSemanticError(line(), "Class features are not supported in this release.");
+      //TODO add properties & features in future release
     }
 
     return this;
@@ -92,9 +96,9 @@ public class ClassDescriptor extends Declaration implements ClassElement {
         defaultValue.codegen(output);
       }
     } else if (type.equals(SubType.PROPERTY)) {
-      //TODO
+      //TODO add properties & features in future release
     } else if (type.equals(SubType.FEATURE)) {
-      //TODO
+      //TODO add properties & features in future release
     }
     output.newLine();
   }
@@ -114,8 +118,9 @@ public class ClassDescriptor extends Declaration implements ClassElement {
         }
         p.printf("</AttributeDefinition>\n");
       }
-      case PROPERTY -> {}//TODO
-      case FEATURE -> {} //TODO
+      case PROPERTY, FEATURE -> {
+        //TODO add properties & features in future release
+      }
     }
   }
 }

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 /**
  * The AST node for an if-statement.
  */
-public class ConditionalStruct extends Statement {
+public class ConditionalStatement extends Statement {
 
   /**
    * Test expressions.
@@ -15,7 +15,8 @@ public class ConditionalStruct extends Statement {
   private final ArrayList<Expression> conditions;
 
   /**
-   * Then clauses. There might be one more if there is an "else" clause
+   * Then clauses, ordered to match the conditions above. There might be one more if there is an
+   * "else" clause.
    */
   private final ArrayList<InStatement> consequences;
 
@@ -29,7 +30,7 @@ public class ConditionalStruct extends Statement {
    * @param conditions test expressions.
    * @param thenPart   then clauses.
    */
-  public ConditionalStruct(int line, ArrayList<Expression> conditions,
+  public ConditionalStatement(int line, ArrayList<Expression> conditions,
       ArrayList<InStatement> thenPart) {
     super(line);
     if (conditions.size() == thenPart.size()) {
@@ -37,7 +38,7 @@ public class ConditionalStruct extends Statement {
     } else if (conditions.size() - 1 == thenPart.size()) {
       elsePart = true;
     } else {
-      //TODO error
+      interStatement.reportSemanticError(line(), "Ill-formed conditional block.");
     }
     this.conditions = conditions;
     this.consequences = thenPart;
@@ -53,7 +54,7 @@ public class ConditionalStruct extends Statement {
   @Override
   public Statement analyze(Context context) {
     conditions.forEach(c -> {
-          c = (Expression) c.analyze(context);
+          c = c.analyze(context);
           c.type().mustMatchExpected(line(), Type.BOOLEAN);
         }
     );
@@ -68,12 +69,32 @@ public class ConditionalStruct extends Statement {
    */
   public void codegen(Emitter output) {
     for (int i = 0; i < consequences.size(); i++) {
-      //generate IF, expression, THEN, statement, ELSE if necessary
-      if (i == consequences.size() - 1) {
-        //last one is an ELSE alone
+      output.token(TokenOz.IF);
+      output.space();
+      output.token(TokenOz.LPAREN);
+      conditions.get(i).codegen(output);
+      output.token(TokenOz.RPAREN);
+      output.space();
+      output.token(TokenOz.THEN);
+      output.newLine();
+      output.indentRight();
+      consequences.get(i).codegen(output);
+      output.newLine();
+      output.indentLeft();
+      if (i != consequences.size() - 1) { //Next i is an "else if"
+        output.token(TokenOz.ELSE);
+      } else if (elsePart && (i == consequences.size() - 1)) { // Next i is an "else"
+        output.token(TokenOz.ELSE);
+        output.newLine();
+        output.indentRight();
+        consequences.get(i).codegen(output);
+        output.newLine();
+        output.indentLeft();
+        output.token(TokenOz.END);
+      } else if (i == consequences.size()-1) { //We are done
+        output.token(TokenOz.END);
       }
     }
-    //TODO
   }
 
   public void writeToStdOut(PrettyPrinter p) {

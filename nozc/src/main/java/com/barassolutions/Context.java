@@ -10,10 +10,11 @@ public class Context {
 
   private final Context parent;
 
-  private final ArrayList<Pattern> definedVars = new ArrayList<>();
-  private final Map<FunctionDef, MethodContext> definedFunctions = new HashMap<>();
-  private final Map<ProcedureDef, MethodContext> definedProcedures = new HashMap<>();
-  private final Map<FunctorDef, FunctorContext> definedFunctors = new HashMap<>();
+  protected final ArrayList<Pattern> definedVars = new ArrayList<>();
+  protected final Map<FunctionDef, MethodContext> definedFunctions = new HashMap<>();
+  protected final Map<ProcedureDef, MethodContext> definedProcedures = new HashMap<>();
+  protected final Map<FunctorDef, FunctorContext> definedFunctors = new HashMap<>();
+  protected final Map<ClassDef, ClassContext> definedClasses = new HashMap<>();
 
   public Context(Context parent) {
     this.parent = parent;
@@ -21,10 +22,10 @@ public class Context {
 
   public boolean addVariable(Pattern p) {
     boolean notExistsHere;
-    if (p instanceof Variable) { //Waiting for Java 16's pattern-matching ...
-      notExistsHere = this.ensureNotExistsHere(((Variable) p).line(), ((Variable) p).name());
-    } else if (p instanceof Record) { //Waiting for Java 16's pattern-matching ...
-      notExistsHere = this.ensureNotExistsHere(((Record) p).line(), ((Record) p).name());
+    if (p instanceof Variable v) {
+      notExistsHere = this.ensureNotExistsHere(v.line(), v.name());
+    } else if (p instanceof Record r) {
+      notExistsHere = this.ensureNotExistsHere(r.line(), r.name());
     } else {
       notExistsHere = true;
     }
@@ -66,11 +67,21 @@ public class Context {
     }
   }
 
+  public boolean addClass(ClassDef f, ClassContext c) {
+    boolean notExistsHere = this.ensureNotExistsHere(f.line(), f.name());
+    if (notExistsHere) {
+      this.definedClasses.put(f, c);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   /**
    * Look for a variable respecting the passed name characteristic, in this or any of the parent
    * contexts.
    *
-   * @param name   Name of the variable to look for
+   * @param name Name of the variable to look for
    * @return the Variable if found, or null if no matching variable exists
    */
   public Variable variableFor(String name) {
@@ -92,7 +103,7 @@ public class Context {
    * Look for a variable respecting the passed name characteristic, in this or any of the parent
    * contexts.
    *
-   * @param name   Name of the variable to look for
+   * @param name Name of the variable to look for
    * @return the Variable if found, or null if no matching variable exists
    */
   public Record recordFor(String name) {
@@ -165,8 +176,8 @@ public class Context {
   }
 
   public MethodContext findMethodContext() {
-    if (this instanceof MethodContext) {
-      return (MethodContext) this; //Waiting for Java 16's pattern-matching ...
+    if (this instanceof MethodContext m) {
+      return m;
     } else if (parent == null) {
       return null;
     } else {
@@ -175,8 +186,8 @@ public class Context {
   }
 
   public ClassContext findClassContext() {
-    if (this instanceof ClassContext) {
-      return (ClassContext) this; //Waiting for Java 16's pattern-matching ...
+    if (this instanceof ClassContext c) {
+      return c;
     } else if (parent == null) {
       return null;
     } else {
@@ -185,8 +196,7 @@ public class Context {
   }
 
   public ClassContext findClassContext(String className) {
-    if (this instanceof ClassContext && ((ClassContext) this).name
-        .equals(className)) { //Waiting for Java 16's pattern-matching ...
+    if (this instanceof ClassContext c && c.name.equals(className)) {
       return (ClassContext) this;
     } else if (parent == null) {
       return null;
@@ -196,72 +206,11 @@ public class Context {
   }
 
   /**
-   * Displays an error if the passed name is not present in this context, or any of its parents'
-   * contexts.
-   *
-   * @return true if the name is not present in this context or any parent, false otherwise.
-   */
-  @Deprecated
-  public boolean ensureExists(int line, String name) {
-    if (definedVars.stream().noneMatch(e -> {
-      if (e instanceof Variable v) {
-        return v.name().equals(name);
-      } else if (e instanceof Record r) {
-        return r.name().equals(name);
-      } else {
-        return false; //Not applicable for name search
-      }
-    })
-        && definedFunctions.keySet().stream().noneMatch(e -> e.name().equals(name))
-        && definedProcedures.keySet().stream().noneMatch(e -> e.name().equals(name))
-        && definedFunctors.keySet().stream().noneMatch(e -> e.name().equals(name))) {
-      if (parent == null) {
-        AST.interStatement
-            .reportSemanticError(line, "Name \"" + name
-                + "\" does not exist in this context, nor any of its parent contexts.");
-        return true;
-      } else {
-        return parent.ensureExists(line, name);
-      }
-    } else {
-      return false;
-    }
-  }
-
-  /**
    * Displays an error if the passed name is NOT present in this particular context.
    *
-   * @return true if the name is not present in this particular context, false otherwise.
+   * @return true if the name IS present in this particular context, false otherwise.
    */
   public boolean ensureExistsHere(int line, String name) {
-    if (definedVars.stream().noneMatch(e -> {
-      if (e instanceof Variable v) {
-        return v.name().equals(name);
-      } else if (e instanceof Record r) {
-        return r.name().equals(name);
-      } else {
-        return false; //Not applicable for name search
-      }
-    })
-        && definedFunctions.keySet().stream().noneMatch(e -> e.name().equals(name))
-        && definedProcedures.keySet().stream().noneMatch(e -> e.name().equals(name))
-        && definedFunctors.keySet().stream().noneMatch(e -> e.name().equals(name))) {
-      AST.interStatement
-          .reportSemanticError(line, "Name \"" + name + "\" does not exist in this context.");
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * Displays an error if the passed name is present in this context, or any of its parents'
-   * contexts.
-   *
-   * @return true if the name is not present in this context or any parent, false otherwise.
-   */
-  @Deprecated
-  public boolean ensureNotExists(int line, String name) {
     if (definedVars.stream().anyMatch(e -> {
       if (e instanceof Variable v) {
         return v.name().equals(name);
@@ -273,24 +222,20 @@ public class Context {
     })
         || definedFunctions.keySet().stream().anyMatch(e -> e.name().equals(name))
         || definedProcedures.keySet().stream().anyMatch(e -> e.name().equals(name))
-        || definedFunctors.keySet().stream().anyMatch(e -> e.name().equals(name))) {
-      AST.interStatement
-          .reportSemanticError(line, "Name \"" + name
-              + "\" is already defined in this context. This definition will be skipped.");
-      return false;
+        || definedFunctors.keySet().stream().anyMatch(e -> e.name().equals(name))
+        || definedClasses.keySet().stream().anyMatch(e -> e.name().equals(name))) {
+      return true;
     } else {
-      if (parent != null) {
-        return parent.ensureNotExists(line, name);
-      } else {
-        return true;
-      }
+      AST.interStatement
+          .reportSemanticError(line, "Name \"" + name + "\" does not exist in this context.");
+      return false;
     }
   }
 
   /**
-   * Displays an error if the passed name is present in this particular context.
+   * Displays an error if the passed name IS present in this particular context.
    *
-   * @return true if the name is not present in this particular context, false otherwise.
+   * @return true if the name is NOT present in this particular context, false otherwise.
    */
   public boolean ensureNotExistsHere(int line, String name) {
     if (definedVars.stream().anyMatch(e -> {
@@ -304,7 +249,8 @@ public class Context {
     })
         || definedFunctions.keySet().stream().anyMatch(e -> e.name().equals(name))
         || definedProcedures.keySet().stream().anyMatch(e -> e.name().equals(name))
-        || definedFunctors.keySet().stream().anyMatch(e -> e.name().equals(name))) {
+        || definedFunctors.keySet().stream().anyMatch(e -> e.name().equals(name))
+        || definedClasses.keySet().stream().anyMatch(e -> e.name().equals(name))) {
       AST.interStatement
           .reportSemanticError(line, "Name \"" + name
               + "\" is already defined in this context. This definition will be skipped.");
@@ -320,8 +266,7 @@ public class Context {
 }
 
 class GlobalContext extends Context {
-  //TODO hold a store of all know Oz functions/procs
-  //TODO creat constructor with parent as arg (always null here)
+  //TODO store all know Oz functions/procs/etc. in lists present in Context
 
   public GlobalContext() {
     super(null);
@@ -353,7 +298,6 @@ class MethodContext extends Context {
 }
 
 class ClassContext extends Context {
-  //TODO creat constructor with parent as arg
 
   private final Map<MethodDef, MethodContext> definedMethods = new HashMap<>();
   public String name;
@@ -380,7 +324,10 @@ class ClassContext extends Context {
   }
 
   /**
-   * Look for a method respecting the passed characteristics, in this specific class's context.
+   * Look for a method respecting the passed characteristics, in this specific class's context. The
+   * reason we don't search "up" recursively is because the usage of super() requires the user to
+   * specify the superclass. This allows analyze() methods to call this method on the exact class
+   * right away.
    *
    * @param name   Name of the method to look for
    * @param nbArgs Number of arguments of the method to look for
@@ -404,11 +351,36 @@ class ClassContext extends Context {
   }
 
   @Override
-  public boolean addProcedure(ProcedureDef f, MethodContext c) throws UnsupportedOperationException {
+  public boolean addProcedure(ProcedureDef f, MethodContext c)
+      throws UnsupportedOperationException {
     throw new UnsupportedOperationException("Cannot create a procedure in a Class context.");
   }
 
-  //TODO rewrite the ensure*** operations to take into account the super classes as well as the available methods
+  /**
+   * Displays an error if the passed name IS present in this particular context.
+   *
+   * @return true if the name is NOT present in this particular context, false otherwise.
+   */
+  @Override
+  public boolean ensureNotExistsHere(int line, String name) {
+    if (definedVars.stream().anyMatch(e -> {
+      if (e instanceof Variable v) {
+        return v.name().equals(name);
+      } else if (e instanceof Record r) {
+        return r.name().equals(name);
+      } else {
+        return false; //Not applicable for name search
+      }
+    })
+        || definedMethods.keySet().stream().anyMatch(e -> e.name().equals(name))) {
+      AST.interStatement
+          .reportSemanticError(line, "Name \"" + name
+              + "\" is already defined in this class' context. This definition will be skipped.");
+      return false;
+    } else {
+      return true;
+    }
+  }
 }
 
 class FunctorContext extends Context {

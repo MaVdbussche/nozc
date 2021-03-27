@@ -8,6 +8,17 @@ java {
     withSourcesJar()
 }
 
+task javaccGen {
+    doFirst {
+        exec {
+            workingDir = './src/main/java/com/barassolutions'
+            commandLine 'javacc', '-static=false', 'newoz.jj'
+        }
+    }
+}
+
+compileJava.dependsOn javaccGen
+
 tasks.withType(JavaCompile).all {
     options.warnings=true
     options.deprecation=true

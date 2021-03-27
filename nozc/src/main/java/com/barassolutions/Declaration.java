@@ -39,8 +39,8 @@ public class Declaration extends Statement {
   @Override
   public AST analyze(Context context) {
     map.forEach((v, e) -> {
-      //TODO declare v.name in context
-      map.put(v, (Expression) e.analyze(context));
+      map.put(v, e.analyze(context));
+      context.addVariable(v);
     });
 
     return this;

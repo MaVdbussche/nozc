@@ -40,7 +40,7 @@ public class CallProcedure extends Statement {
     //No return type for procedures
 
     // Analyzing the arguments
-    args.forEach(a -> a = (Expression) a.analyze(context));
+    args.forEach(a -> a = a.analyze(context));
 
     return this;
   }
@@ -53,10 +53,10 @@ public class CallProcedure extends Statement {
   @Override
   public void codegen(Emitter output) {
     output.token(TokenOz.LCURLY);
-    output.literal(name);
+    output.literal(Utils.ozFriendlyName(name));
     args.forEach(a -> {
-      output.space();
-      a.codegen(output);
+      if(args.indexOf(a)!=0) {output.space();}
+      a.codegen(output); //TODO if it is a var, we need to use @
     });
     output.token(TokenOz.RCURLY);
   }

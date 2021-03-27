@@ -30,15 +30,15 @@ public class OperationAssignment extends Expression {
   @Override
   public Expression analyze(Context context) {
     lhs = (Variable) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    rhs = rhs.analyze(context);
 
     lhs.tryAssign(rhs);
 
-    if (!lhs.type().equals(rhs.type())) {
-      interStatement.reportSemanticError(line(),
-          "Incompatible types : trying to assign %s to a %s value.",
-          lhs.type().toString(), rhs.type().toString());
-    } //TODO actually we don't care !?
+    //if (!lhs.type().equals(rhs.type())) {
+    //  interStatement.reportSemanticError(line(),
+    //      "Incompatible types : trying to assign %s to a %s value.",
+    //      lhs.type().toString(), rhs.type().toString());
+    //} //Actually we don't care, we already checked that lhs is not a val
 
     return this;
   }
@@ -54,7 +54,7 @@ public class OperationAssignment extends Expression {
     } else {
       output.token(TokenOz.DEFINE);
       output.space();
-      output.token(TokenOz.COMMERCAT);
+      output.token(TokenOz.COMMERCAT); //TODO only if rhs is a var
       output.token(TokenOz.LPAREN);
       rhs.codegen(output);
       output.token(TokenOz.RPAREN);

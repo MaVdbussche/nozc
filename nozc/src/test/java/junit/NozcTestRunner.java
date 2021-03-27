@@ -8,14 +8,10 @@ import junit.framework.TestSuite;
 /**
  * JUnit test suite for running the newOz programs in tests/pass.
  */
-
 public class NozcTestRunner {
 
     public static Test suite() {
-        TestSuite suite = new TestSuite();
-        suite.addTestSuite(HelloWorldTest.class);
-        suite.addTestSuite(LogicalOpTest.class);
-        return suite;
+      return new TestSuite();
     }
 
     /**

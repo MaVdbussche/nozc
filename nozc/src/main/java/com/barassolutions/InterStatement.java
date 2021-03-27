@@ -1,6 +1,7 @@
 package com.barassolutions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * The abstract syntax tree (AST) node representing an interactive statement, and so the root of the
@@ -82,8 +83,12 @@ public class InterStatement extends AST {
   public void preAnalyze() {
     context = new GlobalContext();
 
-    context.addFunction(null, null);
-    context.addProcedure(null, null);
+    //context.addFunction();
+    context.addProcedure(new ProcedureDef(-1, "browse",
+            Arrays.asList(new Pattern[]{new Variable(-1, "Target", true)}),
+            null),
+            new MethodContext(null)
+        );
     //TODO all implicit functions/procs in Oz (Browse etc.)
     //TODO also add system calls etc, things directly available without imports
 

@@ -55,7 +55,7 @@ public class CallFunction extends
   @Override
   public void codegen(Emitter output) {
     output.token(TokenOz.LCURLY);
-    output.literal(name);
+    output.literal(Utils.ozFriendlyName(name));
     args.forEach(a -> {
       output.space();
       a.codegen(output);

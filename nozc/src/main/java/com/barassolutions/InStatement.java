@@ -60,11 +60,13 @@ public class InStatement extends Statement {
   @Override
   public void codegen(Emitter output) {
     declarations.forEach(e -> e.codegen(output));
-    output.indentLeft();
-    output.token(TokenOz.IN);
-    output.newLine();
-    output.indentRight();
-    statements.forEach(e -> e.codegen(output));
+    if(statements.size()>0) {
+      output.indentLeft();
+      output.token(TokenOz.IN);
+      output.newLine();
+      output.indentRight();
+      statements.forEach(e -> e.codegen(output));
+    }
   }
 
   @Override

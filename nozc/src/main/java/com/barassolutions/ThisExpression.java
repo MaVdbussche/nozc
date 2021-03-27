@@ -15,7 +15,6 @@ public class ThisExpression extends Expression {
   @Override
   public void codegen(Emitter output) {
     output.token(TokenOz.SELF);
-    output.space();
   }
 
   @Override

@@ -1,6 +1,6 @@
 package com.barassolutions;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class ProcedureDef extends Declaration {
 
@@ -12,14 +12,14 @@ public class ProcedureDef extends Declaration {
   /**
    * The arguments of this procedure.
    */
-  private final ArrayList<Pattern> args;
+  private final List<Pattern> args;
 
   /**
    * The statement constituting the procedure's body.
    */
   private InStatement statement;
 
-  public ProcedureDef(int line, String name, ArrayList<Pattern> args, InStatement statement) {
+  public ProcedureDef(int line, String name, List<Pattern> args, InStatement statement) {
     super(line);
     this.name = name;
     this.args = args;

@@ -1,0 +1,6 @@
+declare
+{
+var iii=
+  thread{5}
+browse(iii)
+}

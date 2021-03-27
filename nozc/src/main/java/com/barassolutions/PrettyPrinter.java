@@ -101,7 +101,7 @@ public class PrettyPrinter {
    *            string to print.
    */
   public void print(@NotNull String s) {
-    doIndent();
+    doIndent(); //TODO check if this looks better
     out.print(s);
   }
 

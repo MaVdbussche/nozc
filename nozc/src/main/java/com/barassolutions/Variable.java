@@ -4,21 +4,27 @@ public class Variable extends Pattern implements Lhs {
 
   private final String name;
 
-  private final boolean constant;
+  private boolean constant;
 
   private boolean isAssigned;
 
   private final boolean usedAsPattern;
 
-  public Variable(int line, String name, boolean isAPattern) {
-    this(line, name, true, isAPattern);
+  /**
+   * This means this is an instance of variable access (typically a rhs or a term)
+   */
+  private final boolean readMode;
+
+  public Variable(int line, String name, boolean isAPattern, boolean readMode) {
+    this(line, name, true, isAPattern, readMode);
   }
 
-  public Variable(int line, String name, boolean constant, boolean isAPattern) {
+  public Variable(int line, String name, boolean constant, boolean isAPattern, boolean readMode) {
     super(line);
     this.name = name;
     this.constant = constant;
     this.usedAsPattern = isAPattern;
+    this.readMode = readMode;
   }
 
   /**
@@ -31,6 +37,14 @@ public class Variable extends Pattern implements Lhs {
 
   public boolean isConstant() {
     return constant;
+  }
+
+  public boolean readMode() {
+    return readMode;
+  }
+
+  public boolean usedAsPattern() {
+    return usedAsPattern;
   }
 
   /**
@@ -49,6 +63,7 @@ public class Variable extends Pattern implements Lhs {
               + "> to a Variable of type VAL. You might want to use VAR instead.");
     }
   }
+
   public void tryPlusAssign(Expression newValue) {
     if (constant) {
       interStatement
@@ -77,6 +92,7 @@ public class Variable extends Pattern implements Lhs {
       }
     }
   }
+
   public void tryMinusAssign(Expression newValue) {
     if (constant) {
       interStatement
@@ -97,18 +113,23 @@ public class Variable extends Pattern implements Lhs {
       } else {
         type = Type.ANY;
         interStatement.reportSemanticError(line(),
-            "This operation is not allowed for variables of type "+this.type().toString()+".");
+            "This operation is not allowed for variables of type " + this.type().toString() + ".");
       }
     }
   }
 
   @Override
   public Expression analyze(Context context) {
-    if(!usedAsPattern) {
+    if (!usedAsPattern) {
       Variable var = context.variableFor(this.name);
-      if(var==null) {
+      if (var == null) {
         interStatement.reportSemanticError(line(),
-            "Could not find variable for: <name:"+name+">");
+            "Could not find variable for: <name:" + name + ">");
+      } else {
+        System.out.println(
+            "Retrieved Variable in context <name:" + var.name + " constant:" + var.constant
+                + " readMode:" + var.readMode + ">");
+        this.constant = var.constant;
       }
     } else {
       //Nothing to do here (it is added to the inner context in analyze() method of all encapsulating AST nodes, like MethodDef or CaseExpressionClause)
@@ -124,6 +145,12 @@ public class Variable extends Pattern implements Lhs {
    */
   @Override
   public void codegen(Emitter output) {
+    System.out.println(
+        "Generating code for a Variable <name:" + name + " constant:" + constant + " readMode:"
+            + readMode + ">");
+    if (!constant) {
+      output.token(TokenOz.COMMERCAT);
+    }
     output.literal(Utils.ozFriendlyName(name));
   }
 
@@ -134,6 +161,10 @@ public class Variable extends Pattern implements Lhs {
    */
   @Override
   public void writeToStdOut(PrettyPrinter p) {
-    //TODO
+    p.printf("<Variable>\n");
+    p.indentRight();
+    p.println("<name:" + name + " constant:" + constant + "assigned:" + isAssigned + ">");
+    p.indentLeft();
+    p.printf("</Variable>\n");
   }
 }

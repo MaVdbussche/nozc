@@ -24,6 +24,7 @@ public class Context {
     boolean notExistsHere;
     if (p instanceof Variable v) {
       notExistsHere = this.ensureNotExistsHere(v.line(), v.name());
+      System.out.println("Adding Variable in context <name:"+v.name()+" constant:"+v.isConstant()+" readMode:"+v.readMode()+" usedAsPattern:"+v.usedAsPattern()+">");
     } else if (p instanceof Record r) {
       notExistsHere = this.ensureNotExistsHere(r.line(), r.name());
     } else {
@@ -266,7 +267,6 @@ public class Context {
 }
 
 class GlobalContext extends Context {
-  //TODO store all know Oz functions/procs/etc. in lists present in Context
 
   public GlobalContext() {
     super(null);
@@ -390,6 +390,8 @@ class FunctorContext extends Context {
   }
 
   public void addImport(ImportClause i) {
-    //TODO
+    i.getValues().forEach((s, v) -> {
+      this.addVariable(v);
+    });
   }
 }

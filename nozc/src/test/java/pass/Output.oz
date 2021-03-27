@@ -1,4 +1,6 @@
 declare
-  Iii  =  {  NewCell     thread     5     end  }  
+I={NewCell 5}  
+A={NewCell 2}  
+K=1  
 in
-  {  Browse  Iii  }  
+{Browse @I}  

@@ -133,8 +133,7 @@ public class Nozc implements Callable<Integer> {
       try {
         parser = new JavaCCParser(scanner); //TODO create an annotation to ignore this error ?
         parser.fileName(inputFile.getName());
-        ast = parser
-            .interStatement(); //Can't do much about this warning; that class is auto-generated
+        ast = parser.interStatement();
         errorHasOccurred |= parser.errorHasOccurred();
       } catch (ParseException e) {
         System.err.println(e.getMessage()); //TODO use picocli error printing
@@ -154,7 +153,7 @@ public class Nozc implements Callable<Integer> {
       }
 
       /* Pre-analyze the input */
-      ast.fileName(inputFile.getName());
+      ast.setFileName(inputFile.getName());
       ast.preAnalyze();
       errorHasOccurred |= ast.errorHasOccurred();
 

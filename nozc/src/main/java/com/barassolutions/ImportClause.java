@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
-public class ImportClause extends Statement implements DeclarationToDeleteMaybe {
+public class ImportClause extends Statement {
 
   /**
    * Name of the variable to import.
@@ -34,15 +34,12 @@ public class ImportClause extends Statement implements DeclarationToDeleteMaybe 
   }
 
   @Override
-  public void preAnalyze(Context context, Emitter partial) {
-    //TODO ensure newly declared names do not already exist in this context.
-    // Otherwise add them to the context as normal
-  }
-
-  @Override
   public AST analyze(Context context) {
+    // Imported values are added to the context in FunctorDef#analyze()
     map.forEach((k, v) -> {
-      map.put(k, (Variable) v.analyze(context));
+      if (v!=null) {
+        map.put(k, (Variable) v.analyze(context));
+      }
     });
 
     return this;
@@ -56,8 +53,10 @@ public class ImportClause extends Statement implements DeclarationToDeleteMaybe 
       map.forEach((s, v) -> {
         output.space();
         output.literal(s);
+        if(v!=null) {
         output.token(TokenOz.COLON);
-        output.literal(Utils.ozFriendlyName(v.name()));
+          output.literal(Utils.ozFriendlyName(v.name()));
+        }
       });
       output.token(TokenOz.RPAREN);
     }
@@ -73,6 +72,11 @@ public class ImportClause extends Statement implements DeclarationToDeleteMaybe 
   @Override
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<Import name=\"%s\"/>\n", name);
-    //TODO come on, you know there is more to it
+    p.indentRight();
+    map.forEach((k,v) -> {
+      p.println(k);
+      p.println(v.name());
+      p.println();
+    });
   }
 }

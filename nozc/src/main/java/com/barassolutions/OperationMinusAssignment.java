@@ -11,7 +11,7 @@ public class OperationMinusAssignment extends OperationAssignment {
     lhs = (Variable) lhs.analyze(context);
     rhs = (Expression) rhs.analyze(context);
 
-    lhs.tryMinusAssign(rhs); //TODO cast probably won't work
+    lhs.tryMinusAssign(rhs);
 
     return this;
   }

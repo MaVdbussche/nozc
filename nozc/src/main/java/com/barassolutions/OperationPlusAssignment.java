@@ -9,9 +9,9 @@ public class OperationPlusAssignment extends OperationAssignment {
   @Override
   public Expression analyze(Context context) {
     lhs = (Variable) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    rhs = rhs.analyze(context);
 
-    lhs.tryPlusAssign(rhs); //TODO cast probably won't work
+    lhs.tryPlusAssign(rhs);
 
     return this;
   }

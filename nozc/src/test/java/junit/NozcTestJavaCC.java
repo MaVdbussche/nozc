@@ -50,6 +50,7 @@ public class NozcTestJavaCC extends TestCase {
 
         // true even if a single test fails
         errorHasOccurred |= Nozc.errorHasOccurred;
+        System.out.println("ErrorHasOccured :"+errorHasOccurred);
       }
     }
 

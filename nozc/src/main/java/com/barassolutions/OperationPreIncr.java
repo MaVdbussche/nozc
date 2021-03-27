@@ -28,7 +28,7 @@ public class OperationPreIncr extends UnaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    arg = (Expression) arg.analyze(context);
+    arg = arg.analyze(context);
     arg.type().mustMatchExpected(line(), Type.INT, Type.FLOAT);
     type = arg.type;
 
@@ -37,6 +37,6 @@ public class OperationPreIncr extends UnaryExpression {
 
   @Override
   public void codegen(Emitter output) {
-    //TODO
+
   }
 }

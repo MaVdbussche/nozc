@@ -4,7 +4,6 @@ package com.barassolutions;
  * The AST node for a statement (includes expressions). The mother of all
  * statements.
  */
-//TODO use Type hierarchy tool on j-- project
 public abstract class Statement extends AST {
 
   /**

@@ -10,12 +10,14 @@ public class InExpression extends Expression {
    */
   private final ArrayList<Declaration> declarations;
 
-  /** Optional statement. */
+  /**
+   * Optional statement.
+   */
   @Nullable
   private Statement statement;
 
   /**
-   * Expresion to evaluate.
+   * Expression to evaluate.
    */
   @Nullable
   private Expression expression;
@@ -26,17 +28,15 @@ public class InExpression extends Expression {
   private Context context;
 
   /**
-   * Construct an AST node for a block given its line number, and the list of
-   * statements and/or expressions forming the block body.
+   * Construct an AST node for a block given its line number, and the list of statements and/or
+   * expressions forming the block body.
    *
-   * @param line
-   *            line in which the block occurs in the source file.
-   * @param statement
-   *            statement present in the block body.
-   * @param expression
-   *            optional expression present in the block body.
+   * @param line       line in which the block occurs in the source file.
+   * @param statement  statement present in the block body.
+   * @param expression optional expression present in the block body.
    */
-  public InExpression(int line, ArrayList<Declaration> decls, @Nullable Statement statement, @Nullable Expression expression) {
+  public InExpression(int line, ArrayList<Declaration> decls, @Nullable Statement statement,
+      @Nullable Expression expression) {
     super(line);
     this.declarations = decls;
     this.statement = statement;
@@ -44,11 +44,10 @@ public class InExpression extends Expression {
   }
 
   /**
-   * Analyzing a block consists of creating a new nested context for that
-   * block and analyzing each of its statements/expressions within that context.
+   * Analyzing a block consists of creating a new nested context for that block and analyzing each
+   * of its statements/expressions within that context.
    *
-   * @param context
-   *            context in which names are resolved.
+   * @param context context in which names are resolved.
    * @return the analyzed (and possibly rewritten) AST subtree.
    */
   @Override
@@ -57,10 +56,10 @@ public class InExpression extends Expression {
 
     declarations.forEach(e -> e = (Declaration) e.analyze(this.context));
 
-    if(statement!=null) {
+    if (statement != null) {
       statement = (Statement) statement.analyze(this.context);
-    } else if(expression!=null) {
-      expression = (Expression) expression.analyze(this.context);
+    } else if (expression != null) {
+      expression = expression.analyze(this.context);
     }
     return this;
   }
@@ -69,22 +68,20 @@ public class InExpression extends Expression {
    * Generating code for a block consists of generating code for each of its declarations and
    * statements/expressions.
    *
-   * @param output
-   *            the code emitter (basically an abstraction for producing the
-   *            Oz file).
+   * @param output the code emitter (basically an abstraction for producing the Oz file).
    */
   @Override
   public void codegen(Emitter output) {
-    if(declarations.size()>0) { //TODO do this check everywhere !
-      declarations.forEach(e -> e.codegen(output));
+    declarations.forEach(e -> e.codegen(output));
+    if (declarations.size() > 0) {
       output.indentLeft();
       output.token(TokenOz.IN);
       output.newLine();
       output.indentRight();
     }
-    if (statement!=null) {
+    if (statement != null) {
       statement.codegen(output);
-    } else if(expression!=null) {
+    } else if (expression != null) {
       expression.codegen(output);
     }
   }
@@ -102,11 +99,11 @@ public class InExpression extends Expression {
       decl.writeToStdOut(p);
       p.indentLeft();
     }
-    if(statement!=null) {
+    if (statement != null) {
       p.indentRight();
       statement.writeToStdOut(p);
       p.indentLeft();
-    } else if(expression!=null) {
+    } else if (expression != null) {
       p.indentRight();
       expression.writeToStdOut(p);
       p.indentLeft();

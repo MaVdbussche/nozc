@@ -59,7 +59,6 @@ public class MethodDef extends Declaration implements ClassElement {
   @Override
   public AST analyze(Context context) {
     MethodContext methContext = new MethodContext(context);
-    //TODO declare name in the context (shadow it if needed) check we are in a class context
     ClassContext classContext = context.asClassContext();
     if (classContext == null) {
       interStatement.reportSemanticError(line(),

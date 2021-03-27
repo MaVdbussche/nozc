@@ -1,8 +1,5 @@
 package com.barassolutions;
 
-//TODO the exact equivalent of this in j-- is JVariableDeclaration
-// JVariableDeclarator has no equivalent in nozc. However it might be a good idea (or even necessary ?) to split assignments anyway
-
 import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
@@ -41,6 +38,7 @@ public class Declaration extends Statement {
     map.forEach((v, e) -> {
       map.put(v, e.analyze(context));
       context.addVariable(v);
+      System.out.println("Added Variable to context : <name:"+v.name()+" constant:"+v.isConstant()+" readMode:"+v.readMode()+">");
     });
 
     return this;

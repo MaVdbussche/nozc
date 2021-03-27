@@ -467,13 +467,13 @@ private InStatement inStatement(): {
 {
     try {
         <LCURLY> { line = token.beginLine; }
-        ( //LOOKAHEAD( declarationPart() )
-          aDecl = declarationPart() { decls.add(aDecl); }
+        ( LOOKAHEAD( declarationPart() )
           {System.out.println("Found a declarationPart");}
+          aDecl = declarationPart() { decls.add(aDecl); }
         )*
-        ( //LOOKAHEAD( statement() )
-          aStatement = statement() { statements.add(aStatement); }
+        ( LOOKAHEAD( statement() )
           {System.out.println("Found a statement");}
+          aStatement = statement() { statements.add(aStatement); }
         )*
         <RCURLY>
     }
@@ -939,14 +939,14 @@ private Expression nestDecAnonym(): {
 }
 {
     try {
-        <VARIABLE> { line = token.beginLine; name = token.image; }
+        <VARIABLESTRICT> { line = token.beginLine; name = token.image; }
         [
           <LPAREN> (<ATOM>|<INT>) { label = token.image; }
-            [<COLON> <VARIABLE> { var = new Variable(token.beginLine, token.image, true); }]
+            [<COLON> <VARIABLE> { var = new Variable(token.beginLine, token.image, true, false); }]
             { map.put(label, var); } //var will be null most of the time
           ( LOOKAHEAD( <COMMA> (<ATOM>|<INT>) )
             <COMMA> (<ATOM>|<INT>) { label = token.image; var = null; } //reset the previous values !
-            [<COLON> <VARIABLE> { var = new Variable(token.beginLine, token.image, true); }]
+            [<COLON> <VARIABLE> { var = new Variable(token.beginLine, token.image, true, false); }]
             { map.put(label, var); } //var will be null most of the time
           )*
         ]
@@ -982,7 +982,7 @@ private Expression nestDecAnonym(): {
         ]
         <VARIABLE>
         { line = (line!=0 ? line : token.beginLine);
-          var = new Variable(token.beginLine, token.image, false); }
+          var = new Variable(token.beginLine, token.image, false, true); }
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
@@ -1015,7 +1015,7 @@ private Expression nestDecAnonym(): {
           LOOKAHEAD( <DEF> methHead() )
           <DEF> { line = token.beginLine; }
           aMethodHead = methHead()
-          [<ASSIGN> <VARIABLE> { name = new Variable(line, token.image, true); }]
+          [<ASSIGN> <VARIABLE> { name = new Variable(line, token.image, true, false); }]
           ( LOOKAHEAD( inExpression() )
             expression = inExpression()
           |
@@ -1466,6 +1466,7 @@ private Expression primary(): {
     String name = null;
     Expression arg = null;
     ArrayList<Expression> args = new ArrayList<Expression>();
+    {System.out.println("Entering primary()");}
 }
 {
     try {
@@ -1478,8 +1479,8 @@ private Expression primary(): {
         | <FLOAT> { out = new Literal(token.beginLine, Type.FLOAT, token.image, false); }
         | <CHARACTER> { out = new Literal(token.beginLine, Type.CHAR, token.image, false); }
         | <STRING> { out = new Literal(token.beginLine, Type.STRING, token.image, false); }
-        | LOOKAHEAD( <VARIABLE> <DOT> expression() )
-          <VARIABLE> { variable = new Variable(token.beginLine, token.image, false);}
+        | LOOKAHEAD( <VARIABLE> <DOT> <VARIABLE> )
+          <VARIABLE> { variable = new Variable(token.beginLine, token.image, false, false);}
           <DOT> <VARIABLE>
           { name = token.image;
             out = new ExpressionSelectionFeature(line, variable, name); }
@@ -1494,15 +1495,15 @@ private Expression primary(): {
               <RPAREN>
               { out = new ExpressionSelectionMethod(line, variable, name, args); }
           ]
-        | <VARIABLE> { out = new Variable(token.beginLine, token.image, false); }
+        | <VARIABLE> { out = new Variable(token.beginLine, token.image, false, true); } //Parameter in function call, for example
           [
             <DOT> expr = expression()
             { out = new ExpressionSelectionList(line, (Variable) out, expr); }
           ]
-        | LOOKAHEAD( <THIS> [<DOT> <VARIABLE>] )
+        | LOOKAHEAD( <THIS> [<DOT> (<VARIABLE>|<VARIABLESTRICT>)] )
           <THIS> { line = token.beginLine; out = new ThisExpression(line); }
             [
-            <DOT> <VARIABLE> { variable = new Variable(line, token.image, false);}
+            <DOT> (<VARIABLE>|<VARIABLESTRICT>) { variable = new Variable(line, token.image, false, false);}
             <LPAREN>
             [
                 arg = expression() { args.add(arg); }
@@ -1511,13 +1512,13 @@ private Expression primary(): {
                 )*
             ]
             <RPAREN>
-            { out = new Call(line, variable, args); }
+            { out = new Call(line, variable.name(), args); }
             ]
         | <SUPER> { line = token.beginLine; }
             [ LOOKAHEAD( <LPAREN> <VARIABLESTRICT> <RPAREN> )
               <LPAREN> <VARIABLESTRICT> { name = token.image; } <RPAREN>
             ]
-            <DOT> <VARIABLE> { variable = new Variable(token.beginLine, token.image, false);}
+            <DOT> (<VARIABLE>|<VARIABLESTRICT>) { variable = new Variable(token.beginLine, token.image, false, false);}
             <LPAREN>
             [ LOOKAHEAD( expression() )
                 arg = expression() { args.add(arg); }
@@ -1526,7 +1527,7 @@ private Expression primary(): {
                 )*
             ]
             <RPAREN>
-            { out = new Call(line, variable, args, name); }
+            { out = new Call(line, variable.name(), args, name); }
     }
     catch ( ParseException e ) {
         recoverFromError( new int[]{RCURLY}, e );
@@ -1760,11 +1761,11 @@ private Declaration declarationPart(): {
             <VAL> { line = token.beginLine; constant = true; }
           | <VAR> { line = token.beginLine; constant = false; }
           )
-          <VARIABLE> { variable = new Variable(line, token.image, constant); map.put(variable, null); System.out.println("Declaring variable "+token.image); }
+          <VARIABLE> { variable = new Variable(line, token.image, constant, true, false); map.put(variable, null); System.out.println("Declaring variable "+token.image+" as a constant("+constant+")"); }
           [<ASSIGN> value = expression()
           { map.put(variable, value); }]
           ( LOOKAHEAD( <COMMA> <VARIABLE> )
-            <COMMA> <VARIABLE> { variable = new Variable(line, token.image, constant); map.put(variable, null); }
+            <COMMA> <VARIABLE> { variable = new Variable(line, token.image, constant, true, false); map.put(variable, null); }
             [<ASSIGN> value = expression()
             { map.put(variable, value); }]
           )*
@@ -1816,7 +1817,7 @@ private LoopDeclaration loopDeclaration(): {
 {
     try {
         LOOKAHEAD(<VARIABLE> <IN> expression() <DOTDOT> )
-        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true); }
+        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, false); }
           <IN> init = expression()
           <DOTDOT> end = expression()
           [
@@ -1824,7 +1825,7 @@ private LoopDeclaration loopDeclaration(): {
           ]
           {out = new LoopDeclaration(line, var, init, null, step, end); }
         | LOOKAHEAD( <VARIABLE> <IN> expression() <SEMI> )
-          <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true); }
+          <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, false); }
           <IN> init = expression()
           <SEMI> step = expression()
           [
@@ -1832,7 +1833,7 @@ private LoopDeclaration loopDeclaration(): {
             { cond=step; step=end; }
           ]
           { out = new LoopDeclaration(line, var, init, cond, step, null); }
-        | <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true); }
+        | <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, false); }
           <IN> generator = expression()
           { out = new LoopDeclaration(line, var, generator); }
     }
@@ -1895,14 +1896,14 @@ private ClassDescriptor classDescriptor(): {
           )*
           { out = new ClassDescriptor(line, SubType.EXTENSION, extensions); }
         | <ATTR> { line = token.beginLine; }
-          <VARIABLE> { var = new Variable(line, token.image, true); }
+          <VARIABLE> { var = new Variable(line, token.image, false, true, false); }
           [
             <ASSIGN> expr = expression()
           ]
           { out = new ClassDescriptor(line, SubType.ATTRIBUTE, var, expr); }
         | <PROP> { line = token.beginLine; }
           <VARIABLE>
-          { var = new Variable(line, token.image, true);
+          { var = new Variable(line, token.image, true, false);
             out = new ClassDescriptor(line, SubType.PROPERTY, var, null); }
     } catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);

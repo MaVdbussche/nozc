@@ -25,9 +25,7 @@ public class ExportClause extends Statement {
     return var;
   }
 
-  //TODO we don't actually check for presence the variable in the context, since it probably hasn't been declared at this time.
-  // Best would be to defer the check until later (how?). For now we just let it slip through, ozc will catch it anyway
-  @Override
+ @Override
   public AST analyze(Context context) {
     return this;
   }

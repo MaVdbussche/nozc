@@ -10,7 +10,8 @@ public class ExpressionSelectionMethod extends Expression {
 
   private final ArrayList<Expression> args;
 
-  public ExpressionSelectionMethod(int line, Variable var, String methodName, ArrayList<Expression> args) {
+  public ExpressionSelectionMethod(int line, Variable var, String methodName,
+      ArrayList<Expression> args) {
     super(line);
     this.instance = var;
     this.methodName = methodName;
@@ -19,7 +20,8 @@ public class ExpressionSelectionMethod extends Expression {
 
   @Override
   public Expression analyze(Context context) {
-    interStatement.reportSemanticError(line(), "Method calls on an instance from outside a class context : this is not supported in this release.");
+    interStatement.reportSemanticError(line(),
+        "Method calls on an instance from outside a class context : this is not supported in this release.");
     //TODO to implement in future release
 
     return this;
@@ -32,10 +34,21 @@ public class ExpressionSelectionMethod extends Expression {
 
   @Override
   public void writeToStdOut(PrettyPrinter p) {
-    p.printf("<MethodSelector line=\"%d\">\n", line());
-    instance.writeToStdOut(p);
-    p.println(methodName);
-    //TODO args
+    p.printf("<MethodSelector line=\"%d\" name=\"%s\" target=\"%s\">\n", line(),
+        methodName, instance);
+
+    p.println("<Arguments>");
+    for (Expression argument : args) {
+      p.indentRight();
+      p.println("<Argument>");
+      p.indentRight();
+      argument.writeToStdOut(p);
+      p.indentLeft();
+      p.println("</Argument>");
+      p.indentLeft();
+    }
+    p.println("</Arguments>");
+
     p.printf("</MethodSelector>\n");
   }
 }

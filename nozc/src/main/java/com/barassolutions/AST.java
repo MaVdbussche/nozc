@@ -8,7 +8,7 @@ abstract class AST {
   /** Current interactive statement (set in InterStatement() constructor). */
   protected static InterStatement interStatement;
 
-  protected String fileName;
+  private String fileName;
 
   /** Line in which the source for the AST was found. */
   private final int line;
@@ -37,7 +37,11 @@ abstract class AST {
     return line;
   }
 
-  public void fileName(String fileName) { this.fileName = fileName; }
+  public String fileName() {
+    return fileName;
+  }
+
+  public void setFileName(String fileName) { this.fileName = fileName; }
 
   /**
    * Perform semantic analysis on this AST. In some instances a new returned

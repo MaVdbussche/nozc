@@ -1,6 +1,6 @@
 declare
 {
-var iii=
-  thread{5}
-browse(iii)
+var i=5, a=2
+val k=1
+browse(i)
 }

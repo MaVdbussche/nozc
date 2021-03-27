@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @see LoopStructure
  */
-public class LoopDeclaration extends AST implements DeclarationToDeleteMaybe {
+public class LoopDeclaration extends AST {
 
   private Variable iterator;
 
@@ -78,12 +78,6 @@ public class LoopDeclaration extends AST implements DeclarationToDeleteMaybe {
     generatorMode = true;
   }
 
-  @Override
-  public void preAnalyze(Context context, Emitter partial) {
-    //TODO ensure newly declared names do not already exist in this context, then add them as normal
-    // (if they are, "shadow" them)
-  }
-
   /**
    * Analyzing the loop declaration part means analyzing its components and evaluating the
    * expression types.
@@ -93,26 +87,29 @@ public class LoopDeclaration extends AST implements DeclarationToDeleteMaybe {
    */
   @Override
   public AST analyze(Context context) {
-    iterator = (Variable) iterator.analyze(context);
+    Context loopContext = new Context(context);
+    loopContext.addVariable(iterator);
+
+    iterator = (Variable) iterator.analyze(loopContext);
 
     if (!generatorMode) {
-      initialValue = (Expression) initialValue.analyze(context);
+      initialValue = initialValue.analyze(context);
       initialValue.type().mustMatchExpected(line(), Type.INT, Type.FLOAT);
 
       if (continuationCondition != null) {
-        continuationCondition = (Expression) continuationCondition.analyze(context);
+        continuationCondition = continuationCondition.analyze(context);
         continuationCondition.type().mustMatchExpected(line(), initialValue.type());
       }
 
       if (stepValue != null) {
-        stepValue = (Expression) stepValue.analyze(context);
+        stepValue = stepValue.analyze(context);
         stepValue.type().mustMatchExpected(line(), initialValue.type());
       }
 
-      endValue = (Expression) endValue.analyze(context);
+      endValue = endValue.analyze(context);
       endValue.type().mustMatchExpected(line(), initialValue.type());
     } else {
-      generator = (Expression) generator.analyze(context);
+      generator = generator.analyze(context);
       generator.type().mustMatchExpected(line(), Type.LIST);
     }
 
@@ -172,7 +169,7 @@ public class LoopDeclaration extends AST implements DeclarationToDeleteMaybe {
     p.printf("<LoopDec>\n");
     p.indentRight();
     if (generatorMode) {
-      p.printf("<Generator >\n");
+      p.printf("<Generator />\n");
       //TODO
     }
     p.indentLeft();

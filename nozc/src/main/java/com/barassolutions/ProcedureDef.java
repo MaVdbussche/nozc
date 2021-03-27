@@ -57,8 +57,7 @@ public class ProcedureDef extends Declaration {
   @Override
   public void codegen(Emitter output) {
     output.token(TokenOz.PROC);
-    output.token(
-        TokenOz.LCURLY); //TODO see if we couldn't merge FunctionDef & ProcedureDef (see MethodDef for reference)
+    output.token(TokenOz.LCURLY);
     output.literal(name);
     args.forEach(a -> {
       output.space();

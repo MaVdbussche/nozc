@@ -22,7 +22,7 @@ public class InterStatement extends AST {
   /**
    * The context represented by this block.
    */
-  private GlobalContext context;
+  private GlobalContext globalContext;
 
   /**
    * Whether a semantic error has been found.
@@ -75,17 +75,17 @@ public class InterStatement extends AST {
   public void reportSemanticError(int line, String message,
       Object... arguments) {
     isInError = true;
-    System.err.printf("%s:%d: ", this.fileName, line);
+    System.err.printf("%s:%d: ", this.fileName(), line);
     System.err.printf(message, arguments);
     System.err.println();
   }
 
   public void preAnalyze() {
-    context = new GlobalContext();
+    globalContext = new GlobalContext();
 
     //context.addFunction();
-    context.addProcedure(new ProcedureDef(-1, "browse",
-            Arrays.asList(new Pattern[]{new Variable(-1, "Target", true)}),
+    globalContext.addProcedure(new ProcedureDef(-1, "browse",
+            Arrays.asList(new Pattern[]{new Variable(-1, "Target", true, true)}),
             null),
             new MethodContext(null)
         );
@@ -98,9 +98,9 @@ public class InterStatement extends AST {
   @Override
   public AST analyze(Context context) {
     if (statements != null) {
-      statements.forEach(s -> s = (Statement) s.analyze(this.context));
+      statements.forEach(s -> s = (Statement) s.analyze(this.globalContext));
     } else if (statement != null) {
-      statement = (InStatement) statement.analyze(this.context);
+      statement = (InStatement) statement.analyze(this.globalContext);
     }
     return this;
   }
@@ -119,7 +119,14 @@ public class InterStatement extends AST {
     }
   }
 
-  public void writeToStdOut(PrettyPrinter printer) {
-    //TODO
+  public void writeToStdOut(PrettyPrinter p) {
+    p.printf("<InteractiveStatement line=\"%d\">\n", line());
+
+    if (statements!=null) {
+      statements.forEach(s -> s.writeToStdOut(p));
+    } else if (statement!=null) {
+      statement.writeToStdOut(p);
+    }
+    p.printf("</InteractiveStatement>\n");
   }
 }

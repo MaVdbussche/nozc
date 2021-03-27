@@ -1,8 +1,5 @@
 package com.barassolutions;
 
-//TODO the exact equivalent of this in j-- is JVariableDeclaration
-// JVariableDeclarator has no equivalent in nozc. However it might be a good idea (or even necessary ?) to split assignments anyway
-
 /**
  * This class mirrors <code>Declaration</code>. However it is empty, as it doesn't make sense to
  * declare variables/values anonymously. Inheriting classes declare things like functors,

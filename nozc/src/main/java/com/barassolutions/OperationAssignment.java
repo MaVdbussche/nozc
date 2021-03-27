@@ -14,7 +14,7 @@ public class OperationAssignment extends Expression {
 
   public OperationAssignment(int line, Expression lhs, Expression rhs) {
     super(line);
-    this.lhs = (Variable) lhs; //TODO cast probably won't work
+    this.lhs = (Variable) lhs;
     this.rhs = rhs;
     if (rhs instanceof FunctorDefAnonym fda) {
       fda.setName(this.lhs.name());
@@ -49,16 +49,11 @@ public class OperationAssignment extends Expression {
     output.space();
     if (lhs.isConstant()) {
       output.token(TokenOz.ASSIGN);
-      output.space();
-      rhs.codegen(output);
     } else {
       output.token(TokenOz.DEFINE);
-      output.space();
-      output.token(TokenOz.COMMERCAT); //TODO only if rhs is a var
-      output.token(TokenOz.LPAREN);
-      rhs.codegen(output);
-      output.token(TokenOz.RPAREN);
     }
+    output.space();
+    rhs.codegen(output);
   }
 
   @Override

@@ -52,11 +52,16 @@ public class CallProcedure extends Statement {
    */
   @Override
   public void codegen(Emitter output) {
+    System.out.println("Generating code for a procedure call <name:"+name+">");
     output.token(TokenOz.LCURLY);
     output.literal(Utils.ozFriendlyName(name));
     args.forEach(a -> {
-      if(args.indexOf(a)!=0) {output.space();}
-      a.codegen(output); //TODO if it is a var, we need to use @
+      output.space();
+      if (a instanceof Variable v) {
+        v.codegen(output);
+      } else {
+        a.codegen(output);
+      }
     });
     output.token(TokenOz.RCURLY);
   }

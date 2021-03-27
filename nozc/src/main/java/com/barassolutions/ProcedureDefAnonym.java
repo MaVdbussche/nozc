@@ -47,7 +47,7 @@ public class ProcedureDefAnonym extends DeclarationAnonym {
     context.addProcedure(new ProcedureDef(this), methContext);
 
     args.forEach(a -> {
-      a = (Pattern) a.analyze(context); //TODO actually we don't need to analyze args in the top context ? Since we will either shadow, or we just don't care if they don't exist ?! [!!!! applicable for all 25 classes that use this mehtContext]
+      a = (Pattern) a.analyze(context);
       methContext.addArgument(a);
     });
 
@@ -61,7 +61,7 @@ public class ProcedureDefAnonym extends DeclarationAnonym {
   public void codegen(Emitter output) {
     output.token(TokenOz.PROC);
     output.token(
-        TokenOz.LCURLY); //TODO see if we couldn't merge FunctionDef & ProcedureDef (see MethodDef for reference)
+        TokenOz.LCURLY);
     output.token(TokenOz.DOLLAR);
     args.forEach(a -> {
       output.space();

@@ -1,0 +1,229 @@
+// EBNF grammar for Oz, suitable for recursive descent
+// This is taken from the reference book by Peter Van Roy, the thesis from Arthur Paquot & Nathan Magrofuoco, as well as the online Mozart documentation.
+// See http://mozart2.org/mozart-v1/doc-1.4.0/notation/index.html
+// Note that the concatenation symbol in EBNF (comma) is omitted for readability reasons
+// <T> represents a template (think about Java generic types, for example)
+//Notation      Meaning
+//========================================================================
+//\epsilon      singleton containing the empty word
+//(w)           grouping of regular expressions
+//[ w ]         union of \epsilon with the set of words w (optionnal group)
+//{ w }         zero or more times w
+//{ w }+        one or more times w
+//w_1 w_2       concatenation of w_1 with w_2
+//w_1 | w_2     logical union of w_1 and w_2 (OR)
+//w_1 - w_2     difference of w_1 and w_2
+
+//Lines preceded by ("*****") are elements not addressed in the Oz reference book,
+// and might not be implemented in this compiler
+
+
+// Interactive statements [ENTRYPOINT]
+interStatement ::= statement
+                  | DECLARE {declarationPart}+ [interStatement]
+                  | DECLARE {declarationPart}+ IN interStatement
+
+statement ::= nestConStatement
+            | nestDecVariable
+            | SKIP
+            | SEMI
+            | statement statement
+            | DECLARE statement
+            *****
+            | fdCompare
+            | fdIn
+            | FAIL
+            | NOT inStatement END
+            | COND condStatementClause
+              {BOX condStatementClause}
+              [ELSE inStatement] END
+            | OR disStatementClause {BOX disStatementClause}+ END
+            | DIS disStatementClause {BOX disStatementClause}+ END
+            | CHOICE inStatement {BOX inStatement} END
+            | expression LARROW expression
+
+expression ::= {LPAREN}+ expression {RPAREN}+
+            | nestConExpression
+            | nestDecAnonym
+            | monOp expression
+            | expression pointOp expression
+            | expression arithOpFirst expression
+            | expression arithOpSecond expression
+            | expression arithOpThird expression
+            | expression consBinOp expression
+            | expression evalBinOp expression
+            | DOLLAR
+            | term
+            | SELF
+            | {LCURLY}+ expression {expression} {RCURLY}+
+            *****
+            | fdCompare
+            | fdIn
+            | FAIL
+            | COND condExpressionClause
+              {BOX condExpressionClause}
+              [ELSE inExpression] END
+            | OR condExpressionClause {BOX condExpressionClause}+ END
+            | DIS condExpressionClause {BOX condExpressionClause}+ END
+            | CHOICE inExpression {BOX inExpression} END
+            | expression LARROW expression
+
+inStatement ::= [{declarationPart}+ IN] statement
+            | [{declarationPart}+ IN] expression
+
+inExpression ::= [{declarationPart}+ IN] [statement] expression
+            | [{declarationPart}+ IN] statement
+
+nestConStatement ::= expression (ASSIGN|DEFINE|COMMA) expression
+              | LOCAL {declarationPart}+ [IN] {statement} [END]
+              | {LCURLY}+ expression {expression} {RCURLY}+
+              | LPAREN inStatement RPAREN
+              | IF expression [THEN] inStatement
+                {ELSEIF expression [THEN] inStatement}
+                [ELSE inStatement] [END]
+              | CASE expression [OF] caseStatementClause
+                {BOX caseStatementClause}
+                [ELSE inStatement] [END]
+              | FOR {loopDec}+ [DO] inStatement [END]
+              | TRY inStatement
+                [CATCH caseStatementClause
+                  {BOX caseStatementClause}]
+                [FINALLY inStatement] END
+              | RAISE inExpression END
+              | THREAD inStatement END
+              | LOCK [expression THEN] inStatement END
+
+nestConExpression ::= LOCAL {declarationPart}+ [IN] [statement] expression [END]
+              | LPAREN expression RPAREN
+              | IF expression [THEN] inExpression
+                {ELSEIF expression [THEN] inExpression}
+                {ELSE inExpression} [END]
+              | CASE expression OF caseExpressionClause
+                {BOX caseExpressionClause}
+                [ELSE inExpression] [END]
+              | FOR {loopDec}+ [DO] inExpression [END]
+              | TRY inExpression
+                [CATCH caseExpressionClause
+                    {BOX caseExpressionClause}]
+                [FINALLY inStatement] END
+              | RAISE inExpression END
+              | THREAD inExpression END
+              | LOCK [expression THEN] inExpression END
+
+nestDecVariable ::= PROC [LCURLY] (variable|atom) {pattern} [RCURLY] inStatement [END]
+              | FUN [LAZY] [LCURLY] (variable|atom) {pattern} [RCURLY] inExpression [END]
+              | FUN [LAZY] LPAREN (variable|atom) {pattern} RPAREN inExpression [END]
+              | FUNCTOR [variable]
+                [IMPORT {variable [AT atom]
+                          | variable LPAREN {(atom|int) [COLON variable]}+ RPAREN
+                        }+
+                ]
+                [EXPORT {[(atom|int) COLON] variable}+]
+                DEFINE {declarationPart}+ [IN statement] END
+              | CLASS (variable|atom) {classDescriptor}
+                {METH methHead [ASSIGN variable]
+                  (inExpression|inStatement) [END]} [END]
+
+nestDecAnonym ::= PROC [LCURLY] DOLLAR {pattern} [RCURLY] inStatement [END]
+              | FUN [LAZY] [LCURLY] DOLLAR {pattern} [RCURLY] inExpression [END]
+              | FUN [LAZY] LPAREN DOLLAR {pattern} RPAREN inExpression [END]
+              | FUNCTOR [variable]
+                [IMPORT {variable [AT atom]
+                            | variable LPAREN {(atom|int) [COLON variable]}+ RPAREN)
+                        }+
+                ]
+                [EXPORT {[(atom|int) COLON] variable}+]
+                DEFINE {declarationPart}+ [IN statement] END
+              | CLASS DOLLAR {classDescriptor}
+                {METH methHead [ASSIGN variable] (inExpression|inStatement) [END]}
+                [END]
+
+caseStatementClause ::= pattern [ANDTHEN [declarationPart IN] expression] THEN inStatement
+
+caseExpressionClause ::= pattern [ANDTHEN [declarationPart IN] expression] THEN inExpression
+
+term ::= [LNOT] variable | int | float | character | atom | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
+      | label LPAREN {[feature COLON] expression} RPAREN
+      | LBRACK {expression} RBRACK
+
+pattern ::= [LNOT] variable | int | float | character | atom | string | UNIT | FALSE | TRUE | UNDERSCORE | NIL
+          | label LPAREN {[feature COLON] pattern} [ELLIPSIS] RPAREN
+          | pattern consBinOp pattern
+          | LBRACK {pattern} RBRACK
+          | {LPAREN pattern RPAREN}+
+
+declarationPart ::= variable | pattern ASSIGN expression | statement | atom
+
+loopDec ::= {variable} IN expression [DOTDOT expression] [SEMI expression]
+          | {variable} IN expression SEMI expression SEMI expression
+          | BREAK [COLON] variable
+          | CONTINUE [COLON] variable
+          | RETURN [COLON] variable
+          | DEFAULT [COLON] expression
+          | COLLECT [COLON] variable
+
+pointOp ::= DOT
+
+monOp ::= WAVE | LNOTNOT | AT | RETURN
+
+consBinOp ::= HASHTAG | PIPE
+
+evalBinOp ::= ANDTHEN | ORELSE | DEFINE | ASSIGN | COMMA | COLCOL | FDASSIGN | FDNE | FDLE
+
+arithOpFirst ::= STAR | DIV | SLASH | MOD | HAT | STARSTAR
+
+arithOpSecond ::= PLUS | MINUS
+
+arithOpThird ::= EQUAL | NE | LT | LE | GT | GE
+
+label ::= UNIT | TRUE | FALSE | variable | atom
+//A label must always be followed by a LPAREN
+
+feature ::= UNIT | TRUE | FALSE | variable | atom | int| NIL
+
+classDescriptor ::= FROM {expression}+
+                  | PROP {expression}+
+                  | ATTR {attrInit}+
+                  *****
+                  | FEAT {attrinit}+
+
+attrInit ::= ([LNOT] variable | atom | UNIT | TRUE | FALSE) [COLON expression]
+
+methodHead ::= ([LNOT] variable | atom | UNIT | TRUE | FALSE)
+                    [LPAREN {methodFormal} [ELLIPSIS] RPAREN]
+                    [ASSIGN variable]
+
+methodFormal ::= [feature COLON] (variable | UNDERSCORE | DOLLAR) [LBARROW expression]
+
+*****
+condStatementClause ::= [declarationPart IN] statement THEN inStatement
+*****
+disStatementClause ::= [declarationPart IN] statement [THEN inStatement]
+*****
+condExpressionClause ::= [declarationPart IN] statement THEN inExpression
+*****
+fdCompare ::= expression (FDASSIGN | FDNE | FDLT | FDLE | FDGT | FDGE) expression
+*****
+fdIn ::= expression (COLCOL | COLCOLCOL) expression
+
+
+
+
+variable ::= UPPERCASE {ALPHANUM}
+          | LACCENT {ALPHANUM | SPECIALCHAR} LACCENT
+
+atom ::= LOWERCASE {ALPHANUM} - keyword
+      | APOSTROPHE {ALPHANUM | SPECIALCHAR} APOSTROPHE
+
+int ::= [WAVE] DIGIT
+      | [WAVE] NONZERODIGIT {DIGIT}
+      | [WAVE] "0" {OCTDIGIT}+
+      | [WAVE] "0" ("x" | "X") {HEXDIGIT}+
+      | [WAVE] "0" ("b" | "B") {BINDIGIT}+
+
+float ::= [WAVE] {DIGIT}+ DOT {DIGIT} [("e" | "E")[~]{DIGIT}+]
+
+string ::= QUOTE {ALPHANUM | SPECIALCHAR} QUOTE
+
+character ::= AND ALPHANUM | AND SPECIALCHAR | CHARINT
+

@@ -1,0 +1,154 @@
+// Lexical grammar for Oz
+// This is taken from the reference book by Peter Van Roy, as well as the online Mozart documentation.
+// See http://mozart2.org/mozart-v1/doc-1.4.0/notation/index.html
+//Notation      Meaning
+//========================================================================
+//\epsilon      singleton containing the empty word
+//(w)           grouping of regular expressions
+//[ w ]         union of \epsilon with the set of words w (optionnal group)
+//{ w }         zero or more times w
+//{ w }+        one or more times w
+//w_1 w_2       concatenation of w_1 with w_2
+//w_1 | w_2     logical union of w_1 and w_2 (OR)
+//w_1 - w_2     difference of w_1 and w_2
+
+// White spaces - ignored
+WHITESPACE ::= (" "|"\t"|"\n"|"\r"|"\f")
+
+// Comments - ignored
+("%" {CHAR - ("\n"|"\r")} ("\n"|"\r"["\n"])) | "?"
+
+// Multi-line comments - ignored
+"/*" {CHAR - "*/"} "*/"
+
+// Reserved keywords
+ANDTHEN ::= "andthen"
+AT      ::= "at"
+ATTR    ::= "attr"
+BREAK   ::= "break"
+CASE    ::= "case"
+CATCH   ::= "catch"
+CHOICE  ::= "choice"
+CLASS   ::= "class"
+COLLECT ::= "collect"
+COND    ::= "cond"
+CONTINUE ::= "continue"
+DECLARE ::= "declare"
+DEFAULT ::= "default"
+DEF  ::= "define"
+DIS     ::= "dis"
+DIV     ::= "div"
+DO      ::= "do"
+ELSE    ::= "else"
+ELSECASE::= "elsecase"
+ELSEIF  ::= "elseif"
+ELSEOF  ::= "elseof"
+END     ::= "end"
+EXPORT  ::= "export"
+FAIL    ::= "fail"
+FALSE   ::= "false"
+FEAT    ::= "feat"
+FINALLY ::= "finally"
+FOR     ::= "for"
+FROM    ::= "from"
+FUN     ::= "fun"
+FUNCTOR ::= "functor"
+IF      ::= "if"
+IMPORT  ::= "import"
+IN      ::= "in"
+LAZY    ::= "lazy"
+LOCAL   ::= "local"
+LOCK    ::= "lock"
+METH    ::= "meth"
+MOD     ::= "mod"
+NIL     ::= "nil"
+NOT     ::= "not"
+OF      ::= "of"
+OR      ::= "or"
+ORELSE  ::= "orelse"
+PREPARE ::= "prepare"
+PROC    ::= "proc"
+PROP    ::= "prop"
+RAISE   ::= "raise"
+REQUIRE ::= "require"
+RETURN  ::= "return"
+SELF    ::= "self"
+SKIP    ::= "skip"
+THEN    ::= "then"
+THREAD  ::= "thread"
+TRUE    ::= "true"
+TRY     ::= "try"
+UNIT    ::= "unit"
+
+ASSIGN      ::= "="
+DEFINE      ::= ":="
+EQUAL       ::= "=="
+NE          ::= "\="
+LT          ::= "<"
+GT          ::= ">"
+LE          ::= "=<"
+GE          ::= ">="
+LBARROW     ::= "<="
+AND         ::= "&"
+PIPE        ::= "|"
+LNOT        ::= "!"
+LNOTNOT     ::= "!!"
+MINUS       ::= "-"
+PLUS        ::= "+"
+STAR        ::= "*"
+STARSTAR    ::= "**"
+SLASH       ::= "/"
+BACKSLASH   ::= "\"
+HASHTAG     ::= "#"
+UNDERSCORE  ::= "_"
+DOLLAR      ::= "$"
+APOSTROPHE  ::= "'"
+QUOTE       ::= """
+LACCENT     ::= "`"
+HAT         ::= "^"
+BOX         ::= "[]"
+WAVE        ::= "~"
+COMMERCAT   ::= "@"
+LARROW      ::= "<-"
+FDASSIGN    ::= "=:"
+FDNE        ::= "\=:"
+FDLT        ::= "<:"
+FDLE        ::= "=<:"
+FDGT        ::= ">:"
+FDGE        ::= ">=:"
+COLCOL      ::= "::"
+COLCOLCOL   ::= ":::"
+
+COMMA       ::= ","
+DOT         ::= "."
+LBRACK      ::= "["
+LCURLY      ::= "{"
+LPAREN      ::= "("
+RBRACK      ::= "]"
+RCURLY      ::= "}"
+RPAREN      ::= ")"
+COLON       ::= ":"
+DOTDOT      ::= ".."
+ELLIPSIS    ::= "..."
+
+// Other symbols
+
+// Literals
+SPECIALCHAR    ::= "_"|"+"|"-"|"*"|"/"|"="|":"|"\"|">"|"<"|"."|","|"!"|"?"|"#"|"@"|"é"|"è"|"à"|"&"|" "
+UPPERCASE      ::= "A"|...|"Z"
+LOWERCASE      ::= "a"|...|"z"
+DIGIT          ::= "0"|...|"9"
+NONZERODIGIT   ::= "1"|...|"9"
+OCTDIGIT       ::= "0"|...|"7"
+HEXDIGIT       ::= "0"|...|"9"|"A"|...|"F"|"a"|...|"f"
+BINDIGIT       ::= "0"|"1"
+CHARINT        ::= "0"|...|"255"
+ALPHANUM       ::= UPPERCASE | LOWERCASE | DIGIT
+ATOMCHAR       ::= CHAR - ("'"|"\"|NUL)
+STRINGCHAR     ::= CHAR - ("""|"\"|NUL)
+VARIABLECHAR   ::= CHAR - ("`"|"\"|NUL)
+CHARCHAR       ::= CHAR - ("\"|NUL)
+ESCCHAR        ::= "a"|"b"|"f"|"n"|"r"|"t"|"v"|"\"|"'"|"""|"`"|"&"
+
+// End of file
+EOF            ::= "<end of file>"

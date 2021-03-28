@@ -1,0 +1,161 @@
+// Lexical grammar for NewOz
+// This is adapted from M. Mbonyincungu's thesis, with my personal "refinements"
+// Notations :
+//Notation      Meaning
+//========================================================================
+//\epsilon      singleton containing the empty word
+//(w)           grouping of regular expressions
+//[ w ]         union of \epsilon with the set of words w (optionnal group)
+//{ w }         zero or more times w
+//{ w }+        one or more times w
+//w_1 w_2       concatenation of w_1 with w_2
+//w_1 | w_2     logical union of w_1 and w_2 (OR)
+//w_1 - w_2     difference of w_1 and w_2
+
+// White spaces - ignored
+WHITESPACE ::= (" "|"\b"|"\t"|"\n"|"\r"|"\f")
+
+// Comments - ignored
+("//" {~("\n"|"\r")} ("\n"|"\r"["\n"])) | "?"
+
+// Multi-line comments - ignored
+"/*" {CHAR - "*/"} "*/"
+
+// Reserved keywords
+//ANDTHEN ::= "andthen"
+AT      ::= "at"
+ATTR    ::= "attr"
+BREAK   ::= "break"
+CASE    ::= "case"
+CATCH   ::= "catch"
+//CHOICE  ::= "choice" //Commented keywords are not implemented yet - don't exist in NewOz for now
+CLASS   ::= "class"
+//COLLECT ::= "collect"
+//COND    ::= "cond"
+CONTINUE  ::= "continue"
+DECLARE ::= "declare"
+DEF     ::= "def"
+DEFPROC ::= "defproc"
+DEFAULT ::= "default"
+//DEFINE  ::= "define"
+//DIS     ::= "dis"
+DO      ::= "do"
+ELSE    ::= "else"
+//ELSECASE  ::= "elsecase"
+//ELSEOF  ::= "elseof"
+EXPORT  ::= "export"
+EXTENDS ::= "extends"
+//FAIL    ::= "fail"
+FALSE   ::= "false"
+//FEAT    ::= "feat"
+FINALLY ::= "finally"
+FOR     ::= "for"
+FROM    ::= "from"
+FUNCTOR ::= "functor"
+IF      ::= "if"
+IMPORT  ::= "import"
+IN      ::= "in"
+LAZY    ::= "lazy"
+//LOCAL   ::= "local"
+LOCK    ::= "lock"
+MATCH   ::= "match"
+METH    ::= "meth"
+NIL     ::= "nil"
+//NOT     ::= "not"
+//OF      ::= "of"
+OR      ::= "or"
+//PREPARE ::= "prepare"
+PROP    ::= "prop"
+RAISE   ::= "raise"
+//REQUIRE ::= "require"
+RETURN  ::= "return"
+SKIP    ::= "skip"
+SUPER   ::= "super"
+THIS    ::= "this"
+THREAD  ::= "thread"
+TRUE    ::= "true"
+TRY     ::= "try"
+UNIT    ::= "unit"
+VAL     ::= "val"
+VAR     ::= "var"
+
+ASSIGN      ::= "=" ok
+PLUSASS  ::= "+=" ok
+MINUSASS ::= "-=" ok
+DEFINE      ::= ":=" ok
+EQUAL       ::= "==" ok
+NE          ::= "\=" ok
+LT          ::= "<" ok
+GT          ::= ">" ok
+LE          ::= "=<" ok
+GE          ::= ">=" ok
+LBARROW     ::= "<=" ok
+IMPL        ::= "=>" ok
+//AND         ::= "&" ok //DELETED
+LAND        ::= "&&" ok
+//PIPE        ::= "|" ok //DELETED
+LOR         ::= "||" ok
+LNOT        ::= "!" ok
+LNOTNOT     ::= "!!" ok
+MINUS       ::= "-" ok
+PLUS        ::= "+" ok
+STAR        ::= "*" ok
+SLASH       ::= "/" ok
+BACKSLASH   ::= "\" ok
+MODULO      ::= "%" ok
+HASHTAG     ::= "#" ok
+UNDERSCORE  ::= "_" ok
+DOLLAR      ::= "$" ok
+APOSTROPHE  ::= "'" ok
+QUOTE       ::= """ ok
+LACCENT     ::= "`" ok
+RACCENT     ::= "´" ok
+HAT         ::= "^" ok
+BOX         ::= "[]" ok
+//TILDE       ::= "~" ok //DELETED
+DEGREE      ::= "°" ok //TODO find another more common character
+//COMMERCAT   ::= "@" ok //DELETED
+//LARROW      ::= "<-" ok
+//RARROW      ::= "->" ok
+//FDASSIGN    ::= "=:" //not implemented yet
+//FDNE        ::= "\=:" //not implemented yet
+//FDLT        ::= "<:" //not implemented yet
+//FDLE        ::= "=<:" //not implemented yet
+//FDGT        ::= ">:" //not implemented yet
+//FDGE        ::= ">=:" //not implemented yet
+COLCOL      ::= "::" ok
+//COLCOLCOL   ::= ":::" //not implemented yet
+
+COMMA       ::= "," ok
+DOT         ::= "." ok
+LBRACK      ::= "[" ok
+LCURLY      ::= "{" ok
+LPAREN      ::= "(" ok
+RBRACK      ::= "]" ok
+RCURLY      ::= "}" ok
+RPAREN      ::= ")" ok
+SEMI        ::= ";" ok
+COLON       ::= ":" ok
+DOTDOT      ::= ".." ok
+ELLIPSIS    ::= "..." ok
+
+// Literals
+UPPERCASE      ::= "A"|...|"Z" ok
+LOWERCASE      ::= "a"|...|"z" ok
+DIGIT          ::= "0"|...|"9" ok
+NONZERODIGIT   ::= "1"|...|"9" ok
+CHARINT        ::= "0"|...|"255" ok
+ALPHANUM       ::= UPPERCASE | LOWERCASE | DIGIT | "_" ok
+DECINT         ::= DIGIT | NONZERODIGIT (DIGIT)*
+HEXINT         ::= "0" ("x"|"X") (HEXDIGIT)+
+OCTINT         ::= "0" (OCTDIGIT)+
+BININT         ::= "0" ("b"|"B") BINDIGIT+
+OCTDIGIT       ::= "0"|...|"7" ok
+HEXDIGIT       ::= "0"|...|"9"|"A"|...|"F"|"a"|...|"f" ok
+BINDIGIT       ::= "0"|"1" ok
+ESCCHAR        ::= "a"|"b"|"f"|"n"|"r"|"t"|"\"|"'"|"""|"`"|"°"
+PSEUDOCHAR     ::= "\" OCTDIGIT OCTDIGIT OCTDIGIT ok
+                | "\" ("x" | "X") HEXDIGIT HEXDIGIT ok
+
+// End of file
+EOF            ::= "<end of file>"

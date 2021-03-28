@@ -1,0 +1,24 @@
+Premisse :
+Oz has achieved its goal of being an ambitious, multi-paradigm language. What it failed at is keeping an active community, mainly because of the unusual syntax.
+It made it harder for new learners to get into the language. We will work towards improving this situation.
+
+3 axes :
+
+Theoretical/Academical :
+Building upon last year's thesis of Jean-Pacifique Mbonyincungu, we will design a new syntax from the ground up,
+focusing on usability while maintaining all the features present in the language.
+We will take inspiration in modern, popular programming languages such as Scala.
+
+Technical :
+Creating a new syntax means creating a new compiler. We will create a new layer that will come on top of the existing ozc compiler.
+Schema : [.noz file] -> [newOz compiler] -> [.oz file] -> [ozc compiler]
+The goal is to provide the user with better error messages due to full AST analysis,
+than if we simply used a newOz->Oz parser (like in last year's thesis)
+Cons : less efficient than one full compiler, two codebases to maintain
+Pros : way easier to develop, allows Oz to still exist independently, easy to hide behavior from the user
+Java has been chosen because of maintainability concerns for future Mozart developers (familiar language for many and OpenJDK roadmap)
+
+Practical/Teaching :
+An idea is to integrate the new syntax in the LINFO1104 course next semester. Students would be first-hand testers
+and would provide feedback on the use of the compiler, but most importantly the syntax.
+Writing big programs is the only way to test the usability of a syntax, after all.

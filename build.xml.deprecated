@@ -1,0 +1,297 @@
+<!-- 
+// Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
+-->
+
+<project default="runCompilerTests">
+
+    <property name="APP_FULL_NAME" value="nozc (A Compiler for NewOz)" />
+    <property name="SRC_DIR" value="app/src/main/java" />
+    <property name="CLASS_DIR" value="classes" />
+    <property name="LIB_DIR" value="lib" />
+    <property name="JAVADOC_DIR" value="javadoc" />
+    <property name="J2H_DIR" value="java2html" />
+    <property name="PASS_TESTS_DIR" value="/tests/pass" />
+    <property name="FAIL_TESTS_DIR" value="/tests/fail" />
+    <property name="GEN_CLASS_DIR" value="${basedir}/${CLASS_DIR}" />
+
+    <!-- help: Lists main targets -->
+    <target name="help">
+        <echo message="package: Creates a distributable for nozc"/>
+        <echo message="runCompilerTests: Compiles and runs nozc (JVM) tests"/>
+        <echo message="testScanner: Tokenizes nozc tests"/>
+        <echo message="testParser: Parses nozc tests"/>
+        <echo message="testPreAnalysis: Pre-analyzes nozc tests"/>
+        <echo message="testAnalysis: Analyzes nozc tests"/>
+    	<echo message="help: Lists main targets"/>
+    </target>
+    
+    <!-- javacc: Generates JavaCC scanner and parser. -->
+    <target name="javacc">
+        <echo message="Generating JavaCC files..."/>
+        <javacc target="${SRC_DIR}/com/barassolutions/newoz.jj"
+                outputdirectory="${SRC_DIR}/nozc"
+                javacchome="${LIB_DIR}"
+                static="false" />
+    </target>
+
+    <!-- compile: Compiles the nozc source files including JavaCC frontend. -->
+    <target name="compile">
+        <echo message="Compiling newOz source files..."/>
+        <mkdir dir="${CLASS_DIR}" />
+        <javac srcdir="${SRC_DIR}"
+               destdir="${CLASS_DIR}"
+               includes="com/barassolutions/**"
+	       includeantruntime="false"
+               debug="on">
+            <!-- Uncomment the following to see compiler warnings. -->
+            <!-- <compilerarg value="-Xlint" />                    -->
+        </javac>
+    </target>
+
+    <!-- jar: Bundles the newOz classes into a jar file. -->
+    <target name="jar">
+        <echo message="Bundling class files into jar file..."/>
+        <jar destfile="${LIB_DIR}/nozc.jar" basedir="${CLASS_DIR}" includes="com/barassolutions/**"/>
+        <!--<jar destfile="${LIB_DIR}/spim.jar" basedir="${CLASS_DIR}" includes="spim/**"/>-->
+    </target>
+
+    <!-- javadoc: Generates javadoc for nozc runtime classes. -->
+    <target name="javadoc">
+        <echo message="Generating javadoc for nozc classes..."/>
+        <mkdir dir="${JAVADOC_DIR}" />
+        <javadoc overview="${SRC_DIR}/overview.html"
+                 package="Yes"
+                 sourcepath="${SRC_DIR}" destdir="${JAVADOC_DIR}"
+                 packagenames="com.barassolutions.*"
+                 windowtitle="${APP_FULL_NAME}" 
+		 	     doctitle="${APP_FULL_NAME}">
+            <link href="http://java.sun.com/javase/6/docs/api/" />
+        </javadoc>
+    </target>
+
+    <!-- j2h: Generates browsable code using java2html. -->
+    <target name="j2h">
+        <echo message="Generating browsable code for nozc..."/>
+        <mkdir dir="${J2H_DIR}" />
+	<java jar="${LIB_DIR}/j2h.jar"
+           fork="true"
+           failonerror="true"
+           maxmemory="128m">
+          <arg value="-m"/>
+          <arg value="4"/>
+          <arg value="-d"/>
+          <arg value="${J2H_DIR}"/>
+          <arg value="-js"/>
+          <arg value="${SRC_DIR}"/>
+       </java>
+    </target>
+
+    <!-- package: Makes a distributable package for the compiler which includes
+    the sources, binaries, documentation and junit test framework. -->
+    <target name="package" 
+	    depends="clean,javacc,compile,jar,javadoc,j2h">
+        <echo message="Making a distributable nozc.zip..."/>
+        <zip destfile="nozc.zip"
+             basedir="../"
+             includes="com/barassolutions/**"
+             excludes="com/barassolutions/${CLASS_DIR}/**,com/barassolutions/*.zip" />
+    </target>
+
+    <!-- runCompilerTests: We first compile the tests in tests/pass and tests/fail directories
+    using the nozc compiler. We use a JUnit test NozcTest.java to run the nozc compiler on each of the tests.
+    We then run the NozcTestRunner JUnit test suite, which includes a JUnit test case for each nozc test file
+    under tests/pass directory. For example, there is a GCDTest.java test case under tests/junit corresponding
+    to the nozc test GCD.java under tests/pass. -->
+    <target name="runCompilerTests"
+	    depends="javacc,compile,jar">
+        <echo message=
+            "Compiling and running newOz programs using JavaCC frontend..."/>
+        <javac srcdir="${basedir}/tests/"
+               destdir="${CLASS_DIR}"
+               includes="junit/NozcTestJavaCC.java"
+	       includeantruntime="false"
+               debug="on">
+            <!-- Uncomment the following to see compiler warnings. -->
+            <!-- <compilerarg value="-Xlint" />                    -->
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+            </classpath>
+        </javac>
+        <junit printsummary="yes" haltonfailure="no" showoutput="yes">
+            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_DIR}" />
+            <sysproperty key="FAIL_TESTS_DIR" value="${FAIL_TESTS_DIR}" />
+            <sysproperty key="GEN_CLASS_DIR" value="${GEN_CLASS_DIR}" />
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+                <pathelement location="${basedir}/${CLASS_DIR}" />
+            </classpath>
+            <test name="junit.NozcJavaCCTestCase"
+                  haltonfailure="no">
+                <formatter type="plain" usefile="false"/>
+            </test>
+        </junit>
+        <javac srcdir="${basedir}/tests"
+               sourcepath=""
+               destdir="${CLASS_DIR}"
+               includes="junit/**"
+               excludes="clemitter/**,pass/**,fail/**"
+	       includeantruntime="false"
+               debug="on">
+            <!-- Uncomment the following to see compiler warnings. -->
+            <!-- <compilerarg value="-Xlint" />                    -->
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+                <pathelement location="${basedir}/${CLASS_DIR}" />
+            </classpath>
+        </javac>
+        <junit printsummary="yes" haltonfailure="no" showoutput="yes">
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+                <pathelement location="${basedir}/${CLASS_DIR}" />
+            </classpath>
+            <test name="junit.NozcTestRunner"
+                  haltonfailure="no">
+                <formatter type="plain" usefile="false"/>
+            </test>
+        </junit>
+    </target>
+
+    <!-- testJavaCCScanner: Tests JavaCC scanner by running it on all tests under tests/pass directory. -->
+    <target name="testJavaCCScanner" depends="javacc,compile,jar">
+        <echo message="Running JavaCC scanner on the newOz programs..."/>
+        <javac srcdir="${basedir}/tests/"
+               destdir="${CLASS_DIR}"
+               includes="junit/JavaCCScannerTest.java"
+	       includeantruntime="false"
+               debug="on">
+            <!-- Uncomment the following to see compiler warnings. -->
+            <!-- <compilerarg value="-Xlint" />                    -->
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+            </classpath>
+        </javac>
+        <junit printsummary="yes" haltonfailure="no" showoutput="yes">
+            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_DIR}" />
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+                <pathelement location="${basedir}/${CLASS_DIR}" />
+            </classpath>
+            <test name="junit.JavaCCScannerTest"
+                  haltonfailure="no">
+                <formatter type="plain" usefile="false"/>
+            </test>
+        </junit>
+    </target>
+    
+    <!-- testJavaCCParser: Tests JavaCC parser by running it on all tests under tests/pass directory. -->
+    <target name="testJavaCCParser" depends="javacc,compile,jar">
+        <echo message="Running JavaCC parser on the newOz programs..."/>
+        <javac srcdir="${basedir}/tests/"
+               destdir="${CLASS_DIR}"
+               includes="junit/JavaCCParserTest.java"
+	       includeantruntime="false"
+               debug="on">
+            <!-- Uncomment the following to see compiler warnings. -->
+            <!-- <compilerarg value="-Xlint" />                    -->
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+            </classpath>
+        </javac>
+        <junit printsummary="yes" haltonfailure="no" showoutput="yes">
+            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_DIR}" />
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+                <pathelement location="${basedir}/${CLASS_DIR}" />
+            </classpath>
+            <test name="junit.JavaCCParserTest"
+                  haltonfailure="no">
+                <formatter type="plain" usefile="false"/>
+            </test>
+        </junit>
+    </target>
+
+    <!-- testPreAnalysis: Runs the nozc compiler on each test under tests/pass up to the stage
+    where the AST has been pre-analyzed. -->
+    <target name="testPreAnalysis" depends="compile,jar">
+        <echo message="Running compiler on newOz programs up to pre-analysis..."/>
+        <javac srcdir="${basedir}/tests/"
+               destdir="${CLASS_DIR}"
+               includes="junit/PreAnalysisTest.java"
+	       includeantruntime="false"
+               debug="on">
+            <!-- Uncomment the following to see compiler warnings. -->
+            <!-- <compilerarg value="-Xlint" />                    -->
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+            </classpath>
+        </javac>
+        <junit printsummary="yes" haltonfailure="no" showoutput="yes">
+            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_DIR}" />
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+                <pathelement location="${basedir}/${CLASS_DIR}" />
+            </classpath>
+            <test name="junit.PreAnalysisTest"
+                  haltonfailure="no">
+                <formatter type="plain" usefile="false"/>
+            </test>
+        </junit>
+    </target>
+    
+    <!-- testAnalysis: Runs the nozc compiler on each test under tests/pass up to the stage
+    where the AST has been analyzed. -->
+    <target name="testAnalysis" depends="compile,jar">
+        <echo message="Running compiler on newOz programs up to analysis..."/>
+        <javac srcdir="${basedir}/tests/"
+               destdir="${CLASS_DIR}"
+               includes="junit/AnalysisTest.java"
+	       includeantruntime="false"
+               debug="on">
+            <!-- Uncomment the following to see compiler warnings. -->
+            <!-- <compilerarg value="-Xlint" />                    -->
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+            </classpath>
+        </javac>
+        <junit printsummary="yes" haltonfailure="no" showoutput="yes">
+            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_DIR}" />
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+                <pathelement location="${basedir}/${CLASS_DIR}" />
+            </classpath>
+            <test name="junit.AnalysisTest"
+                  haltonfailure="no">
+                <formatter type="plain" usefile="false"/>
+            </test>
+        </junit>
+    </target>
+
+    <!-- clean: Removes generated files and folders. -->
+    <target name="clean">
+        <echo message="Removing generated files and folders..."/>
+        <delete file="${SRC_DIR}/com/barassolutions/Token.java" />
+        <delete file="${SRC_DIR}/com/barassolutions/TokenMgrError.java" />
+        <delete file="${SRC_DIR}/com/barassolutions/ParseException.java" />
+        <delete file="${SRC_DIR}/com/barassolutions/JavaCCParser.java" />
+        <delete file="${SRC_DIR}/com/barassolutions/JavaCCParserTokenManager.java" />
+        <delete file="${SRC_DIR}/com/barassolutions/JavaCCParserConstants.java" />
+        <delete file="${SRC_DIR}/com/barassolutions/SimpleCharStream.java" />
+        <delete>
+            <fileset dir="${basedir}" includes="**/*.class"/>
+        </delete>
+        <delete file="nozc.zip" />
+        <delete file="${LIB_DIR}/nozc.jar" />
+        <delete file="${LIB_DIR}/spim.jar" />
+        <delete dir="${CLASS_DIR}" />
+        <delete dir="${JAVADOC_DIR}" />
+        <delete dir="${J2H_DIR}" />
+    </target>
+
+</project>
+
+
+
+
+
+
+

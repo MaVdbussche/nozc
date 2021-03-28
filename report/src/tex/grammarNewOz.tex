@@ -1,0 +1,235 @@
+\begin{lstlisting}[label={lst:newOzEBNF},frame=single,basicstyle=\footnotesize\ttfamily,escapeinside={(*}{*)}]
+EBNF grammar for newOz, suitable for recursive descent
+- Note that the concatenation symbol in EBNF (comma) is
+omitted for readability reasons
+Notation      Meaning
+===========================================================================
+(*\epsilon*)             singleton containing the empty word
+(*$(w)$*)           grouping of regular expressions
+(*$[w]$*)           union of \epsilon with the set of words w (optional group)
+(*$\{w\}$*)          zero or more times w
+(*$\{w\}+$*)         one or more times w
+(*$w_1~w_2$*)         concatenation of (*$w_1$*) with (*$w_2$*)
+(*$w_1 | w_2$*)         logical union of (*$w_1$*) and (*$w_2$*) (OR)
+(*$w_1-w_2$*)       difference of (*$w_1$*) and (*$w_2$*)
+
+// Interactive statements [ENTRYPOINT]
+interStatement ::= statement
+            | DECLARE LCURLY {declarationPart}+ [interStatement] RCURLY
+
+statement ::= nestConStatement
+            | nestDecVariable
+            | SKIP
+            | SEMI
+            //| DECLARE statement //TODO removed bcs matched in interStatement ?
+            | RETURN expression
+
+expression ::= nestConExpression
+            | nestDecAnonym
+            | DOLLAR
+            | term
+            | THIS
+            | LCURLY expression {expression} RCURLY //TODO not implemented like this
+
+parExpression ::= LPAREN expression RPAREN
+
+inStatement ::= LCURLY {declarationPart} {statement} RCURLY //TODO added possibility for multiple chained statements
+            | LCURLY {declarationPart} expression RCURLY
+
+inExpression ::= LCURLY {declarationPart} [statement] expression RCURLY
+            | LCURLY {declarationPart} statement RCURLY
+
+nestConStatement ::= assignmentExpression
+            | variable LPAREN {expression {COMMA expression}} RPAREN
+            | {LCURLY}+ expression {expression} {RCURLY}+
+            | LPAREN inStatement RPAREN
+            | IF parExpression inStatement
+                {ELSE IF LPAREN expression RPAREN inStatement}
+                [ELSE inStatement]
+            | MATCH expression LCURLY
+                {CASE caseStatementClause}+
+                [ELSE inStatement]
+              RCURLY
+            | FOR LPAREN {loopDec}+ RPAREN inStatement
+            | TRY inStatement
+                [CATCH LCURLY
+                    {CASE caseStatementClause}+
+                RCURLY]
+                [FINALLY inStatement]
+            | RAISE inExpression
+            | THREAD inStatement
+            | LOCK [LPAREN expression RPAREN] inStatement
+
+nestConExpression ::= LPAREN expression RPAREN
+            | variable LPAREN {expression {COMMA expression}} RPAREN
+            | IF LPAREN expression RPAREN inExpression
+                {ELSE IF LPAREN expression RPAREN inExpression}
+                [ELSE inExpression]
+            | MATCH expression LCURLY
+                {CASE caseExpressionClause}+
+                [ELSE inExpression]
+              RCURLY
+            | FOR LPAREN {loopDec}+ RPAREN inExpression
+            | TRY inExpression
+                [CATCH LCURLY
+                    {CASE caseExpressionClause}+
+                RCURLY]
+                [FINALLY inStatement]
+            | RAISE inExpression
+            | THREAD inExpression
+            | LOCK [LPAREN expression RPAREN] inExpression
+
+nestDecVariable ::= DEFPROC variable
+                LPAREN {pattern {COMMA pattern}} RPAREN inStatement
+            | DEF [LAZY] variable
+                LPAREN {pattern {COMMA pattern}} RPAREN inExpression
+            | FUNCTOR [variable] {
+                (IMPORT importClause {COMMA importClause}+)
+                    | (EXPORT exportClause {COMMA exportClause}+)
+                }
+                inStatement
+            | CLASS variableStrict [classDescriptor] LCURLY
+                {classElementDef} RCURLY
+
+nestDecAnonym ::= DEFPROC DOLLAR
+                LPAREN {pattern {COMMA pattern}} RPAREN inStatement
+            | DEF [LAZY] DOLLAR
+                LPAREN {pattern {COMMA pattern}} RPAREN inExpression
+            | FUNCTOR [DOLLAR] {
+                (IMPORT importClause {COMMA importClause}+)
+                    | (EXPORT exportClause {COMMA exportClause}+)
+                }
+              inStatement
+            | CLASS DOLLAR [classDescriptor] LCURLY
+                {classElementDef} RCURLY
+
+importClause ::=  variable
+                [LPAREN (atom|int)[COLON variable]
+                {COMMA (atom|int)[COLON variable]} RPAREN]
+                [FROM atom]
+
+exportClause ::= [(atom|int) COLON] variable
+
+classElementDef ::= DEF methHead [ASSIGN variable]
+                (inExpression|inStatement)
+            | classDescriptor
+
+caseStatementClause ::= pattern {(LAND|LOR) conditionalExpression}
+                IMPL inStatement
+
+caseExpressionClause ::= pattern {(LAND|LOR) conditionalExpression}
+                IMPL inExpression
+
+assignmentExpression ::= conditionalExpression
+                [(ASSIGN|PLUSASS|MINUSASS|DEFINE) assignmentExpression]
+
+conditionalExpression ::= conditionalOrExpression
+
+conditionalOrExpression ::= conditionalAndExpression
+                {LOR conditionalAndExpression}
+
+conditionalAndExpression ::= equalityExpression
+                {LAND equalityExpression}
+
+equalityExpression ::= relationalExpression
+                {EQUAL relationalExpression}
+
+relationalExpression ::= additiveExpression
+                [(GT|GE|LT|LE) additiveExpression]
+
+additiveExpression ::= multiplicativeExpression
+                {(PLUS|MINUS) multiplicativeExpression}
+
+multiplicativeExpression ::= unaryExpression
+                {(STAR|SLASH|MODULO) unaryExpression}
+
+unaryExpression ::= (INC|DEC|MINUS|PLUS) unaryExpression
+            | simpleUnaryExpression
+
+simpleUnaryExpression ::= LNOT unaryExpression
+            | postfixExpression
+
+postfixExpression ::= primary {selector} {(DEC|INC)}
+
+primary ::= parExpression
+            | THIS DOT
+                variable [LPAREN {expression {COMMA expresssion}} RPAREN]
+            | SUPER LPAREN variableStrict RPAREN DOT
+                variable [LPAREN {expression {COMMA expression}} RPAREN]
+            | literal
+            | qualifiedIdentifier
+            | initializer
+
+// Terms and patterns
+term ::= atom
+            | atomLisp LPAREN
+                [[feature COLON] expression
+                {COMMA [feature COLON] expression}] RPAREN
+
+pattern ::= {LNOT} variable | int | float | character | atom | string
+            | UNIT | TRUE | FALSE | UNDERSCORE | NIL //TODO we can remove character bcs of int representation ?
+            | atomLisp LPAREN [[feature COLON] pattern
+                {COMMA [feature COLON] pattern} [COMMA ELLIPSIS]] RPAREN
+            | LPAREN pattern {(HASHTAG|COLCOL) pattern} RPAREN
+            | LBRACK [pattern {COMMA pattern}] RBRACK
+            | LPAREN pattern RPAREN
+
+declarationPart ::= (VAL|VAR) (variable|pattern)
+                ASSIGN (expression|statement)
+                {COMMA (variable|pattern) ASSIGN (expression|statement)} //TODO why statement ?
+
+loopDec ::= variable IN expression [DOTDOT expression] [SEMI expression]
+            | variable IN expression SEMI expression SEMI expression
+            | BREAK COLON variable
+            | CONTINUE COLON variable
+            | RETURN COLON variable
+            | DEFLT COLON expression
+            | COLLECT COLON variable
+
+literal ::= TRUE | FALSE | NIL | int | string | character | float //TODO we can remove character bcs of int representation ?
+
+//label ::= UNIT | TRUE | FALSE | variable | atom //TODO actually not used anywhere
+
+feature ::= UNIT | TRUE | FALSE | atom | int | NIL //TODO not implemented like this
+
+classDescription ::= EXTENDS variableStrict {COMMA variableStrict}+
+            | ATTR variable [ASSIGN expression]
+            | PROP variable
+
+//attrInit ::= ([LNOT] variable | atom | UNIT | TRUE | FALSE) [COLON expression] //TODO not implemented
+
+methHead ::= ([LNOT] variableStrict | atomLisp | UNIT | TRUE | FALSE) //TODO not implemented like this
+                [LPAREN methArg {COMMA methArg}
+                [COMMA ELLIPSIS] [DOLLAR] RPAREN]
+
+methArg ::= [feature COLON] (variable | UNDERSCORE) [LE expression]
+
+variableStrict ::= UPPERCASE {ALPHANUM}
+              | LACCENT {VARIABLECHAR | PSEUDOCHAR} LACCENT
+
+variable ::= LOWERCASE {ALPHANUM}
+          | APOSTROPHE {VARIABLECHAR | PSEUDOCHAR} APOSTROPHE //TODO really ?
+
+atom ::= atomLisp
+        | RACCENT {ATOMCHAR | PSEUDOCHAR} RACCENT
+
+atomLisp ::= APOSTROPHE (LOWERCASE | UPPERCASE) {ALPHANUM}
+
+string ::= QUOTE {STRINGCHAR | PSEUDOCHAR} QUOTE
+
+character ::= CHARINT
+            | DEGREE CHARCHAR
+            | DEGREE PSEUDOCHAR
+            | CHAR // TODO in this case we should send a warning during analysis that it is not supported in underlying oldOz
+
+int ::= [MINUS] DIGIT
+        | [MINUS] NONZERODIGIT {DIGIT}
+        | [MINUS] "0" {OCTDIGIT}+
+        | [MINUS] ("0x"|"0X") {HEXDIGIT}+
+        | [MINUS] ("0b"|"0B") {BINDIGIT}+
+
+float ::= [MINUS] {DIGIT}+ DOT {DIGIT} [("e" | "E")[~]{DIGIT}+]
+
+boolean ::= TRUE | FALSE
+
+\end{lstlisting}

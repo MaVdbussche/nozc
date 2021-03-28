@@ -1,2 +1,17 @@
+# Local IntelliJ configs
 .idea/
 *.iml
+
+# Gradle local stuff
+.gradle/
+
+# Gradle build output
+nozc/build/
+build/
+
+
+# Latex compilation files
+report/build_latex/
+report/out/
+
+lib/

@@ -1,0 +1,72 @@
+plugins {
+    id 'application'
+    id 'java-library'
+}
+
+java {
+    //withJavadocJar()
+    withSourcesJar()
+}
+
+task javaccGen {
+    doFirst {
+        exec {
+            workingDir = './src/main/java/com/barassolutions'
+            commandLine 'javacc', '-static=false', 'newoz.jj'
+        }
+    }
+}
+compileJava.dependsOn javaccGen
+
+tasks.withType(JavaCompile).all {
+    options.warnings = true
+    options.deprecation = true
+    options.debug = true
+    options.incremental = false
+    //options.compilerArgs += ['--enable-preview']
+    //options.release = 16
+}
+tasks.withType(JavaExec) {
+    //jvmArgs += '--enable-preview'
+}
+tasks.withType(Test) {
+    //jvmArgs += '--enable-preview'
+}
+
+jar {
+    it.manifest {
+        attributes 'Main-Class': 'com.barassolutions.Nozc'
+    }
+}
+javadoc.options {
+    //addBooleanOption('-enable-preview', true)
+    //addStringOption('-release', '16')
+}
+
+group 'com.barassolutions'
+version = project.property("version")
+
+processResources {
+    filesMatching('**/app.properties') {
+        filter {
+            it.replace('%APP_VERSION_TOKEN%', version)
+        }
+    }
+}
+
+application {
+    mainClass = 'com.barassolutions.Nozc'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/junit/junit
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    // https://stefanbirkner.github.io/system-rules/index.html
+    testImplementation group: 'com.github.stefanbirkner', name: 'system-rules', version: '1.19.0'
+    // https://mvnrepository.com/artifact/org.jetbrains/annotations
+    implementation group: 'org.jetbrains', name: 'annotations', version: '20.1.0'
+}

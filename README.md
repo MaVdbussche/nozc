@@ -1,8 +1,8 @@
 # NOZC
 
-[![GitHub](https://img.shields.io/github/license/mavdbussche/nozc)](LICENSE)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/mavdbussche/nozc)](releases)
-[![GitHub repo size](https://img.shields.io/github/repo-size/mavdbussche/nozc)](https://github.com/MaVdbussche/nozc)
+[![GitHub](https://img.shields.io/github/license/MaVdbussche/nozc?label=License)](LICENSE)
+[![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/MaVdbussche/nozc?include_prereleases&label=Release&sort=semver)](releases)
+![GitHub repo size](https://img.shields.io/github/repo-size/MaVdbussche/nozc?label=Size)
 
 
 Nozc is compiler for NewOz, written in Java. It is able to translate NewOz files (denoted by the use of `.noz` extension) to Oz files (`.oz`), which are then be fed to the Mozart compiler (`ozc`).\

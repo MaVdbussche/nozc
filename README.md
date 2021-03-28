@@ -51,8 +51,7 @@ The downloaded archive will have this form :
     ├── bin
     │   ├── nozc                # Unix executable file (shell script)
     │   └── nozc.bat            # Windows executable
-    ├── lib                     # Librairies and JARs necessary to run the app
-    └── README.md               # A copy of this README file
+    └── lib                     # Librairies and JARs necessary to run the app
 > Please note that the Windows version of the program, although it should behave exactly the same way,
 > has not been as thoroughly tested as the Linux one, and is thus more susceptible to bugs. 
 
@@ -94,7 +93,7 @@ When placed in the extracted folder, run the following command to see the valid 
 
 All contributions to this compiler are welcome. See [CONTRIBUTING](CONTRIBUTING.md) for more info.
 
-Note: If editing the Readme, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
+Note: When editing the Readme, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
 
 ## Issues and discussion
 
@@ -110,7 +109,7 @@ Tools used for the making of this program include :
 * IntelliJ IDEA Utlimate, a modern Java IDE by [JetBrains](https://www.jetbrains.com/idea/).
 * [JUnit4](https://junit.org/junit4/), a powerful testing framework for Java programs, with the [System Rules](https://stefanbirkner.github.io/system-rules/index.html) library on top.
 
-The general structure of the program is inpired by the works of Bill Campbell, Swami Iyer, and Bahar Akbal-Delibaş on the [j--](https://www.cs.umb.edu/j--/index.html) compiler. The accompanying has been of great help as well.
+The general structure of the program is inpired by the works of Bill Campbell, Swami Iyer, and Bahar Akbal-Delibaş on the [j--](https://www.cs.umb.edu/j--/index.html) compiler. The accompanying book has been of great help as well.
 
 ## License
 

@@ -16,14 +16,13 @@ task javaccGen {
         }
     }
 }
-
 compileJava.dependsOn javaccGen
 
 tasks.withType(JavaCompile).all {
-    options.warnings=true
-    options.deprecation=true
-    options.debug=true
-    options.incremental=false
+    options.warnings = true
+    options.deprecation = true
+    options.debug = true
+    options.incremental = false
     //options.compilerArgs += ['--enable-preview']
     //options.release = 16
 }
@@ -66,6 +65,8 @@ repositories {
 dependencies {
     // https://mvnrepository.com/artifact/junit/junit
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    // https://stefanbirkner.github.io/system-rules/index.html
+    testImplementation group: 'com.github.stefanbirkner', name: 'system-rules', version: '1.19.0'
     // https://mvnrepository.com/artifact/org.jetbrains/annotations
     implementation group: 'org.jetbrains', name: 'annotations', version: '20.1.0'
 }

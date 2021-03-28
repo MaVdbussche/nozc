@@ -10,6 +10,10 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Help;
+import picocli.CommandLine.Help.Ansi;
+import picocli.CommandLine.Help.Ansi.Style;
+import picocli.CommandLine.Help.ColorScheme;
 import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -24,7 +28,8 @@ import picocli.CommandLine.Parameters;
     parameterListHeading = "%n@|bold,underline Parameters:|@%n",
     optionListHeading = "%n@|bold,underline Options:|@%n",
     exitCodeListHeading = "%n@|bold,underline Exit codes:|@%n",
-    exitCodeList = {"0:Successful program execution", "1:something", "24:something bad"},
+    exitCodeList = {"0:Successful program execution",
+        "1:Exception occurred during program execution", "2:Invalid input (usage)"},
     mixinStandardHelpOptions = true,
     versionProvider = Nozc.VersionProvider.class,
     sortOptions = false,
@@ -37,6 +42,9 @@ public class Nozc implements Callable<Integer> {
     */
 
   public static boolean errorHasOccurred;
+
+  private static Ansi usedAnsi = Ansi.AUTO;
+
   @Option(names = {
       "--no-keep"}, negatable = true, description = "Keep the intermediary Oz files in the output folder. True by default")
   boolean deleteOzFiles;
@@ -64,32 +72,44 @@ public class Nozc implements Callable<Integer> {
   private File destDirectory;
 
   public static void main(String[] args) {
-    PrintWriter out = null;
-    PrintWriter err = null;
-    //Ansi ansi = Ansi.AUTO;
+    PrintWriter out = new PrintWriter(System.out);
+    PrintWriter err = new PrintWriter(System.err);
+    ColorScheme colorScheme = new ColorScheme.Builder()
+        .commands(Style.bold)
+        .options(Style.fg_yellow)
+        .parameters(Style.fg_yellow)
+        .optionParams(Style.italic)
+        .errors(Style.fg_red, Style.bold)
+        .stackTraces(Style.italic)
+        .build();
 
-    CommandLine cmd = new CommandLine(new Nozc())
-        .setOut(new PrintWriter(System.out))
-        .setErr(new PrintWriter(System.err));
-    //.setColorScheme(Help.defaultColorScheme(ansi));
+    Nozc nozc = new Nozc();
 
-    cmd.printVersionHelp(System.out);
+    CommandLine cmd = new CommandLine(nozc)
+        .setOut(out)
+        .setErr(err)
+        .setColorScheme(colorScheme);
+
+    cmd.printVersionHelp(out);
+    System.out.println("================================================");
     int exitCode = cmd.execute(args);
     System.exit(exitCode);
   }
 
   @Override
   public Integer call() throws Exception {
-    System.out.println("Compiling "+inputFiles.length+" NewOz files to destination directory "+destDirectory.getPath());
+    System.out.println(
+        "Compiling " + inputFiles.length + " NewOz files to destination directory " + destDirectory
+            .getPath());
     for (File inputFile : inputFiles) {
       errorHasOccurred = false;
       if (outputFile == null) {
-        outputFile = new File(destDirectory, inputFile.getName().substring(0, inputFile.getName().lastIndexOf('.')) + ".oz");
-        System.out.println("Created output file "+outputFile.toString());
+        outputFile = new File(destDirectory,
+            inputFile.getName().substring(0, inputFile.getName().lastIndexOf('.')) + ".oz");
       } else {
         outputFile = new File(destDirectory, outputFile.getName());
-        System.out.println("Created output file "+outputFile.toString());
       }
+      System.out.println("Created output file " + outputFile.toString());
 
       /* Create the Scanner */
       JavaCCParserTokenManager scanner;
@@ -100,11 +120,11 @@ public class Nozc implements Callable<Integer> {
             1)
         );
       } catch (FileNotFoundException e) {
-        return 2; //TODO catch this custom exit code and display appropriate error/help message https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
+        return 1;
       }
       if (scanner == null) {
-        System.err.println("Error in scanner initialization"); //TODO use picocli error printing
-        return 1; //TODO catch this custom exit code and display appropriate error/help message https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
+        System.err.println(getErrorString("Error in scanner initialization"));
+        return 1;
       }
 
       // Tokenize the NewOz input, print the tokens to STDOUT, and then stop the compilation
@@ -114,9 +134,9 @@ public class Nozc implements Callable<Integer> {
         do {
           token = scanner.getNextToken();
           if (token.kind == JavaCCParserConstants.ERROR) {
-            System.err.printf(
-                "%s:%d: Unidentified input token: '%s'\n",
-                inputFile, token.beginLine, token.image); //TODO use picocli error printing
+            System.err.println(getErrorString(
+                inputFile + ":" + token.beginLine + ": Unidentified input token: '" + token.image
+                    + "'"));
             errorHasOccurred = true;
           } else {
             p.printf("%d\t : %s = %s\n", token.beginLine,
@@ -131,16 +151,19 @@ public class Nozc implements Callable<Integer> {
       InterStatement ast = null;
       JavaCCParser parser;
       try {
-        parser = new JavaCCParser(scanner); //TODO create an annotation to ignore this error ?
+        //This is not actually an error : IntelliJ just tries to match this with the class
+        // in newoz.jj, instead of the valid constructor in JavaCC.java.
+        // This does not cause an error at runtime.
+        parser = new JavaCCParser(scanner);
         parser.fileName(inputFile.getName());
         ast = parser.interStatement();
         errorHasOccurred |= parser.errorHasOccurred();
       } catch (ParseException e) {
-        System.err.println(e.getMessage()); //TODO use picocli error printing
+        System.err.println(e.getMessage());
       }
       if (ast == null) {
-        System.err.println("Error in parser initialization"); //TODO use picocli error printing
-        return 1; //TODO catch this custom exit code and display appropriate error/help message https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
+        System.err.println(getErrorString("Error in parser initialization"));
+        return 1;
       }
 
       // Scan/parse the NewOz input, print the AST to STDOUT, and then stop the compilation
@@ -149,7 +172,7 @@ public class Nozc implements Callable<Integer> {
         return 0;
       }
       if (errorHasOccurred) {
-        return 1; //TODO catch this custom exit code and display appropriate error/help message https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
+        return 1;
       }
 
       /* Pre-analyze the input */
@@ -162,7 +185,7 @@ public class Nozc implements Callable<Integer> {
         return 0;
       }
       if (errorHasOccurred) {
-        return 1; //TODO catch this custom exit code and display appropriate error/help message https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
+        return 1;
       }
 
       /* Analyze the input */
@@ -174,7 +197,7 @@ public class Nozc implements Callable<Integer> {
         return 0;
       }
       if (errorHasOccurred) {
-        return 1; //TODO catch this custom exit code and display appropriate error/help message https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
+        return 1;
       }
 
       /* Generate Oz code */
@@ -183,7 +206,7 @@ public class Nozc implements Callable<Integer> {
       emitter.close();
       errorHasOccurred |= ast.errorHasOccurred();
       if (errorHasOccurred) {
-        return 1; //TODO catch this custom exit code and display appropriate error/help message https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
+        return 1;
       }
 
       /**
@@ -192,14 +215,18 @@ public class Nozc implements Callable<Integer> {
        **/
 
       /* Delete the generated Oz files if so required */
-      if(deleteOzFiles) {
-        System.out.println("Deleting file \""+outputFile.getName()+"\" as requested...");
+      if (deleteOzFiles) {
+        System.out.println("Deleting file \"" + outputFile.getName() + "\" as requested...");
         Files.delete(outputFile.toPath());
       }
     }
 
     // No error occurred
     return 0;
+  }
+
+  private static String getErrorString(String s) {
+    return usedAnsi.string("@|bold,red " + s + "|@");
   }
 
   static class VersionProvider implements IVersionProvider {
@@ -212,10 +239,11 @@ public class Nozc implements Callable<Integer> {
       String version = props.get("version").toString();
 
       return new String[]{"@|yellow ${COMMAND-FULL-NAME} " + version + "|@",
-          "(c) COPYRIGHT INFO HERE 2021",
-          "Picocli " + CommandLine.VERSION,
+          "(c) Martin \"Barsingha\" Vandenbussche 2021",
+          "Run via Picocli " + CommandLine.VERSION,
           "JVM: ${java.version} (${java.vendor} ${java.vm.name} ${java.vm.version})",
-          "OS: ${os.name} ${os.version} ${os.arch}"};
+          "OS: ${os.name} ${os.version} ${os.arch}",
+          "This software is distributed under the BSD license, available at <link>"};
     }
   }
 }

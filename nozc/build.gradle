@@ -1,6 +1,16 @@
 plugins {
     id 'application'
     id 'java-library'
+    //id 'org.beryx.runtime' version '1.12.2'
+}
+
+group 'com.barassolutions'
+version = project.property("version")
+
+application {
+    mainClass = 'com.barassolutions.Nozc'
+    applicationName = 'nozc'
+    applicationDefaultJvmArgs = []
 }
 
 java {
@@ -24,7 +34,7 @@ tasks.withType(JavaCompile).all {
     options.debug = true
     options.incremental = false
     //options.compilerArgs += ['--enable-preview']
-    //options.release = 16
+    options.release = 16
 }
 tasks.withType(JavaExec) {
     //jvmArgs += '--enable-preview'
@@ -34,7 +44,7 @@ tasks.withType(Test) {
 }
 
 jar {
-    it.manifest {
+    manifest {
         attributes 'Main-Class': 'com.barassolutions.Nozc'
     }
 }
@@ -43,8 +53,15 @@ javadoc.options {
     //addStringOption('-release', '16')
 }
 
-group 'com.barassolutions'
-version = project.property("version")
+task uberJar(type: Jar) {
+    archiveClassifier = 'uber'
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll {it.name.endsWith('jar')}.collect {zipTree(it)}
+    }
+}
 
 processResources {
     filesMatching('**/app.properties') {
@@ -52,10 +69,6 @@ processResources {
             it.replace('%APP_VERSION_TOKEN%', version)
         }
     }
-}
-
-application {
-    mainClass = 'com.barassolutions.Nozc'
 }
 
 repositories {

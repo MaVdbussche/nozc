@@ -1402,7 +1402,7 @@ public class CommandLine {
    * or programmatically (e.g. {@link CommandSpec#exitCodeOnInvalidInput(int)}).</p>
    * <p>Additionally, there are several mechanisms for commands to return custom exit codes.
    * See the javadoc of the {@link #execute(String...) execute} method for details.</p>
-   * <h3>Standard Exit Codes</h3>
+   * <h2>Standard Exit Codes</h2>
    * <p>There are a few conventions, but there is <a href="https://stackoverflow.com/questions/1101957/are-there-any-standard-exit-status-codes-in-linux/40484670#40484670">no
    * standard</a>. The specific set of codes returned is unique to the program that sets it.
    * Typically an exit code of zero indicates success, any non-zero exit code indicates failure. For
@@ -5864,8 +5864,8 @@ public class CommandLine {
 
   /**
    * <p>
-   * Fields annotated with {@code @Mixin} are "expanded" into the current command: {@link Option
-   * @Option} and {@link Parameters @Parameters} in the mixin class are added to the options and
+   * Fields annotated with {@code @Mixin} are "expanded" into the current command: {@link Option @Option}
+   * and {@link Parameters @Parameters} in the mixin class are added to the options and
    * positional parameters of this command. A {@link DuplicateOptionAnnotationsException} is thrown
    * if any of the options in the mixin has the same name as an option in this command.</p>
    * <p>The {@code Mixin} annotation provides a way to reuse common options and parameters without
@@ -6618,8 +6618,8 @@ public class CommandLine {
 
   /**
    * <p>
-   * When parsing command line arguments and initializing fields annotated with {@link Option
-   * @Option} or {@link Parameters @Parameters}, String values can be converted to any type for
+   * When parsing command line arguments and initializing fields annotated with {@link Option @Option}
+   * or {@link Parameters @Parameters}, String values can be converted to any type for
    * which a {@code ITypeConverter} is registered.
    * </p><p>
    * This interface defines the contract for classes that know how to convert a String into some

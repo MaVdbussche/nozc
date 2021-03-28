@@ -243,7 +243,7 @@ public class Nozc implements Callable<Integer> {
           "Run via Picocli " + CommandLine.VERSION,
           "JVM: ${java.version} (${java.vendor} ${java.vm.name} ${java.vm.version})",
           "OS: ${os.name} ${os.version} ${os.arch}",
-          "This software is distributed under the BSD license, available at <link>"};
+          "This software is distributed under the BSD license, available at https://github.com/MaVdbussche/nozc/blob/master/LICENSE"};
     }
   }
 }

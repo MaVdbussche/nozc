@@ -1,7 +1,0 @@
-# Use this file for reflexions that don't have their place yet in the main TeX report
-
-- We need an equivalent to Scala "currying", where dots are facultative
-ex: ex1(7).ex2().browse()
-
-- The idea of a built-in function list must be complete, completely coherent, and explicit to the user.
-Is it the case today ?

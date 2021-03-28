@@ -10,8 +10,7 @@ nozc/build/
 build/
 
 
-# Latex compilation files
-report/build_latex/
-report/out/
+# Latex report
+report/
 
 lib/

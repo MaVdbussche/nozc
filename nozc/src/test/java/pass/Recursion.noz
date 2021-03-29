@@ -1,0 +1,10 @@
+declare
+{
+  def sumList(l) {
+    if(l==nil) {
+      nil
+    } else {
+      l.1
+    }
+  }
+}

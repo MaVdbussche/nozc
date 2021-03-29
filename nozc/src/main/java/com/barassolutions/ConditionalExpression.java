@@ -89,6 +89,7 @@ public class ConditionalExpression extends Expression {
         break;
       } else if (i == conditions.size()-1) { //We are done
         output.token(TokenOz.END);
+        break;
       }
     }
   }

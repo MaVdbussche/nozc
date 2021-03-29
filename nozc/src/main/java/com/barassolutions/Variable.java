@@ -25,6 +25,9 @@ public class Variable extends Pattern implements Lhs {
     this.constant = constant;
     this.usedAsPattern = isAPattern;
     this.readMode = readMode;
+    if (isAPattern) {
+      this.type = Type.ANY;
+    }
   }
 
   /**
@@ -128,8 +131,9 @@ public class Variable extends Pattern implements Lhs {
       } else {
         System.out.println(
             "Retrieved Variable in context <name:" + var.name + " constant:" + var.constant
-                + " readMode:" + var.readMode + ">");
+                + " readMode:" + var.readMode + " type:" + var.type() + ">");
         this.constant = var.constant;
+        this.type = var.type();
       }
     } else {
       //Nothing to do here (it is added to the inner context in analyze() method of all encapsulating AST nodes, like MethodDef or CaseExpressionClause)

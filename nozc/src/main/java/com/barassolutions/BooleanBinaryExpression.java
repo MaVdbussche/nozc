@@ -74,7 +74,7 @@ class OperationLogicalAnd extends BooleanBinaryExpression {
 /**
  * The AST node for a logical equality (==) expression.
  */
-class OperationLogicalEqual extends BooleanBinaryExpression {
+class OperationEqual extends BooleanBinaryExpression {
 
   /**
    * Construct an AST node for a logical EQUAL expression given its line number, and lhs and rhs
@@ -84,7 +84,7 @@ class OperationLogicalEqual extends BooleanBinaryExpression {
    * @param lhs  lhs operand.
    * @param rhs  rhs operand.
    */
-  public OperationLogicalEqual(int line, Expression lhs, Expression rhs) {
+  public OperationEqual(int line, Expression lhs, Expression rhs) {
     super(line, "==", lhs, rhs);
   }
 
@@ -97,11 +97,12 @@ class OperationLogicalEqual extends BooleanBinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
-    lhs.type().mustMatchExpected(line(), Type.BOOLEAN);
-    rhs.type().mustMatchExpected(line(), Type.BOOLEAN);
-    type = Type.BOOLEAN;
+    System.out.println("Starting analysis of boolean equality");
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
+    lhs.type()
+        .mustMatchExpected(line(), rhs.type());
+    this.type = Type.BOOLEAN;
     return this;
   }
 }

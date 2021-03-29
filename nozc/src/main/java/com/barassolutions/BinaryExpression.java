@@ -75,15 +75,17 @@ class OperationPlus extends BinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
     if (lhs.type() == Type.STRING || rhs.type() == Type.STRING) {
       return (new OperationStringConcatenation(line(), lhs, rhs)).analyze(context);
     } else if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
-    } else {
+    } else if (lhs.type == Type.UNKNOWN && rhs.type() == Type.UNKNOWN){
+      type = Type.UNKNOWN;
+    } else{
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
           "Invalid operand types for addition");
@@ -118,8 +120,8 @@ class OperationMinus extends BinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
     if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
@@ -159,8 +161,8 @@ class OperationMultiplication extends BinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
     if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
@@ -200,8 +202,8 @@ class OperationModulo extends BinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
     if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
     } else {
@@ -239,8 +241,8 @@ class OperationDivision extends BinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
     if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {

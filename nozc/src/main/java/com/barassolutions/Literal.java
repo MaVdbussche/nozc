@@ -13,7 +13,10 @@ public class Literal extends Pattern {
     super(line);
     this.type = type;
     switch (type) {
-      case NIL -> this.image = TokenOz.NIL.image();
+      case NIL -> {
+        //this.image = TokenOz.NIL.image(); TODO
+        this.type = Type.ANY;
+      }
       case UNIT -> this.image = TokenOz.UNIT.image();
       case UNDERSCORE -> this.image = TokenOz.UNDERSCORE.image();
     }
@@ -22,7 +25,7 @@ public class Literal extends Pattern {
 
   public Literal(int line, Type type, boolean value, boolean isAPattern) {
     super(line);
-    assert type==Type.BOOLEAN;
+    assert type == Type.BOOLEAN;
     this.type = type;
     this.image = String.valueOf(value);
     this.usedAsPattern = isAPattern;

@@ -112,6 +112,7 @@ public class Nozc implements Callable<Integer> {
       System.out.println("Created output file " + outputFile.toString());
 
       /* Create the Scanner */
+      System.out.println("==========Scanning input==========");
       JavaCCParserTokenManager scanner;
       try {
         scanner = new JavaCCParserTokenManager(new SimpleCharStream(
@@ -146,8 +147,10 @@ public class Nozc implements Callable<Integer> {
         } while (token.kind != JavaCCParserConstants.EOF);
         return 0;
       }
+      System.out.println("==========Scanning done==========");
 
       /* Create the Parser */
+      System.out.println("==========Parsing input==========");
       InterStatement ast = null;
       JavaCCParser parser;
       try {
@@ -174,8 +177,10 @@ public class Nozc implements Callable<Integer> {
       if (errorHasOccurred) {
         return 1;
       }
+      System.out.println("==========Parsing done==========");
 
       /* Pre-analyze the input */
+      System.out.println("==========Pre-analyzing input==========");
       ast.setFileName(inputFile.getName());
       ast.preAnalyze();
       errorHasOccurred |= ast.errorHasOccurred();
@@ -187,8 +192,10 @@ public class Nozc implements Callable<Integer> {
       if (errorHasOccurred) {
         return 1;
       }
+      System.out.println("==========Pre-analyzing done==========");
 
       /* Analyze the input */
+      System.out.println("==========Analyzing input==========");
       ast.analyze(null);
       errorHasOccurred |= ast.errorHasOccurred();
 
@@ -199,8 +206,10 @@ public class Nozc implements Callable<Integer> {
       if (errorHasOccurred) {
         return 1;
       }
+      System.out.println("==========Analyzing done==========");
 
       /* Generate Oz code */
+      System.out.println("==========Code generation started==========");
       Emitter emitter = new Emitter(outputFile);
       ast.codegen(emitter);
       emitter.close();
@@ -208,6 +217,7 @@ public class Nozc implements Callable<Integer> {
       if (errorHasOccurred) {
         return 1;
       }
+      System.out.println("==========Code generation done==========");
 
       /**
        //TODO now launch to Oz compiler (ozc)

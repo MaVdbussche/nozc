@@ -51,7 +51,6 @@ public class FunctionDef extends Declaration {
   @Override
   public AST analyze(Context context) {
     MethodContext methContext = new MethodContext(context);
-    context.addFunction(this, methContext);
 
     args.forEach(a -> {
       a = (Pattern) a.analyze(context);
@@ -62,6 +61,8 @@ public class FunctionDef extends Declaration {
 
     returnType = expression.type();
     methContext.setReturnType(returnType);
+
+    context.addFunction(this, methContext);
     return this;
   }
 
@@ -74,7 +75,7 @@ public class FunctionDef extends Declaration {
       output.space();
     }
     output.token(TokenOz.LCURLY);
-    output.literal(name);
+    output.literal(Utils.ozFriendlyName(name));
     args.forEach(a -> {
       output.space();
       a.codegen(output);

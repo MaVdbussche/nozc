@@ -25,6 +25,9 @@ public class Variable extends Pattern implements Lhs {
     this.constant = constant;
     this.usedAsPattern = isAPattern;
     this.readMode = readMode;
+    if (isAPattern) {
+      this.type = Type.ANY;
+    }
   }
 
   /**
@@ -126,10 +129,11 @@ public class Variable extends Pattern implements Lhs {
         interStatement.reportSemanticError(line(),
             "Could not find variable for: <name:" + name + ">");
       } else {
-        System.out.println(
-            "Retrieved Variable in context <name:" + var.name + " constant:" + var.constant
-                + " readMode:" + var.readMode + ">");
+        Logger.debug(
+            "Retrieved Variable in context <name:" + var.name() + " constant:" + var.isConstant()
+                + " readMode:" + var.readMode() + " type:" + var.type() + ">");
         this.constant = var.constant;
+        this.type = var.type();
       }
     } else {
       //Nothing to do here (it is added to the inner context in analyze() method of all encapsulating AST nodes, like MethodDef or CaseExpressionClause)
@@ -145,7 +149,7 @@ public class Variable extends Pattern implements Lhs {
    */
   @Override
   public void codegen(Emitter output) {
-    System.out.println(
+    Logger.debug(
         "Generating code for a Variable <name:" + name + " constant:" + constant + " readMode:"
             + readMode + ">");
     if (!constant) {

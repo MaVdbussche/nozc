@@ -75,15 +75,17 @@ class OperationPlus extends BinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
     if (lhs.type() == Type.STRING || rhs.type() == Type.STRING) {
       return (new OperationStringConcatenation(line(), lhs, rhs)).analyze(context);
     } else if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
-    } else {
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+      type = Type.ANY;
+    } else{
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
           "Invalid operand types for addition");
@@ -118,12 +120,14 @@ class OperationMinus extends BinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
     if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+      type = Type.ANY;
     } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
@@ -159,12 +163,14 @@ class OperationMultiplication extends BinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
     if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+      type = Type.ANY;
     } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
@@ -200,10 +206,12 @@ class OperationModulo extends BinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
     if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+      type = Type.ANY;
     } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
@@ -239,12 +247,14 @@ class OperationDivision extends BinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
     if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+      type = Type.ANY;
     } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),

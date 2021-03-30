@@ -1,6 +1,7 @@
 package com.barassolutions;
 
 import java.util.ArrayList;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class InExpression extends Expression {
@@ -11,10 +12,9 @@ public class InExpression extends Expression {
   private final ArrayList<Declaration> declarations;
 
   /**
-   * Optional statement.
+   * Optional statements.
    */
-  @Nullable
-  private Statement statement;
+  private final ArrayList<Statement> statements;
 
   /**
    * Expression to evaluate.
@@ -32,14 +32,14 @@ public class InExpression extends Expression {
    * expressions forming the block body.
    *
    * @param line       line in which the block occurs in the source file.
-   * @param statement  statement present in the block body.
+   * @param statements statements present in the block body.
    * @param expression optional expression present in the block body.
    */
-  public InExpression(int line, ArrayList<Declaration> decls, @Nullable Statement statement,
+  public InExpression(int line, ArrayList<Declaration> decls, ArrayList<Statement> statements,
       @Nullable Expression expression) {
     super(line);
     this.declarations = decls;
-    this.statement = statement;
+    this.statements = statements;
     this.expression = expression;
   }
 
@@ -56,11 +56,13 @@ public class InExpression extends Expression {
 
     declarations.forEach(e -> e = (Declaration) e.analyze(this.context));
 
-    if (statement != null) {
-      statement = (Statement) statement.analyze(this.context);
-    } else if (expression != null) {
+    statements.forEach(s -> s = (Statement) s.analyze(this.context));
+
+    if(expression!=null) {
       expression = expression.analyze(this.context);
+      this.type = expression.type();
     }
+
     return this;
   }
 
@@ -79,9 +81,9 @@ public class InExpression extends Expression {
       output.newLine();
       output.indentRight();
     }
-    if (statement != null) {
-      statement.codegen(output);
-    } else if (expression != null) {
+    statements.forEach(s -> s.codegen(output));
+
+    if(expression!=null) {
       expression.codegen(output);
     }
   }
@@ -94,20 +96,13 @@ public class InExpression extends Expression {
       context.writeToStdOut(p);
       p.indentLeft();
     }
-    for (Declaration decl : declarations) {
-      p.indentRight();
-      decl.writeToStdOut(p);
-      p.indentLeft();
-    }
-    if (statement != null) {
-      p.indentRight();
-      statement.writeToStdOut(p);
-      p.indentLeft();
-    } else if (expression != null) {
-      p.indentRight();
+    p.indentRight();
+    declarations.forEach(decl -> decl.writeToStdOut(p));
+    statements.forEach(s -> s.writeToStdOut(p));
+    if(expression!=null) {
       expression.writeToStdOut(p);
-      p.indentLeft();
     }
+    p.indentLeft();
 
     p.printf("</ExpressionBlock>\n");
   }

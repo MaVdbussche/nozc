@@ -35,7 +35,7 @@ public class ConditionalStatement extends Statement {
     super(line);
     if (conditions.size() == thenPart.size()) {
       elsePart = false;
-    } else if (conditions.size() - 1 == thenPart.size()) {
+    } else if (conditions.size() + 1 == thenPart.size()) {
       elsePart = true;
     } else {
       interStatement.reportSemanticError(line(), "Ill-formed conditional block.");
@@ -68,7 +68,7 @@ public class ConditionalStatement extends Statement {
    * @param output the code emitter (basically an abstraction for producing the .oz file).
    */
   public void codegen(Emitter output) {
-    for (int i = 0; i < consequences.size(); i++) {
+    for (int i = 0; i < conditions.size(); i++) {
       output.token(TokenOz.IF);
       output.space();
       output.token(TokenOz.LPAREN);
@@ -81,9 +81,9 @@ public class ConditionalStatement extends Statement {
       consequences.get(i).codegen(output);
       output.newLine();
       output.indentLeft();
-      if (i != consequences.size() - 1) { //Next i is an "else if"
+      if (i != conditions.size() - 1) { //Next i is an "else if"
         output.token(TokenOz.ELSE);
-      } else if (elsePart && (i == consequences.size() - 1)) { // Next i is an "else"
+      } else if (elsePart && (i == conditions.size() - 1)) { // Next i is an "else"
         output.token(TokenOz.ELSE);
         output.newLine();
         output.indentRight();
@@ -91,8 +91,10 @@ public class ConditionalStatement extends Statement {
         output.newLine();
         output.indentLeft();
         output.token(TokenOz.END);
+        break;
       } else if (i == consequences.size()-1) { //We are done
         output.token(TokenOz.END);
+        break;
       }
     }
   }

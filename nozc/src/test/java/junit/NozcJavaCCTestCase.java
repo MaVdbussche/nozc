@@ -1,11 +1,12 @@
 package junit;
 
+import com.barassolutions.Logger;
 import com.barassolutions.Nozc;
 import java.io.File;
-import junit.framework.TestCase;
-import org.junit.Assert;
+import java.util.Arrays;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.Assertion;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
 /**
@@ -17,7 +18,9 @@ public class NozcJavaCCTestCase {
   /**
    * This library allows us to test programs which call System#exit() through JUnit ! Which is the
    * case for our CLI application here.
-   * @see <a href="https://stefanbirkner.github.io/system-rules/index.html">System Rules Online documentation</a>
+   *
+   * @see <a href="https://stefanbirkner.github.io/system-rules/index.html">System Rules Online
+   * documentation</a>
    */
   @Rule
   public final ExpectedSystemExit exit = ExpectedSystemExit.none();
@@ -25,67 +28,58 @@ public class NozcJavaCCTestCase {
   private static String[] args = null;
 
   /**
-   * Run the nozc compiler against each pass-test file.
+   * Run the nozc compiler against a pass-test file.
    */
   @Test
-  public void testPassAll() {
-    System.out.println("================================================");
-    System.out.println("Starting testPass");
+  public void testPassHelloWorld() {
+    String testedFile = "HelloWorld.noz";
 
-    File passTestsDir = new File("src/test/java/pass");
+    File passTest = new File("src/test/java/pass/"+testedFile);
     File genClassDir = new File("src/test/java/pass");
-    File[] files = passTestsDir.listFiles();
-    for (int i = 0; files != null && i < files.length; i++) {
-      if (files[i].toString().endsWith(".noz")) {
-        System.out.printf("""
-            Running nozc (with javacc frontend) on %s ...
+    System.out.print("\n\n");
+    System.out.println("================================================");
+    System.out.println("Starting testPass on " + passTest.toString() + " to test and compile.");
 
-            """, files[i].toString());
-        args = new String[]{"-d", genClassDir.getAbsolutePath(),
-            files[i].toString()};
-        testPassFile();
-        System.out.print("\n\n");
-      }
-    }
-  }
+    args = new String[]{"-d", genClassDir.getAbsolutePath(), passTest.toString()};
 
-  /**
-   * Run the nozc compiler against a specific pass-test file.
-   */
-  private void testPassFile() {
     exit.expectSystemExitWithStatus(0);
     Nozc.main(args);
   }
 
   /**
-   * Run the nozc compiler against each fail-test file.
+   * Run the nozc compiler against a pass-test file.
    */
   @Test
-  public void testFailAll() {
+  public void testPassRecursion() {
+    String testedFile = "Recursion.noz";
+
+    File passTest = new File("src/test/java/pass/"+testedFile);
+    File genClassDir = new File("src/test/java/pass");
+    System.out.print("\n\n");
     System.out.println("================================================");
-    System.out.println("Starting testFail");
+    System.out.println("Starting testPass on " + passTest.toString() + " to test and compile.");
 
-    File failTestsDir = new File("src/test/java/fail");
-    File genClassDir = new File("src/test/java/fail");
-    File[] files = failTestsDir.listFiles();
-    for (int i = 0; files != null && i < files.length; i++) {
-      if (files[i].toString().endsWith(".noz")) {
-        System.out.printf("""
-            Running nozc (with javacc frontend) on %s ...
+    args = new String[]{"-d", genClassDir.getAbsolutePath(), passTest.toString()};
 
-            """, files[i].toString());
-        args = new String[]{"-d", genClassDir.getAbsolutePath(),
-            files[i].toString()};
-        testFailFile();
-        System.out.print("\n\n");
-      }
-    }
+    exit.expectSystemExitWithStatus(0);
+    Nozc.main(args);
   }
 
   /**
-   * Run the nozc compiler against a specific fail-test file.
+   * Run the nozc compiler against a fail-test file.
    */
-  private void testFailFile() {
+  @Test
+  public void testFailAll() {
+    String testedFile = "HelloWorldFailing.noz";
+
+    File failTest = new File("src/test/java/pass/"+testedFile);
+    File genClassDir = new File("src/test/java/pass");
+    System.out.print("\n\n");
+    System.out.println("================================================");
+    System.out.println("Starting testFail on " + failTest.toString() + " to test and compile.");
+
+    args = new String[]{"-d", genClassDir.getAbsolutePath(), failTest.toString()};
+
     exit.expectSystemExitWithStatus(1);
     Nozc.main(args);
   }

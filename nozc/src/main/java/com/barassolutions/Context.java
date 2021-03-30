@@ -24,7 +24,7 @@ public class Context {
     boolean notExistsHere;
     if (p instanceof Variable v) {
       notExistsHere = this.ensureNotExistsHere(v.line(), v.name());
-      System.out.println("Adding Variable in context <name:"+v.name()+" constant:"+v.isConstant()+" readMode:"+v.readMode()+" usedAsPattern:"+v.usedAsPattern()+">");
+      Logger.debug("Adding Variable in context <name:"+v.name()+" constant:"+v.isConstant()+" readMode:"+v.readMode()+" usedAsPattern:"+v.usedAsPattern()+">");
     } else if (p instanceof Record r) {
       notExistsHere = this.ensureNotExistsHere(r.line(), r.name());
     } else {
@@ -40,6 +40,7 @@ public class Context {
 
   public boolean addFunction(FunctionDef f, MethodContext c) {
     boolean notExistsHere = this.ensureNotExistsHere(f.line(), f.name());
+    Logger.debug("Adding Function in context <name:"+f.name()+" returnType:"+f.returnType()+" args:"+f.nbArgs()+">");
     if (notExistsHere) {
       this.definedFunctions.put(f, c);
       return true;
@@ -50,6 +51,7 @@ public class Context {
 
   public boolean addProcedure(ProcedureDef p, MethodContext c) {
     boolean notExistsHere = this.ensureNotExistsHere(p.line(), p.name());
+    Logger.debug("Adding Procedure in context <name:"+p.name()+" args:"+p.nbArgs()+">");
     if (notExistsHere) {
       this.definedProcedures.put(p, c);
       return true;
@@ -60,6 +62,7 @@ public class Context {
 
   public boolean addFunctor(FunctorDef f, FunctorContext c) {
     boolean notExistsHere = this.ensureNotExistsHere(f.line(), f.name());
+    Logger.debug("Adding Functor in context <name:"+f.name()+">");
     if (notExistsHere) {
       this.definedFunctors.put(f, c);
       return true;
@@ -70,6 +73,7 @@ public class Context {
 
   public boolean addClass(ClassDef f, ClassContext c) {
     boolean notExistsHere = this.ensureNotExistsHere(f.line(), f.name());
+    Logger.debug("Adding Class in context <name:"+f.name()+">");
     if (notExistsHere) {
       this.definedClasses.put(f, c);
       return true;
@@ -287,6 +291,19 @@ class MethodContext extends Context {
   public void addArgument(Pattern p) {
     this.addVariable(p);
   }
+/*
+  /**
+   * The following methods are used to add a method name to its own context, to allow for recursion
+   *
+  public void addFunction(FunctionDef f) {
+    super.addFunction(f, null);
+  }
+  public void addProcedure(ProcedureDef f) {
+    super.addProcedure(f, null);
+  }
+  public void addMethod(MethodDef f) {
+    super.ad
+  }*/
 
   public void setReturnType(Type type) {
     this.returnType = type;

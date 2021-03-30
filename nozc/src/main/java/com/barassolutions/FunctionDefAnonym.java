@@ -51,7 +51,6 @@ public class FunctionDefAnonym extends DeclarationAnonym {
   @Override
   public Expression analyze(Context context) {
     MethodContext methContext = new MethodContext(context);
-    context.addFunction(new FunctionDef(this), methContext);
 
     args.forEach(a -> {
       a = (Pattern) a.analyze(context);
@@ -62,6 +61,8 @@ public class FunctionDefAnonym extends DeclarationAnonym {
 
     Type returnType = this.expression.type();
     methContext.setReturnType(returnType);
+
+    context.addFunction(new FunctionDef(this), methContext);
     return this;
   }
 

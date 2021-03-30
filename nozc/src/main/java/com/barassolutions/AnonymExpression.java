@@ -8,7 +8,7 @@ public class AnonymExpression extends Expression {
 
   @Override
   public Expression analyze(Context context) {
-    this.type = Type.UNKNOWN;
+    this.type = Type.ANY;
     return this;
   }
 

@@ -70,14 +70,14 @@ public class InterStatement extends AST {
    *
    * @param line      line in which the error occurred in the source file.
    * @param message   message identifying the error.
-   * @param arguments related values.
    */
-  public void reportSemanticError(int line, String message,
-      Object... arguments) {
+  public void reportSemanticError(int line, String message, Object... args) {
+    var arguments = new ArrayList<>();
+    arguments.add(line);
+    arguments.addAll(Arrays.asList(args));
+
     isInError = true;
-    System.err.printf("%s:%d: ", this.fileName(), line);
-    System.err.printf(message, arguments);
-    System.err.println();
+    Logger.error("%d: "+message, arguments.toArray());
   }
 
   public void preAnalyze() {

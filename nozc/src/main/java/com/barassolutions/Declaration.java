@@ -37,8 +37,9 @@ public class Declaration extends Statement {
   public AST analyze(Context context) {
     map.forEach((v, e) -> {
       map.put(v, e.analyze(context));
+      v.type = e.type();
       context.addVariable(v);
-      System.out.println("Added Variable to context : <name:"+v.name()+" constant:"+v.isConstant()+" readMode:"+v.readMode()+">");
+      Logger.debug("Added Variable to context : <name:"+v.name()+" constant:"+v.isConstant()+" readMode:"+v.readMode()+">");
     });
 
     return this;

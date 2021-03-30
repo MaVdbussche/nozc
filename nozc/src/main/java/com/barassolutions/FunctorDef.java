@@ -68,7 +68,7 @@ public class FunctorDef extends Declaration {
     output.token(TokenOz.FUNCTOR);
     if (name != null) {
       output.space();
-      output.literal(name);
+      output.literal(Utils.ozFriendlyName(name));
     }
     output.newLine();
     if (imports.size() > 0) {

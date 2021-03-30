@@ -11,10 +11,10 @@ public enum Type {
   INT("Int"),
   LIST("List"),
   NIL("Nil"),
+  OBJECT("Object"),
   RECORD("Record"),
   STRING("String"),
   UNDERSCORE("_"),
-  UNKNOWN("Unknown"),
   UNIT("Unit");
 
   private final String image;

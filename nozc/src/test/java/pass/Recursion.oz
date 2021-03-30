@@ -1,8 +1,5 @@
 declare
-fun{sumList L}  
-if (L == <image>) then    
-<image>      
-else    
-<image>      
-end    
+L={NewCell 1}  
+fun{Sum A B}  
+A + B    
 end  

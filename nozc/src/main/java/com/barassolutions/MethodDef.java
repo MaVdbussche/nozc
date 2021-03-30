@@ -19,7 +19,9 @@ public class MethodDef extends Declaration implements ClassElement {
 
   private final boolean isAFunction;
 
-  /** Only makes sense if this is a function, of course. */
+  /**
+   * Only makes sense if this is a function, of course.
+   */
   @Nullable
   private Type returnType;
 
@@ -63,8 +65,6 @@ public class MethodDef extends Declaration implements ClassElement {
     if (classContext == null) {
       interStatement.reportSemanticError(line(),
           "Definition of a method is only allowed in the context of a Class.");
-    } else {
-      classContext.addMethod(this, methContext);
     }
 
     head.args().forEach(a -> {
@@ -81,6 +81,9 @@ public class MethodDef extends Declaration implements ClassElement {
       methContext.setReturnType(returnType);
     }
 
+    if (classContext != null) {
+      classContext.addMethod(this, methContext);
+    }
     return this;
   }
 

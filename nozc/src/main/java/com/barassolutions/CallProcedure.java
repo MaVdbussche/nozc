@@ -52,7 +52,7 @@ public class CallProcedure extends Statement {
    */
   @Override
   public void codegen(Emitter output) {
-    System.out.println("Generating code for a procedure call <name:"+name+">");
+    Logger.debug("Generating code for a procedure call <name:"+name+">");
     output.token(TokenOz.LCURLY);
     output.literal(Utils.ozFriendlyName(name));
     args.forEach(a -> {

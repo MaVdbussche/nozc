@@ -60,6 +60,7 @@ public class InExpression extends Expression {
 
     if(expression!=null) {
       expression = expression.analyze(this.context);
+      this.type = expression.type();
     }
 
     return this;

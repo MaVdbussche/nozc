@@ -1,10 +1,7 @@
 declare
 {
-  def sumList(l) {
-    if(l==nil) {
-      nil
-    } else {
-      l.1
-    }
-  }
+var l = 1
+def sum(a, b) {
+  a+b
+}
 }

@@ -1,5 +1,6 @@
 package junit;
 
+import com.barassolutions.Logger;
 import com.barassolutions.Nozc;
 import java.io.File;
 import java.util.Arrays;
@@ -27,76 +28,58 @@ public class NozcJavaCCTestCase {
   private static String[] args = null;
 
   /**
-   * Run the nozc compiler against all pass-test files.
+   * Run the nozc compiler against a pass-test file.
    */
   @Test
-  public void testPassAll() {
-    System.out.println("================================================");
-    System.out.println("Starting testPass");
+  public void testPassHelloWorld() {
+    String testedFile = "HelloWorld.noz";
 
-    File passTestsDir = new File("src/test/java/pass");
+    File passTest = new File("src/test/java/pass/"+testedFile);
     File genClassDir = new File("src/test/java/pass");
-    File[] files = passTestsDir.listFiles();
-    System.out.println("Found " + files.length + " potential files to test and compile.");
+    System.out.print("\n\n");
+    System.out.println("================================================");
+    System.out.println("Starting testPass on " + passTest.toString() + " to test and compile.");
 
-    testPassFiles(files, genClassDir);
+    args = new String[]{"-d", genClassDir.getAbsolutePath(), passTest.toString()};
+
+    exit.expectSystemExitWithStatus(0);
+    Nozc.main(args);
   }
 
   /**
-   * Not pretty, but the best way I found to test all files is to do this recursion, since the Main
-   * method calls System#exit()...
+   * Run the nozc compiler against a pass-test file.
    */
-  private void testPassFiles(File[] files, File genClassDir) {
-    if (files[0].toString().endsWith(".noz")) {
-      System.out.printf("""
-          Running nozc (with javacc frontend) on %s ...
+  @Test
+  public void testPassRecursion() {
+    String testedFile = "Recursion.noz";
 
-          """, files[0].toString());
-      args = new String[]{"-d", genClassDir.getAbsolutePath(),
-          files[0].toString()};
+    File passTest = new File("src/test/java/pass/"+testedFile);
+    File genClassDir = new File("src/test/java/pass");
+    System.out.print("\n\n");
+    System.out.println("================================================");
+    System.out.println("Starting testPass on " + passTest.toString() + " to test and compile.");
 
-      exit.expectSystemExitWithStatus(0);
-      exit.checkAssertionAfterwards(
-          () -> testPassFiles(Arrays.copyOfRange(files, 1, files.length), genClassDir));
-      Nozc.main(args);
+    args = new String[]{"-d", genClassDir.getAbsolutePath(), passTest.toString()};
 
-      System.out.print("\n\n");
-    } else {
-      testPassFiles(Arrays.copyOfRange(files, 1, files.length), genClassDir);
-    }
-
-
+    exit.expectSystemExitWithStatus(0);
+    Nozc.main(args);
   }
 
   /**
-   * Run the nozc compiler against each fail-test file.
+   * Run the nozc compiler against a fail-test file.
    */
   @Test
   public void testFailAll() {
+    String testedFile = "HelloWorldFailing.noz";
+
+    File failTest = new File("src/test/java/pass/"+testedFile);
+    File genClassDir = new File("src/test/java/pass");
+    System.out.print("\n\n");
     System.out.println("================================================");
-    System.out.println("Starting testFail");
+    System.out.println("Starting testFail on " + failTest.toString() + " to test and compile.");
 
-    File failTestsDir = new File("src/test/java/fail");
-    File genClassDir = new File("src/test/java/fail");
-    File[] files = failTestsDir.listFiles();
-    for (int i = 0; files != null && i < files.length; i++) {
-      if (files[i].toString().endsWith(".noz")) {
-        System.out.printf("""
-            Running nozc (with javacc frontend) on %s ...
+    args = new String[]{"-d", genClassDir.getAbsolutePath(), failTest.toString()};
 
-            """, files[i].toString());
-        args = new String[]{"-d", genClassDir.getAbsolutePath(),
-            files[i].toString()};
-        testFailFile();
-        System.out.print("\n\n");
-      }
-    }
-  }
-
-  /**
-   * Run the nozc compiler against a specific fail-test file.
-   */
-  private void testFailFile() {
     exit.expectSystemExitWithStatus(1);
     Nozc.main(args);
   }

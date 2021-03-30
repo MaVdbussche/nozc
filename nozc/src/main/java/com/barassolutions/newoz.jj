@@ -15,6 +15,7 @@ package com.barassolutions;
 
 import com.barassolutions.ClassDescriptor.SubType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -37,10 +38,13 @@ class JavaCCParser {
      * @param args related values.
      */
     private void reportParserError(String message, Object... args) {
-        errorHasOccurred = true;
-        System.err.printf("%s:%d: ", fileName, token.beginLine);
-        System.err.printf(message, args);
-        System.err.println();
+      ArrayList<Object> arguments = new ArrayList<Object>();
+      arguments.add(fileName);
+      arguments.add(token.beginLine);
+      arguments.addAll(Arrays.asList(args));
+
+      errorHasOccurred = true;
+      Logger.error("%s:%d: "+message, arguments.toArray());
     }
 
     /**
@@ -321,14 +325,14 @@ InterStatement interStatement(): {
 {
     try {
         //LOOKAHEAD( <DECLARE> inStatement() )
-        <DECLARE> { line = token.beginLine; System.out.println("Found an interStatement"); }
+        <DECLARE> { line = token.beginLine; Logger.debug("Found an interStatement"); }
         statement = inStatement()
         <EOF>
         { out = new InterStatement(line, statement); } //Declare block
       |
         //LOOKAHEAD( nestConStatement() )
         ( aStatement = nestConStatement()
-        { statements.add(aStatement); System.out.println("Found a statement"); } //Stand-alone statements
+        { statements.add(aStatement); Logger.debug("Found a statement"); } //Stand-alone statements
         )+
         { out = new InterStatement(line, statements); }
     }
@@ -368,7 +372,7 @@ private Statement statement(): {
           //{ statement = new ReturnStatement(line, expression); }
         |
           //LOOKAHEAD( nestConStatement() )
-          {System.out.println("Found a nestConStatement");}
+          {Logger.debug("Found a nestConStatement");}
           statement = nestConStatement()
         //|
           //<SEMI> //Ignore it
@@ -400,7 +404,7 @@ private Statement statement(): {
 private Expression expression(): {
     int line = 0;
     Expression expression = null;
-    {System.out.println("Entering expression()");}
+    {Logger.debug("Entering expression()");}
 }
 {
     try {
@@ -411,13 +415,13 @@ private Expression expression(): {
         | LOOKAHEAD( parExpression() )
           expression = parExpression()
         | LOOKAHEAD( inExpression() )
-          {System.out.println("Found an inExpression");}
+          {Logger.debug("Found an inExpression");}
           expression = inExpression()
         | LOOKAHEAD( nestConExpression() )
-          {System.out.println("Found a nestConExpression");}
+          {Logger.debug("Found a nestConExpression");}
           expression = nestConExpression()
         | LOOKAHEAD( term() )
-          {System.out.println("Found a term");}
+          {Logger.debug("Found a term");}
           expression = term()
         | LOOKAHEAD( nestDecAnonym() )
           expression = nestDecAnonym()
@@ -440,7 +444,7 @@ private Expression expression(): {
 
 private Expression parExpression(): {
     Expression expr = null;
-    {System.out.println("Entering parExpression()");}
+    {Logger.debug("Entering parExpression()");}
 }
 {
     try {
@@ -468,17 +472,17 @@ private InStatement inStatement(): {
     ArrayList<Declaration> decls = new ArrayList<Declaration>();
     Statement aStatement = null;
     ArrayList<Statement> statements = new ArrayList<Statement>();
-    {System.out.println("Entering inStatement()");}
+    {Logger.debug("Entering inStatement()");}
 }
 {
     try {
         <LCURLY> { line = token.beginLine; }
         ( //LOOKAHEAD( declarationPart() )
-          { System.out.println("Found a declarationPart"); }
+          { Logger.debug("Found a declarationPart"); }
           aDecl = declarationPart() { decls.add(aDecl); }
         )*
         ( //LOOKAHEAD( statement() )
-          {System.out.println("Found a statement");}
+          { Logger.debug("Found a statement"); }
           aStatement = statement() { statements.add(aStatement); }
         )*
         <RCURLY>
@@ -505,22 +509,22 @@ private InExpression inExpression(): {
     Statement statement = null;
     ArrayList<Statement> statements = new ArrayList<Statement>();
     Expression expression = null;
-    {System.out.println("Entering inExpression()");}
+    {Logger.debug("Entering inExpression()");}
 }
 {
     try {
         <LCURLY> { line = token.beginLine; }
         ( LOOKAHEAD( declarationPart() )
-          {System.out.println("Found a declarationPart");}
+          { Logger.debug("Found a declarationPart"); }
           aDecl = declarationPart() { decls.add(aDecl); }
         )*
         ( LOOKAHEAD( statement() )
-          {System.out.println("Found a statement");}
+          { Logger.debug("Found a statement"); }
           statement = statement() { statements.add(statement); }
         )*
         [ LOOKAHEAD( expression() )
-        expression = expression()
-        {System.out.println("Found the returned expression");}
+          expression = expression()
+          { Logger.debug("Found the returned expression"); }
         ]
         <RCURLY>
     }
@@ -577,7 +581,8 @@ private Statement nestConStatement(): {
 {
     try {
           LOOKAHEAD( <VARIABLE> <LPAREN> )
-          <VARIABLE> { line = token.beginLine; name = token.image;  System.out.println("Found a CallProcedure to "+name+" at line "+line);}
+          <VARIABLE> { line = token.beginLine; name = token.image;
+            Logger.debug("Found a CallProcedure to "+name+" at line "+line); }
           <LPAREN> expression2 = expression() { args.add(expression2); }
           (
             <COMMA> expression2 = expression() { args.add(expression2); }
@@ -648,7 +653,7 @@ private Statement nestConStatement(): {
           statement2 = inStatement()
           { out = new LockStructure(line, expression, statement2); }
         | LOOKAHEAD( assignmentExpression() )
-          {System.out.println("Found an assignmentExpression()");}
+          { Logger.debug("Found an assignmentExpression()"); }
           expression = assignmentExpression()
           { out = expression; }
     }
@@ -697,9 +702,9 @@ private Expression nestConExpression(): {
 }
 {
     try {
-          <IF> { line = token.beginLine; }
-          {System.out.println("Found if expression");}
-          expression = parExpression() expression2 = inExpression()
+          <IF> { line = token.beginLine;
+            Logger.debug("Found if expression"); }
+            expression = parExpression() expression2 = inExpression()
           { conds.add(expression); consq.add(expression2); }
           ( LOOKAHEAD( <ELSE> <IF> )
             <ELSE> <IF> <LPAREN> expression = expression() <RPAREN> expression2 = inExpression()
@@ -778,12 +783,12 @@ private Declaration nestDecVariable(): {
     ArrayList<ClassDescriptor> descriptors = new ArrayList<ClassDescriptor>();
     ClassElement classElement = null;
     ArrayList<MethodDef> methods = new ArrayList<MethodDef>();
-    {System.out.println("Entering nestDecVariable()");}
+    {Logger.debug("Entering nestDecVariable()");}
 }
 {
     try {
           LOOKAHEAD( <DEFPROC> <VARIABLE> <LPAREN> )
-          {System.out.println("Found a Procedure definition");}
+          { Logger.debug("Found a Procedure definition"); }
           <DEFPROC> { line = token.beginLine; }
           <VARIABLE> { name = token.image; }
           <LPAREN>
@@ -795,7 +800,7 @@ private Declaration nestDecVariable(): {
           statement = inStatement()
           { out = new ProcedureDef(line, name, args, statement); }
         | LOOKAHEAD( <DEF> [<LAZY>] <VARIABLE> <LPAREN> )
-          {System.out.println("Found a Function definition");}
+          { Logger.debug("Found a Function definition"); }
           <DEF> { line = token.beginLine; }
           [<LAZY> { lazy = true; }]
           <VARIABLE> { name = token.image; }
@@ -1146,7 +1151,7 @@ private Expression assignmentExpression(): {
     int line = 0;
     Expression lhs = null;
     Expression rhs = null;
-    {System.out.println("Entering assignmentExpression()");}
+    {Logger.debug("Entering assignmentExpression()");}
 }
 {
     try {
@@ -1180,7 +1185,7 @@ private Expression assignmentExpression(): {
 private Expression conditionalExpression(): {
     //int line = 0;
     Expression lhs = null;
-    {System.out.println("Entering conditionalExpression()");}
+    {Logger.debug("Entering conditionalExpression()");}
 }
 {
     try {
@@ -1205,7 +1210,7 @@ private Expression conditionalOrExpression(): {
     int line = 0;
     Expression lhs = null;
     Expression rhs = null;
-    {System.out.println("Entering conditionalOrExpression()");}
+    {Logger.debug("Entering conditionalOrExpression()");}
 }
 {
     try {
@@ -1234,7 +1239,7 @@ private Expression conditionalAndExpression(): {
     int line = 0;
     Expression lhs = null;
     Expression rhs = null;
-    {System.out.println("Entering conditionalAndExpression()");}
+    {Logger.debug("Entering conditionalAndExpression()");}
 }
 {
     try {
@@ -1263,7 +1268,7 @@ private Expression equalityExpression(): {
     int line = 0;
     Expression lhs = null;
     Expression rhs = null;
-    {System.out.println("Entering equalityExpression()");}
+    {Logger.debug("Entering equalityExpression()");}
 }
 {
     try {
@@ -1292,7 +1297,7 @@ private Expression relationalExpression(): {
     int line = 0;
     Expression lhs = null;
     Expression rhs = null;
-    {System.out.println("Entering relationalExpression()");}
+    {Logger.debug("Entering relationalExpression()");}
 }
 {
     try {
@@ -1324,15 +1329,16 @@ private Expression additiveExpression(): {
     int line = 0;
     Expression lhs = null;
     Expression rhs = null;
-    {System.out.println("Entering additiveExpression()");}
+    {Logger.debug("Entering additiveExpression()");}
 }
 {
     try {
         lhs = multiplicativeExpression() { line = token.beginLine; }
         ( LOOKAHEAD( (<PLUS>|<MINUS>) multiplicativeExpression() )
           (
-            <PLUS> rhs = multiplicativeExpression() {System.out.println("Found an additiveExpression");}
-                { lhs = new OperationPlus(line, lhs, rhs); }
+            <PLUS> rhs = multiplicativeExpression()
+            { Logger.debug("Found an additiveExpression");
+              lhs = new OperationPlus(line, lhs, rhs); }
           | <MINUS> rhs = multiplicativeExpression()
                 { lhs = new OperationMinus(line, lhs, rhs); }
           )
@@ -1357,7 +1363,7 @@ private Expression multiplicativeExpression(): {
     int line = 0;
     Expression lhs = null;
     Expression rhs = null;
-    {System.out.println("Entering multiplicativeExpression()");}
+    {Logger.debug("Entering multiplicativeExpression()");}
 }
 {
     try {
@@ -1392,7 +1398,7 @@ private Expression unaryExpression(): {
     int line = 0;
     Expression expr = null;
     Expression expr2 = null;
-    {System.out.println("Entering unaryExpression()");}
+    {Logger.debug("Entering unaryExpression()");}
 }
 {
     try {
@@ -1463,7 +1469,7 @@ private Expression postfixExpression(): {
     Expression out = null;
     Expression expr = null;
     Variable variable = null;
-    {System.out.println("Entering postfixExpression()");}
+    {Logger.debug("Entering postfixExpression()");}
 }
 {
     try {
@@ -1503,7 +1509,7 @@ private Expression primary(): {
     String name = null;
     Expression arg = null;
     ArrayList<Expression> args = new ArrayList<Expression>();
-    {System.out.println("Entering primary()");}
+    {Logger.debug("Entering primary()");}
 }
 {
     try {
@@ -1565,13 +1571,14 @@ private Expression primary(): {
           <VARIABLE> { variable = new Variable(token.beginLine, token.image, false, true); out=variable; }
           [
           <DOT> expr = expression()
-          { out = new ExpressionSelectionList(line, variable, expr); System.out.println("Found a list selection arg:"+variable.name());}
+          { out = new ExpressionSelectionList(line, variable, expr);
+            Logger.debug("Found a list selection arg:"+variable.name()); }
           ]
     }
     catch ( ParseException e ) {
         recoverFromError( new int[]{RCURLY}, e );
     }
-    { System.out.println("Returning primary "+((out instanceof Variable) ? ((Variable)out).name() :
+    { Logger.debug("Returning primary "+((out instanceof Variable) ? ((Variable)out).name() :
         ((out instanceof Literal) ? ((Literal)out).image() : "")));
 
     return out; }
@@ -1601,7 +1608,7 @@ private Expression term(): {
     int lostLabelsCounter = 0;
     boolean more = false;
     ArrayList<Expression> args = new ArrayList<Expression>();
-    {System.out.println("Entering term()");}
+    {Logger.debug("Entering term()");}
 }
 {
     try {
@@ -1640,7 +1647,8 @@ private Expression term(): {
           <RPAREN>
           { out = new Record(line, value, map, more); }
         | LOOKAHEAD( <VARIABLE> <LPAREN> expression() )
-          <VARIABLE> { line = token.beginLine; value = token.image; System.out.println("Found a CallFunction to "+value+" at line "+line);}
+          <VARIABLE> { line = token.beginLine; value = token.image;
+            Logger.debug("Found a CallFunction to "+value+" at line "+line); }
           <LPAREN> val = expression() { args.add(val); }
           (
             <COMMA> val = expression() { args.add(val); }
@@ -1797,32 +1805,36 @@ private Declaration declarationPart(): {
     Variable variable = null;
     Expression value = null;
     Map<Variable, Expression> map = new HashMap<Variable, Expression>();
-    {System.out.println("Entering declarationPart()");}
+    {Logger.debug("Entering declarationPart()");}
 }
 {
-    try {
-        LOOKAHEAD( (<VAL>|<VAR>) <VARIABLE> )
-        (
-          <VAL> { line = token.beginLine; constant = true; }
-        | <VAR> { line = token.beginLine; constant = false; }
-        )
-        <VARIABLE> { variable = new Variable(line, token.image, constant, true, false); map.put(variable, null); System.out.println("Declaring variable "+token.image+" as a constant("+constant+")"); }
+  try {
+      LOOKAHEAD( (<VAL>|<VAR>) <VARIABLE> )
+      (
+        <VAL> { line = token.beginLine; constant = true; }
+      | <VAR> { line = token.beginLine; constant = false; }
+      )
+      <VARIABLE> { variable = new Variable(line, token.image, constant, true, false);
+          map.put(variable, null);
+          Logger.debug("Declaring variable "+token.image+" as a constant("+constant+")"); }
+      [<ASSIGN> value = expression()
+      { map.put(variable, value); }]
+      ( LOOKAHEAD( <COMMA> <VARIABLE> )
+        <COMMA> <VARIABLE> { variable = new Variable(line, token.image, constant, true, false);
+           map.put(variable, null);
+           Logger.debug("Declaring variable "+token.image+" as a constant("+constant+")"); }
         [<ASSIGN> value = expression()
         { map.put(variable, value); }]
-        ( LOOKAHEAD( <COMMA> <VARIABLE> )
-          <COMMA> <VARIABLE> { variable = new Variable(line, token.image, constant, true, false); map.put(variable, null); System.out.println("Declaring variable "+token.image+" as a constant("+constant+")"); }
-          [<ASSIGN> value = expression()
-          { map.put(variable, value); }]
-        )*
-        { out = new Declaration(line, map, constant); }
+      )*
+      { out = new Declaration(line, map, constant); }
 
-     |  LOOKAHEAD( <DEFPROC> | <DEF> | <CLASS> | <FUNCTOR> )
-        out = nestDecVariable()
-    }
-    catch ( ParseException e ) {
-        recoverFromError(new int[]{RCURLY}, e);
-    }
-    { return out; }
+   |  LOOKAHEAD( <DEFPROC> | <DEF> | <CLASS> | <FUNCTOR> )
+      out = nestDecVariable()
+  }
+  catch ( ParseException e ) {
+      recoverFromError(new int[]{RCURLY}, e);
+  }
+  { return out; }
 }
 
 /**

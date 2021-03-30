@@ -83,8 +83,8 @@ class OperationPlus extends BinaryExpression {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
-    } else if (lhs.type == Type.UNKNOWN && rhs.type() == Type.UNKNOWN){
-      type = Type.UNKNOWN;
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+      type = Type.ANY;
     } else{
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
@@ -126,6 +126,8 @@ class OperationMinus extends BinaryExpression {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+      type = Type.ANY;
     } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
@@ -167,6 +169,8 @@ class OperationMultiplication extends BinaryExpression {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+      type = Type.ANY;
     } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
@@ -206,6 +210,8 @@ class OperationModulo extends BinaryExpression {
     rhs = rhs.analyze(context);
     if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+      type = Type.ANY;
     } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
@@ -247,6 +253,8 @@ class OperationDivision extends BinaryExpression {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+      type = Type.ANY;
     } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),

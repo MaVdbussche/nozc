@@ -62,8 +62,8 @@ class OperationLogicalAnd extends BooleanBinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
     lhs.type().mustMatchExpected(line(), Type.BOOLEAN);
     rhs.type().mustMatchExpected(line(), Type.BOOLEAN);
     type = Type.BOOLEAN;
@@ -97,7 +97,7 @@ class OperationEqual extends BooleanBinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    System.out.println("Starting analysis of boolean equality");
+    Logger.debug("Starting analysis of boolean equality");
     lhs = lhs.analyze(context);
     rhs = rhs.analyze(context);
     lhs.type()
@@ -133,8 +133,8 @@ class OperationLogicalOr extends BooleanBinaryExpression {
    */
   @Override
   public Expression analyze(Context context) {
-    lhs = (Expression) lhs.analyze(context);
-    rhs = (Expression) rhs.analyze(context);
+    lhs = lhs.analyze(context);
+    rhs = rhs.analyze(context);
     lhs.type().mustMatchExpected(line(), Type.BOOLEAN);
     rhs.type().mustMatchExpected(line(), Type.BOOLEAN);
     type = Type.BOOLEAN;

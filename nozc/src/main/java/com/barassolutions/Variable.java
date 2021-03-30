@@ -129,9 +129,9 @@ public class Variable extends Pattern implements Lhs {
         interStatement.reportSemanticError(line(),
             "Could not find variable for: <name:" + name + ">");
       } else {
-        System.out.println(
-            "Retrieved Variable in context <name:" + var.name + " constant:" + var.constant
-                + " readMode:" + var.readMode + " type:" + var.type() + ">");
+        Logger.debug(
+            "Retrieved Variable in context <name:" + var.name() + " constant:" + var.isConstant()
+                + " readMode:" + var.readMode() + " type:" + var.type() + ">");
         this.constant = var.constant;
         this.type = var.type();
       }
@@ -149,7 +149,7 @@ public class Variable extends Pattern implements Lhs {
    */
   @Override
   public void codegen(Emitter output) {
-    System.out.println(
+    Logger.debug(
         "Generating code for a Variable <name:" + name + " constant:" + constant + " readMode:"
             + readMode + ">");
     if (!constant) {

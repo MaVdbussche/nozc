@@ -41,7 +41,6 @@ public class ProcedureDef extends Declaration {
   @Override
   public AST analyze(Context context) {
     MethodContext methContext = new MethodContext(context);
-    context.addProcedure(this, methContext);
 
     args.forEach(a -> {
       a = (Pattern) a.analyze(context);
@@ -51,6 +50,7 @@ public class ProcedureDef extends Declaration {
     statement = (InStatement) statement
         .analyze(methContext);
 
+    context.addProcedure(this, methContext);
     return this;
   }
 
@@ -58,7 +58,7 @@ public class ProcedureDef extends Declaration {
   public void codegen(Emitter output) {
     output.token(TokenOz.PROC);
     output.token(TokenOz.LCURLY);
-    output.literal(name);
+    output.literal(Utils.ozFriendlyName(name));
     args.forEach(a -> {
       output.space();
       a.codegen(output);

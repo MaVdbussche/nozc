@@ -1,16 +1,18 @@
 package com.barassolutions;
 
+import com.barassolutions.Logger.LogLevel;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Help;
 import picocli.CommandLine.Help.Ansi;
 import picocli.CommandLine.Help.Ansi.Style;
 import picocli.CommandLine.Help.ColorScheme;
@@ -43,7 +45,9 @@ public class Nozc implements Callable<Integer> {
 
   public static boolean errorHasOccurred;
 
-  private static Ansi usedAnsi = Ansi.AUTO;
+  private static final Ansi usedAnsi = Ansi.AUTO;
+
+  public static LogLevel loglevel;
 
   @Option(names = {
       "--no-keep"}, negatable = true, description = "Keep the intermediary Oz files in the output folder. True by default")
@@ -60,15 +64,16 @@ public class Nozc implements Callable<Integer> {
   @Option(names = {"-a",
       "--analyze"}, description = "Analyze the NewOz input, print the AST to STDOUT, and then stop the compilation")
   boolean stopAtAnalysis;
-  @Option(names = {"-v", "--verbose"})
-  boolean verbose;
+  @Option(names = {"-v",
+      "--verbosity"}, description = "The verbosity you want to see in output.\nAvailable levels : [OFF, FATAL, ERROR, WARN, INFO, DEBUG, ALL] (default: INFO)", arity = "1", defaultValue = "INFO")
+  String verbosity;
   @Parameters(description = "The .noz file(s) to compile or translate.", paramLabel = "FILE", arity = "1..*")
   private File[] inputFiles;
   @Option(names = {"-o",
       "--out"}, description = "Name of the output file. This option will be ignored if you pass more than one input file.")
   private File outputFile;
   @Option(names = {"-d",
-      "--directory"}, description = "Output directory for compiled and/or translated files (default: ${DEFAULT_VALUE})", arity = "1", defaultValue = ".")
+      "--directory"}, description = "Output directory for compiled and/or translated files (default: .)", arity = "1", defaultValue = ".")
   private File destDirectory;
 
   public static void main(String[] args) {
@@ -90,17 +95,36 @@ public class Nozc implements Callable<Integer> {
         .setErr(err)
         .setColorScheme(colorScheme);
 
-    cmd.printVersionHelp(out);
-    System.out.println("================================================");
+    if (!Arrays.asList(args).contains("-V")) {
+      cmd.printVersionHelp(out);
+    } //Don't print it twice
+
     int exitCode = cmd.execute(args);
     System.exit(exitCode);
   }
 
   @Override
   public Integer call() throws Exception {
-    System.out.println(
-        "Compiling " + inputFiles.length + " NewOz files to destination directory " + destDirectory
-            .getPath());
+    long startTime = System.nanoTime();
+    long time;
+    switch (verbosity) {
+      case "OFF" -> loglevel = LogLevel.OFF;
+      case "FATAL" -> loglevel = LogLevel.FATAL;
+      case "ERROR" -> loglevel = LogLevel.ERROR;
+      case "WARN" -> loglevel = LogLevel.WARN;
+      case "INFO" -> loglevel = LogLevel.INFO;
+      case "DEBUG" -> loglevel = LogLevel.DEBUG;
+      case "TRACE" -> loglevel = LogLevel.TRACE;
+      case "ALL" -> loglevel = LogLevel.ALL;
+      default -> {
+        loglevel = LogLevel.INFO;
+        Logger.warn("Invalid verbosity level. Defaulting to INFO");
+      }
+    }
+
+    Logger.info(
+        "Compiling " + inputFiles.length + " NewOz files to destination directory \"" + destDirectory
+            .getPath() + "\"");
     for (File inputFile : inputFiles) {
       errorHasOccurred = false;
       if (outputFile == null) {
@@ -109,10 +133,11 @@ public class Nozc implements Callable<Integer> {
       } else {
         outputFile = new File(destDirectory, outputFile.getName());
       }
-      System.out.println("Created output file " + outputFile.toString());
+      Logger.info(getSuccessString("Created output file " + outputFile.toString()));
 
       /* Create the Scanner */
-      System.out.println("==========Scanning input==========");
+      Logger.info("==========Scanning started==========");
+      time = System.nanoTime();
       JavaCCParserTokenManager scanner;
       try {
         scanner = new JavaCCParserTokenManager(new SimpleCharStream(
@@ -124,7 +149,7 @@ public class Nozc implements Callable<Integer> {
         return 1;
       }
       if (scanner == null) {
-        System.err.println(getErrorString("Error in scanner initialization"));
+        Logger.error(getErrorString("Error in scanner initialization"));
         return 1;
       }
 
@@ -135,7 +160,7 @@ public class Nozc implements Callable<Integer> {
         do {
           token = scanner.getNextToken();
           if (token.kind == JavaCCParserConstants.ERROR) {
-            System.err.println(getErrorString(
+            Logger.error(getErrorString(
                 inputFile + ":" + token.beginLine + ": Unidentified input token: '" + token.image
                     + "'"));
             errorHasOccurred = true;
@@ -147,10 +172,11 @@ public class Nozc implements Callable<Integer> {
         } while (token.kind != JavaCCParserConstants.EOF);
         return 0;
       }
-      System.out.println("==========Scanning done==========");
+      Logger.info("==========Scanning done in %s==========", getTimeString(time));
 
       /* Create the Parser */
-      System.out.println("==========Parsing input==========");
+      Logger.info("==========Parsing input==========");
+      time = System.nanoTime();
       InterStatement ast = null;
       JavaCCParser parser;
       try {
@@ -165,7 +191,7 @@ public class Nozc implements Callable<Integer> {
         System.err.println(e.getMessage());
       }
       if (ast == null) {
-        System.err.println(getErrorString("Error in parser initialization"));
+        Logger.error(getErrorString("Error in parser initialization"));
         return 1;
       }
 
@@ -177,10 +203,11 @@ public class Nozc implements Callable<Integer> {
       if (errorHasOccurred) {
         return 1;
       }
-      System.out.println("==========Parsing done==========");
+      Logger.info("==========Parsing done in %s==========", getTimeString(time));
 
       /* Pre-analyze the input */
-      System.out.println("==========Pre-analyzing input==========");
+      Logger.info("==========Pre-analyzing input==========");
+      time = System.nanoTime();
       ast.setFileName(inputFile.getName());
       ast.preAnalyze();
       errorHasOccurred |= ast.errorHasOccurred();
@@ -192,10 +219,11 @@ public class Nozc implements Callable<Integer> {
       if (errorHasOccurred) {
         return 1;
       }
-      System.out.println("==========Pre-analyzing done==========");
+      Logger.info("==========Pre-analyzing done in %s==========", getTimeString(time));
 
       /* Analyze the input */
-      System.out.println("==========Analyzing input==========");
+      Logger.info("==========Analyzing input==========");
+      time = System.nanoTime();
       ast.analyze(null);
       errorHasOccurred |= ast.errorHasOccurred();
 
@@ -206,10 +234,11 @@ public class Nozc implements Callable<Integer> {
       if (errorHasOccurred) {
         return 1;
       }
-      System.out.println("==========Analyzing done==========");
+      Logger.info("==========Analyzing done in %s==========", getTimeString(time));
 
       /* Generate Oz code */
-      System.out.println("==========Code generation started==========");
+      Logger.info("==========Code generation started==========");
+      time = System.nanoTime();
       Emitter emitter = new Emitter(outputFile);
       ast.codegen(emitter);
       emitter.close();
@@ -217,7 +246,7 @@ public class Nozc implements Callable<Integer> {
       if (errorHasOccurred) {
         return 1;
       }
-      System.out.println("==========Code generation done==========");
+      Logger.info("==========Code generation done %s==========", getTimeString(time));
 
       /**
        //TODO now launch to Oz compiler (ozc)
@@ -226,17 +255,41 @@ public class Nozc implements Callable<Integer> {
 
       /* Delete the generated Oz files if so required */
       if (deleteOzFiles) {
-        System.out.println("Deleting file \"" + outputFile.getName() + "\" as requested...");
+        Logger.info(
+            getSuccessString("Deleting file \"" + outputFile.getName() + "\" as requested..."));
         Files.delete(outputFile.toPath());
       }
     }
 
     // No error occurred
+    Logger.info(getSuccessString("Compilation completed in " + getTimeString(startTime)));
     return 0;
   }
 
   private static String getErrorString(String s) {
     return usedAnsi.string("@|bold,red " + s + "|@");
+  }
+
+  private static String getSuccessString(String s) {
+    return usedAnsi.string("@|bold,green " + s + "|@");
+  }
+
+  private static String getTimeString(long startTime) {
+    long diffNano = System.nanoTime() - startTime;
+    Logger.debug("Printing " + diffNano + " nanoseconds");
+
+    long nbNano = diffNano % 1000;
+    long diffMicro = (diffNano - nbNano) / 1000;
+    long nbMicro = diffMicro % 1000;
+    long diffMilli = (diffMicro - nbMicro) / 1000;
+    long nbMilli = diffMilli % 1000;
+    long diffSec = (diffMilli - nbMilli) / 1000;
+    long nbSec = diffSec % 60;
+    long diffMin = (diffSec - nbSec) / 60;
+    long nbMin = diffMin % 60;
+
+    return String.format("%dm:%ds:%dms:%dµs:%dns",
+        nbMin, nbSec, nbMilli, nbMicro, nbNano);
   }
 
   static class VersionProvider implements IVersionProvider {

@@ -44,7 +44,6 @@ public class ProcedureDefAnonym extends DeclarationAnonym {
   @Override
   public Expression analyze(Context context) {
     MethodContext methContext = new MethodContext(context);
-    context.addProcedure(new ProcedureDef(this), methContext);
 
     args.forEach(a -> {
       a = (Pattern) a.analyze(context);
@@ -54,6 +53,7 @@ public class ProcedureDefAnonym extends DeclarationAnonym {
     statement = (InStatement) statement
         .analyze(methContext);
 
+    context.addProcedure(new ProcedureDef(this), methContext);
     return this;
   }
 

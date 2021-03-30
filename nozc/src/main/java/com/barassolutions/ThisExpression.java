@@ -8,7 +8,7 @@ public class ThisExpression extends Expression {
 
   @Override
   public Expression analyze(Context context) {
-    this.type = Type.UNKNOWN;
+    this.type = Type.OBJECT;
     return this;
   }
 

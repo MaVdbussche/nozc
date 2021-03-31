@@ -88,7 +88,7 @@ public class InterStatement extends AST {
     for (BuiltIns b : BuiltIns.values()) {
       switch (b.type()) {
         case FUNCTION -> {
-          globalContext.addFunction(new FunctionDef(-1, b.nozString(),
+          globalContext.addFunctionBuiltIn(new FunctionDef(-1, b.nozString(),
                   /*Function arguments*/
                   b.args(),
                   /*Function content is not important for Nozc*/
@@ -98,7 +98,7 @@ public class InterStatement extends AST {
               new MethodContext(null));
         }
         case PROCEDURE -> {
-          globalContext.addProcedure(new ProcedureDef(-1, b.nozString(),
+          globalContext.addProcedureBuiltIn(new ProcedureDef(-1, b.nozString(),
                   /*Procedure arguments*/
                   b.args(),
                   /*Procedure content is not important for Nozc*/
@@ -109,7 +109,7 @@ public class InterStatement extends AST {
           //TODO necessary ?
         }
         case CLASS -> {
-          globalContext.addClass(new ClassDef(-1, b.ozString(),
+          globalContext.addClassBuiltIn(new ClassDef(-1, b.ozString(),
                   /*Class descriptors*/
                   b.descrs(),
                   /*Class methods*/

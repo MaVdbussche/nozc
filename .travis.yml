@@ -1,7 +1,6 @@
 {
   "language": "java",
   "os": [
-    "windows",
     "linux"
   ],
   "dist": "bionic",

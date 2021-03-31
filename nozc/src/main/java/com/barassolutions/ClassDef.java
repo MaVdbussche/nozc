@@ -1,6 +1,7 @@
 package com.barassolutions;
 
 import com.barassolutions.ClassDescriptor.SubType;
+import com.barassolutions.util.Utils;
 import java.util.ArrayList;
 
 public class ClassDef extends Declaration {

@@ -1,5 +1,5 @@
 declare
-L={NewCell 1}  
-fun{Sum A B}  
-A + B    
+fun{Sum L}  
+{Browse L.1}    
+L.1    
 end  

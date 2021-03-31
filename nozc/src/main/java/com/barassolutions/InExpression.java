@@ -61,6 +61,8 @@ public class InExpression extends Expression {
     if(expression!=null) {
       expression = expression.analyze(this.context);
       this.type = expression.type();
+    } else {
+      interStatement.reportSemanticError(line(), "Missing expression or return value in block");
     }
 
     return this;

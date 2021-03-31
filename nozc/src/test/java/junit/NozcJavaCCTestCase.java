@@ -1,12 +1,10 @@
 package junit;
 
-import com.barassolutions.Logger;
 import com.barassolutions.Nozc;
+import com.barassolutions.util.Logger;
 import java.io.File;
-import java.util.Arrays;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.Assertion;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
 /**
@@ -40,7 +38,7 @@ public class NozcJavaCCTestCase {
     System.out.println("================================================");
     System.out.println("Starting testPass on " + passTest.toString() + " to test and compile.");
 
-    args = new String[]{"-d", genClassDir.getAbsolutePath(), passTest.toString()};
+    args = new String[]{"-v", "DEBUG", "-d", genClassDir.getAbsolutePath(), passTest.toString()};
 
     exit.expectSystemExitWithStatus(0);
     Nozc.main(args);
@@ -59,7 +57,7 @@ public class NozcJavaCCTestCase {
     System.out.println("================================================");
     System.out.println("Starting testPass on " + passTest.toString() + " to test and compile.");
 
-    args = new String[]{"-d", genClassDir.getAbsolutePath(), passTest.toString()};
+    args = new String[]{"-v", "DEBUG", "-d", genClassDir.getAbsolutePath(), passTest.toString()};
 
     exit.expectSystemExitWithStatus(0);
     Nozc.main(args);
@@ -78,7 +76,7 @@ public class NozcJavaCCTestCase {
     System.out.println("================================================");
     System.out.println("Starting testFail on " + failTest.toString() + " to test and compile.");
 
-    args = new String[]{"-d", genClassDir.getAbsolutePath(), failTest.toString()};
+    args = new String[]{"-v", "DEBUG", "-d", genClassDir.getAbsolutePath(), failTest.toString()};
 
     exit.expectSystemExitWithStatus(1);
     Nozc.main(args);

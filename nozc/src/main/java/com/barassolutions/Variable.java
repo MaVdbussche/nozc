@@ -1,5 +1,8 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
+import com.barassolutions.util.Utils;
+
 public class Variable extends Pattern implements Lhs {
 
   private final String name;

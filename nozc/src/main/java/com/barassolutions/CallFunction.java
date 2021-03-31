@@ -1,5 +1,7 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
+import com.barassolutions.util.Utils;
 import java.util.ArrayList;
 
 public class CallFunction extends
@@ -62,6 +64,7 @@ public class CallFunction extends
       a.codegen(output);
     });
     output.token(TokenOz.RCURLY);
+    output.newLine();
   }
 
   @Override

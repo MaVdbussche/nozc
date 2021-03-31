@@ -1,5 +1,6 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 

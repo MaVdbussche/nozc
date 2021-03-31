@@ -1,5 +1,6 @@
 # NOZC
 
+[![Travis (.com)](https://img.shields.io/travis/com/MaVdbussche/nozc?label=Build)](https://www.travis-ci.com/github/MaVdbussche/nozc)
 [![GitHub](https://img.shields.io/github/license/MaVdbussche/nozc?label=License)](LICENSE)
 [![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/MaVdbussche/nozc?include_prereleases&label=Release&sort=semver)](releases)
 [![GitHub repo size](https://img.shields.io/github/repo-size/MaVdbussche/nozc?label=Size)](https://github.com/MaVdbussche/nozc)

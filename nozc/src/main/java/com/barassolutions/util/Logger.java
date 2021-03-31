@@ -1,4 +1,6 @@
-package com.barassolutions;
+package com.barassolutions.util;
+
+import com.barassolutions.Nozc;
 
 public class Logger {
 

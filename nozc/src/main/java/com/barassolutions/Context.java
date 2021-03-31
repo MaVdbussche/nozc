@@ -1,5 +1,6 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,13 +9,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class Context {
 
-  private final Context parent;
-
   protected final ArrayList<Pattern> definedVars = new ArrayList<>();
   protected final Map<FunctionDef, MethodContext> definedFunctions = new HashMap<>();
   protected final Map<ProcedureDef, MethodContext> definedProcedures = new HashMap<>();
   protected final Map<FunctorDef, FunctorContext> definedFunctors = new HashMap<>();
   protected final Map<ClassDef, ClassContext> definedClasses = new HashMap<>();
+  private final Context parent;
 
   public Context(Context parent) {
     this.parent = parent;
@@ -24,7 +24,8 @@ public class Context {
     boolean notExistsHere;
     if (p instanceof Variable v) {
       notExistsHere = this.ensureNotExistsHere(v.line(), v.name());
-      Logger.debug("Adding Variable in context <name:"+v.name()+" constant:"+v.isConstant()+" readMode:"+v.readMode()+" usedAsPattern:"+v.usedAsPattern()+">");
+      Logger.debug("Adding Variable in context <name:" + v.name() + " constant:" + v.isConstant()
+          + " readMode:" + v.readMode() + " usedAsPattern:" + v.usedAsPattern() + ">");
     } else if (p instanceof Record r) {
       notExistsHere = this.ensureNotExistsHere(r.line(), r.name());
     } else {
@@ -40,7 +41,8 @@ public class Context {
 
   public boolean addFunction(FunctionDef f, MethodContext c) {
     boolean notExistsHere = this.ensureNotExistsHere(f.line(), f.name());
-    Logger.debug("Adding Function in context <name:"+f.name()+" returnType:"+f.returnType()+" args:"+f.nbArgs()+">");
+    Logger.debug("Adding Function in context <name:" + f.name() + " returnType:" + f.returnType()
+        + " nbArgs:" + f.nbArgs() + ">");
     if (notExistsHere) {
       this.definedFunctions.put(f, c);
       return true;
@@ -49,9 +51,30 @@ public class Context {
     }
   }
 
+  /**
+   * @hidden
+   */
+  public void addFunctionBuiltIn(FunctionDef f, MethodContext c) {
+    boolean existsConflictingFunction = false;
+    for (FunctionDef def : definedFunctions.keySet()) {
+      if (def.name().equals(f.name()) && def.nbArgs() == f.nbArgs()) {
+        existsConflictingFunction = true;
+        break;
+      }
+    }
+    if (!existsConflictingFunction) {
+      Logger.debug("Adding Built-in Function <name:" + f.name() + " returnType:" + f.returnType()
+          + " nbArgs:" + f.nbArgs() + ">");
+      this.definedFunctions.put(f, c);
+    } else {
+      Logger.error("There is already a Procedure matching <name:" + f.name() + " returnType:" + f
+          .returnType() + " nbArgs:" + f.nbArgs() + ">. Ignoring this one.");
+    }
+  }
+
   public boolean addProcedure(ProcedureDef p, MethodContext c) {
     boolean notExistsHere = this.ensureNotExistsHere(p.line(), p.name());
-    Logger.debug("Adding Procedure in context <name:"+p.name()+" args:"+p.nbArgs()+">");
+    Logger.debug("Adding Procedure in context <name:" + p.name() + " nbArgs:" + p.nbArgs() + ">");
     if (notExistsHere) {
       this.definedProcedures.put(p, c);
       return true;
@@ -60,9 +83,30 @@ public class Context {
     }
   }
 
+  /**
+   * @hidden
+   */
+  public void addProcedureBuiltIn(ProcedureDef f, MethodContext c) {
+    boolean existsConflictingProcedure = false;
+    for (ProcedureDef def : definedProcedures.keySet()) {
+      if (def.name().equals(f.name()) && def.nbArgs() == f.nbArgs()) {
+        existsConflictingProcedure = true;
+        break;
+      }
+    }
+    if (!existsConflictingProcedure) {
+      Logger.debug("Adding Built-in Function <name:" + f.name() + " nbArgs:" + f.nbArgs() + ">");
+      this.definedProcedures.put(f, c);
+    } else {
+      Logger.error(
+          "There is already a Procedure matching <name:" + f.name() + " nbArgs:" + f.nbArgs()
+              + ">. Ignoring this one.");
+    }
+  }
+
   public boolean addFunctor(FunctorDef f, FunctorContext c) {
     boolean notExistsHere = this.ensureNotExistsHere(f.line(), f.name());
-    Logger.debug("Adding Functor in context <name:"+f.name()+">");
+    Logger.debug("Adding Functor in context <name:" + f.name() + ">");
     if (notExistsHere) {
       this.definedFunctors.put(f, c);
       return true;
@@ -71,14 +115,53 @@ public class Context {
     }
   }
 
+  /**
+   * @hidden
+   */
+  public void addFunctorBuiltIn(FunctorDef f, FunctorContext c) {
+    boolean existsConflictingFunctor = false;
+    for (FunctorDef def : definedFunctors.keySet()) {
+      if (def.name().equals(f.name())) {
+        existsConflictingFunctor = true;
+        break;
+      }
+    }
+    if (!existsConflictingFunctor) {
+      Logger.debug("Adding Built-in Functor <name:" + f.name() + ">");
+      this.definedFunctors.put(f, c);
+    } else {
+      Logger
+          .error("There is already a Functor matching <name:" + f.name() + ">. Ignoring this one.");
+    }
+  }
+
   public boolean addClass(ClassDef f, ClassContext c) {
     boolean notExistsHere = this.ensureNotExistsHere(f.line(), f.name());
-    Logger.debug("Adding Class in context <name:"+f.name()+">");
+    Logger.debug("Adding Class in context <name:" + f.name() + ">");
     if (notExistsHere) {
       this.definedClasses.put(f, c);
       return true;
     } else {
       return false;
+    }
+  }
+
+  /**
+   * @hidden
+   */
+  public void addClassBuiltIn(ClassDef f, ClassContext c) {
+    boolean existsConflictingClass = false;
+    for (ClassDef def : definedClasses.keySet()) {
+      if (def.name().equals(f.name())) {
+        existsConflictingClass = true;
+        break;
+      }
+    }
+    if (!existsConflictingClass) {
+      Logger.debug("Adding Built-in Class <name:" + f.name() + ">");
+      this.definedClasses.put(f, c);
+    } else {
+      Logger.error("There is already a Class matching <name:" + f.name() + ">. Ignoring this one.");
     }
   }
 
@@ -407,8 +490,6 @@ class FunctorContext extends Context {
   }
 
   public void addImport(ImportClause i) {
-    i.getValues().forEach((s, v) -> {
-      this.addVariable(v);
-    });
+    i.getValues().forEach((s, v) -> this.addVariable(v));
   }
 }

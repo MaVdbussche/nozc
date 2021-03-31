@@ -1,5 +1,7 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
+
 /**
  * Most binary expressions that return booleans can be recognized by their syntax. We take advantage
  * of this to define a common codegen().

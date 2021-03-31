@@ -1,5 +1,8 @@
 package com.barassolutions;
 
+import com.barassolutions.util.BuiltIns;
+import com.barassolutions.util.Utils;
+
 public abstract class UnaryExpression extends Expression {
 
   /**
@@ -136,7 +139,7 @@ class OperationLogicalNot extends UnaryExpression {
   @Override
   public void codegen(Emitter output) {
     output.token(TokenOz.LCURLY);
-    output.literal(BuiltIns.not(true));
+    output.literal(BuiltIns.NOT.ozString());
     output.space();
     arg.codegen(output);
     output.token(TokenOz.RCURLY);

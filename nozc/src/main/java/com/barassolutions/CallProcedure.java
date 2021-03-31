@@ -1,5 +1,7 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
+import com.barassolutions.util.Utils;
 import java.util.ArrayList;
 
 public class CallProcedure extends Statement {
@@ -35,7 +37,7 @@ public class CallProcedure extends Statement {
     ProcedureDef method = context.procedureFor(name, args.size());
     if (method == null) {
       interStatement.reportSemanticError(line(),
-          "Could not find procedure for: <name:" + name + " args:" + args.size() + ">");
+          "Could not find procedure for: <name:" + name + " nbArgs:" + args.size() + ">");
     }
     //No return type for procedures
 
@@ -61,9 +63,10 @@ public class CallProcedure extends Statement {
         v.codegen(output);
       } else {
         a.codegen(output);
-      }
+      } //Can't remember the purpose of this. But at this point I'm too afraid to ask
     });
     output.token(TokenOz.RCURLY);
+    output.newLine();
   }
 
   @Override

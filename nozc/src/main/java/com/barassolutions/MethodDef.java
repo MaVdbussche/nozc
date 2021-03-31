@@ -1,5 +1,6 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Utils;
 import org.jetbrains.annotations.Nullable;
 
 public class MethodDef extends Declaration implements ClassElement {
@@ -8,7 +9,7 @@ public class MethodDef extends Declaration implements ClassElement {
 
   @Nullable
   private final String aliasName;
-
+  private final boolean isAFunction;
   /**
    * The statement/expression constituting the method's body.
    */
@@ -16,9 +17,6 @@ public class MethodDef extends Declaration implements ClassElement {
   private InStatement statement;
   @Nullable
   private InExpression expression;
-
-  private final boolean isAFunction;
-
   /**
    * Only makes sense if this is a function, of course.
    */
@@ -28,12 +26,16 @@ public class MethodDef extends Declaration implements ClassElement {
   public MethodDef(int line, MethodHead head, @Nullable Variable name,
       @Nullable InExpression expression, @Nullable InStatement statement) {
     super(line);
-    assert (expression != null || statement != null);
-    isAFunction = head.isAFunction();
-
+    if ((expression == null && statement == null) || (expression != null && statement != null)) {
+      interStatement.reportSemanticError(line,
+          "Invalid structure for method definition. You should wrote a statement or an expression, but not both.");
+    }
     this.head = head;
     this.statement = statement;
     this.expression = expression;
+
+    //This is only correct because of the statements above. Be careful when editing this constructor !
+    isAFunction = (expression != null);
 
     if (name != null) {
       this.aliasName = name.name();

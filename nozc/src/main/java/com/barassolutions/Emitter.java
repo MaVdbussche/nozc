@@ -1,5 +1,3 @@
-// Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
-
 package com.barassolutions;
 
 import java.io.File;
@@ -35,7 +33,7 @@ public class Emitter {
    * @see TokenOz
    */
   public void token(@NotNull TokenOz token) {
-    out.print(token.image());
+    out.printRaw(token.image());
   }
 
   /**
@@ -45,21 +43,21 @@ public class Emitter {
    * @see TokenOz
    */
   public void literal(@NotNull String literal) {
-    out.print(literal);
+    out.printRaw(literal);
   }
 
   /**
    * Print a space at the current position in the output file.
    */
   public void space() {
-    out.print(" ");
+    out.printRaw(" ");
   }
 
   /**
    * Print a line at the current position in the output file.
    */
   public void newLine() {
-    out.println();
+    out.printRawLn();
   }
 
   public void indentLeft() { out.indentLeft(); }

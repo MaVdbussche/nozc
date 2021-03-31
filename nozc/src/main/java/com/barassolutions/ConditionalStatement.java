@@ -1,5 +1,3 @@
-// Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
-
 package com.barassolutions;
 
 import java.util.ArrayList;

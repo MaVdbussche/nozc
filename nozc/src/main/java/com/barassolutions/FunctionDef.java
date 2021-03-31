@@ -1,6 +1,7 @@
 package com.barassolutions;
 
-import java.util.ArrayList;
+import com.barassolutions.util.Utils;
+import java.util.List;
 
 public class FunctionDef extends Declaration {
 
@@ -12,7 +13,7 @@ public class FunctionDef extends Declaration {
   /**
    * The arguments of this function.
    */
-  private final ArrayList<Pattern> args;
+  private final List<Pattern> args;
 
   /**
    * The expression constituting the function's body.
@@ -23,7 +24,7 @@ public class FunctionDef extends Declaration {
 
   private Type returnType;
 
-  public FunctionDef(int line, String name, ArrayList<Pattern> args, InExpression expression,
+  public FunctionDef(int line, String name, List<Pattern> args, InExpression expression,
       boolean lazy) {
     super(line);
     this.name = name;

@@ -1,7 +1,9 @@
 package com.barassolutions;
 
 import com.barassolutions.ClassDescriptor.SubType;
+import com.barassolutions.util.Utils;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ClassDef extends Declaration {
 
@@ -13,15 +15,15 @@ public class ClassDef extends Declaration {
   /**
    * The descriptors of this class.
    */
-  private final ArrayList<ClassDescriptor> descriptors;
+  private final List<ClassDescriptor> descriptors;
 
   /**
    * The methods defined in this class.
    */
-  private final ArrayList<MethodDef> methods;
+  private final List<MethodDef> methods;
 
-  public ClassDef(int line, String name, ArrayList<ClassDescriptor> descriptors,
-      ArrayList<MethodDef> methods) {
+  public ClassDef(int line, String name, List<ClassDescriptor> descriptors,
+      List<MethodDef> methods) {
     super(line);
     this.className = name;
     Utils.sortDescriptors(descriptors);

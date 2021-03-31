@@ -14,6 +14,7 @@ PARSER_BEGIN( JavaCCParser )
 package com.barassolutions;
 
 import com.barassolutions.ClassDescriptor.SubType;
+import com.barassolutions.util.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -349,9 +350,6 @@ InterStatement interStatement(): {
  * <pre>
  *   statement ::= nestConStatement
  *                  | SKIP
- *                  //| SEMI //TODO removed
- *                  //| DECLARE statement //TODO removed bcs matched in interStatement ?
- *                  //| RETURN expression //TODO removed
  * </pre>
  *
  * @return an AST for a statement.
@@ -366,19 +364,10 @@ private Statement statement(): {
         <SKP>
           { line = token.beginLine;
           statement = new SkipStatement(line); }
-        //|
-          //<RETURN> { line = token.beginLine; }
-          //expression = expression()
-          //{ statement = new ReturnStatement(line, expression); }
         |
           //LOOKAHEAD( nestConStatement() )
           {Logger.debug("Found a nestConStatement");}
           statement = nestConStatement()
-        //|
-          //<SEMI> //Ignore it
-        //|
-          //<DECLARE> statement = statement() { line = token.beginLine; }
-
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{EOF}, e);
@@ -392,7 +381,6 @@ private Statement statement(): {
  * <pre>
  *   expression ::= nestConExpression
  *                  | nestDecAnonym
- *                  | parExpression()
  *                  | DOLLAR
  *                  | term
  *                  | THIS
@@ -412,8 +400,6 @@ private Expression expression(): {
           <DOLLAR>
           { line = token.beginLine;
           expression = new AnonymExpression(line); }
-        | LOOKAHEAD( parExpression() )
-          expression = parExpression()
         | LOOKAHEAD( inExpression() )
           {Logger.debug("Found an inExpression");}
           expression = inExpression()
@@ -441,7 +427,6 @@ private Expression expression(): {
  *
  * @return an AST for a parExpression.
  */
-
 private Expression parExpression(): {
     Expression expr = null;
     {Logger.debug("Entering parExpression()");}
@@ -461,7 +446,6 @@ private Expression parExpression(): {
  *
  * <pre>
  *   inStatement ::= LCURLY {declarationPart} {statement} RCURLY
- *                    | LCURLY {declarationPart} expression RCURLY //TODO why expression ? Not necessary since we have RETURN keyword ?
  * </pre>
  *
  * @return an AST for an inStatement.
@@ -500,6 +484,8 @@ private InStatement inStatement(): {
  *   inExpression ::= LCURLY {declarationPart} {statement} [expression] RCURLY
  * </pre>
  *
+ * Note that expression is actually mandatory :
+ *   but we will give the user an error message during the analysis instead.
  * @return an AST for an inExpression.
  */
 private InExpression inExpression(): {
@@ -515,16 +501,17 @@ private InExpression inExpression(): {
     try {
         <LCURLY> { line = token.beginLine; }
         ( LOOKAHEAD( declarationPart() )
-          { Logger.debug("Found a declarationPart"); }
+          { Logger.debug("Found a declarationPart in inExpression()"); }
           aDecl = declarationPart() { decls.add(aDecl); }
         )*
         ( LOOKAHEAD( statement() )
-          { Logger.debug("Found a statement"); }
+          { Logger.debug("Found a statement in inExpression()"); }
           statement = statement() { statements.add(statement); }
         )*
-        [ LOOKAHEAD( expression() )
-          expression = expression()
-          { Logger.debug("Found the returned expression"); }
+        [
+        LOOKAHEAD( expression() )
+        expression = expression()
+        { Logger.debug("Found the returned expression in inExpression()"); }
         ]
         <RCURLY>
     }
@@ -538,8 +525,8 @@ private InExpression inExpression(): {
  * Parse a nestable construct (statement).
  *
  * <pre>
- *   nestConStatement ::= assignmentExpression
- *                    | variable LPAREN {expression {COMMA expression}} RPAREN
+ *   nestConStatement ::= assignmentStatement
+ *                    | variable LPAREN [expression {COMMA expression}] RPAREN
  *                    | inStatement
  *                    | IF parExpression inStatement
  *                      {ELSE IF LPAREN expression RPAREN inStatement}
@@ -583,10 +570,14 @@ private Statement nestConStatement(): {
           LOOKAHEAD( <VARIABLE> <LPAREN> )
           <VARIABLE> { line = token.beginLine; name = token.image;
             Logger.debug("Found a CallProcedure to "+name+" at line "+line); }
-          <LPAREN> expression2 = expression() { args.add(expression2); }
+          <LPAREN>
+          [
+          expression2 = expression() { args.add(expression2); }
           (
             <COMMA> expression2 = expression() { args.add(expression2); }
-          )* <RPAREN>
+          )*
+          ]
+          <RPAREN>
           { out = new CallProcedure(line, name, args); }
         | LOOKAHEAD( inStatement() )
           statement2 = inStatement()
@@ -652,11 +643,10 @@ private Statement nestConStatement(): {
           ]
           statement2 = inStatement()
           { out = new LockStructure(line, expression, statement2); }
-        | LOOKAHEAD( assignmentExpression() )
-          { Logger.debug("Found an assignmentExpression()"); }
-          expression = assignmentExpression()
-          { out = expression; }
-    }
+        | LOOKAHEAD( assignmentStatement() )
+          { Logger.debug("Found an assignmentStatement()"); }
+          out = assignmentStatement()
+              }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
     }
@@ -753,8 +743,8 @@ private Expression nestConExpression(): {
  * Parse a nestable declaration (variables).
  *
  * <pre>
- *   nestDecVariable ::= DEFPROC variable LPAREN {pattern {COMMA pattern}} RPAREN inStatement
- *                 | DEF [LAZY] variable LPAREN {pattern {COMMA pattern}} RPAREN inExpression
+ *   nestDecVariable ::= DEFPROC variable LPAREN [pattern {COMMA pattern}] RPAREN inStatement
+ *                 | DEF [LAZY] variable LPAREN [pattern {COMMA pattern}] RPAREN inExpression
  *                 | FUNCTOR [variable] {
  *                     (IMPORT importClause {COMMA importClause}+)
  *                     | (EXPORT exportClause {COMMA exportClause}+)
@@ -792,10 +782,12 @@ private Declaration nestDecVariable(): {
           <DEFPROC> { line = token.beginLine; }
           <VARIABLE> { name = token.image; }
           <LPAREN>
+          [
           aPattern = pattern() { args.add(aPattern); }
           (
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )*
+          ]
           <RPAREN>
           statement = inStatement()
           { out = new ProcedureDef(line, name, args, statement); }
@@ -805,10 +797,12 @@ private Declaration nestDecVariable(): {
           [<LAZY> { lazy = true; }]
           <VARIABLE> { name = token.image; }
           <LPAREN>
+          [
           aPattern = pattern() { args.add(aPattern); }
           (
             <COMMA> aPattern = pattern() { args.add(aPattern); }
           )*
+          ]
           <RPAREN>
           expression = inExpression()
           { out = new FunctionDef(line, name, args, expression, lazy); }
@@ -858,8 +852,8 @@ private Declaration nestDecVariable(): {
  * Parse a nestable declaration (anonymous).
  *
  * <pre>
- *   nestDecAnonym ::= DEFPROC DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inStatement
- *                 | DEF [LAZY] DOLLAR LPAREN {pattern {COMMA pattern}} RPAREN inExpression
+ *   nestDecAnonym ::= DEFPROC DOLLAR LPAREN [pattern {COMMA pattern}] RPAREN inStatement
+ *                 | DEF [LAZY] DOLLAR LPAREN [pattern {COMMA pattern}] RPAREN inExpression
  *                 | FUNCTOR [DOLLAR] {
  *                     (IMPORT importClause {COMMA importClause}+)
  *                     | (EXPORT exportClause {COMMA exportClause}+)
@@ -892,19 +886,25 @@ private Expression nestDecAnonym(): {
     try {
         <DEFPROC> { line = token.beginLine; }
           <DOLLAR> <LPAREN>
+          [
           aPattern = pattern() { args.add(aPattern); }
           (
             <COMMA> aPattern = pattern() { args.add(aPattern); }
-          )* <RPAREN>
+          )*
+          ]
+          <RPAREN>
           statement = inStatement()
           { out = new ProcedureDefAnonym(line, args, statement, null); }
         | <DEF> { line = token.beginLine; }
           [<LAZY> { lazy = true; }]
           <DOLLAR> <LPAREN>
+          [
           aPattern = pattern() { args.add(aPattern); }
           (
             <COMMA> aPattern = pattern() { args.add(aPattern); }
-          )* <RPAREN>
+          )*
+          ]
+          <RPAREN>
           expression = inExpression()
           { out = new FunctionDefAnonym(line, args, expression, lazy, null); }
         | <FUNCTOR> { line = token.beginLine; }
@@ -1142,7 +1142,6 @@ private CaseExpressionClause caseExpressionClause(boolean firstClausePassed): {
  *
  * <pre>
  *   assignmentExpression ::= conditionalExpression
- *                              [(ASSIGN|PLUSASS|MINUSASS|DEFINE) conditionalExpression]
  * </pre>
  *
  * @return an AST for an AssignmentExpression.
@@ -1171,6 +1170,36 @@ private Expression assignmentExpression(): {
         recoverFromError(new int[]{RCURLY}, e);
     }
     { return lhs; }
+}
+
+/**
+ * Parse an assignment statement.
+ *
+ * <pre>
+ *   assignmentStatement ::= variable ASSIGN assignmentExpression
+ * </pre>
+ *
+ * @return an AST for an AssignmentStatement.
+ */
+private Statement assignmentStatement(): {
+    int line = 0;
+    Statement out = null;
+    Variable lhs = null;
+    Expression rhs = null;
+    {Logger.debug("Entering assignmentStatement()");}
+}
+{
+    try {
+        <VARIABLE>
+        { lhs = new Variable(token.beginLine, token.image, false, false); }
+        //Do not activate readmode : OperationAssignment#codegen() will handle the correct operator t write (= vs :=)
+        <ASSIGN> rhs = assignmentExpression()
+        { out = new OperationAssignment(line, lhs, rhs); }
+    }
+    catch ( ParseException e ) {
+        recoverFromError(new int[]{RCURLY}, e);
+    }
+    { return out; }
 }
 
 /**
@@ -1496,7 +1525,7 @@ private Expression postfixExpression(): {
  *             | THIS DOT variable LPAREN [expression {COMMA expression}] RPAREN
  *             | SUPER [LPAREN variableStrict RPAREN]
  *                      DOT variable LPAREN [expression {COMMA expression}] RPAREN
- *             | variable
+ *             | parExpression
  * </pre>
  *
  * @return an AST for a primaryExpression.
@@ -1513,7 +1542,10 @@ private Expression primary(): {
 }
 {
     try {
-          LOOKAHEAD( <UNIT> ) <UNIT> { out = new Literal(token.beginLine, Type.UNIT, false); }
+
+          LOOKAHEAD( parExpression() )
+          out = parExpression()
+        | LOOKAHEAD( <UNIT> ) <UNIT> { out = new Literal(token.beginLine, Type.UNIT, false); }
         | LOOKAHEAD( <TRUE> ) <TRUE> { out = new Literal(token.beginLine, Type.BOOLEAN, true, false); }
         | LOOKAHEAD( <FALSE> ) <FALSE> { out = new Literal(token.beginLine, Type.BOOLEAN, false, false); }
         | LOOKAHEAD( <UNDERSCORE> ) <UNDERSCORE> { out = new Literal(token.beginLine, Type.UNDERSCORE, false); }
@@ -1649,10 +1681,14 @@ private Expression term(): {
         | LOOKAHEAD( <VARIABLE> <LPAREN> expression() )
           <VARIABLE> { line = token.beginLine; value = token.image;
             Logger.debug("Found a CallFunction to "+value+" at line "+line); }
-          <LPAREN> val = expression() { args.add(val); }
+          <LPAREN>
+          [
+          val = expression() { args.add(val); }
           (
             <COMMA> val = expression() { args.add(val); }
-          )* <RPAREN>
+          )*
+          ]
+          <RPAREN>
           { out = new CallFunction(line, value, args); }
         | LOOKAHEAD( <LPAREN> expression() (<HASHTAG> expression())+ <RPAREN> )
           <LPAREN> { line = token.beginLine; }
@@ -1791,8 +1827,8 @@ private Pattern pattern(): {
  * Parse a variables declaration group.
  *
  * <pre>
- *   declarationPart ::= (VAL|VAR) variable [ASSIGN (expression|statement)] //TODO why statement ? => because of statements like i++
- *                        {COMMA variable [ASSIGN (expression|statement)]} //TODO why pattern ?
+ *   declarationPart ::= (VAL|VAR) variable [ASSIGN expression]
+ *                        {COMMA variable [ASSIGN expression]}
  *                      | nestDecVariable
  * </pre>
  *
@@ -1973,7 +2009,7 @@ private ClassDescriptor classDescriptor(): {
  *
  * <pre>
  *   methHead ::= (variableStrict | variable ) //variableStrict => private, variable => public
- *                  LPAREN [methArg {COMMA methArg} [COMMA ELLIPSIS] ] [DOLLAR] RPAREN //TODO we might be able to remove $ since block will be an inExpression -> recognizable
+ *                  LPAREN [methArg {COMMA methArg} [COMMA ELLIPSIS]] RPAREN
  * </pre>
  *
  * @return an AST for a MethHead.
@@ -1985,7 +2021,6 @@ private MethodHead methHead(): {
     MethodArg arg = null;
     ArrayList<MethodArg> args = new ArrayList<MethodArg>();
     boolean moreArgs = false;
-    boolean isAFunction = false;
 }
 {
     try {
@@ -2004,15 +2039,12 @@ private MethodHead methHead(): {
             { moreArgs = true; }
           ]
         ]
-        [
-          <DOLLAR> { isAFunction = true; }
-        ]
         <RPAREN>
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
     }
-    { return new MethodHead(line, name, priv, args, moreArgs, isAFunction); }
+    { return new MethodHead(line, name, priv, args, moreArgs); }
 }
 
 /**

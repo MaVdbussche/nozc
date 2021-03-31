@@ -1,5 +1,7 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
+import com.barassolutions.util.Utils;
 import java.util.ArrayList;
 
 public class CallFunction extends
@@ -36,7 +38,7 @@ public class CallFunction extends
     FunctionDef method = context.functionFor(name, args.size());
     if (method == null) {
       interStatement.reportSemanticError(line(),
-          "Could not find function for: <name:" + name + " args:" + args.size() + ">");
+          "Could not find function for: <name:" + name + " nbArgs:" + args.size() + ">");
     } else {
       this.type = method.returnType();
     }
@@ -62,6 +64,7 @@ public class CallFunction extends
       a.codegen(output);
     });
     output.token(TokenOz.RCURLY);
+    output.newLine();
   }
 
   @Override

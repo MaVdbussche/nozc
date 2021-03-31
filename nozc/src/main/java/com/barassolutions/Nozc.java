@@ -1,13 +1,13 @@
 package com.barassolutions;
 
-import com.barassolutions.Logger.LogLevel;
+import com.barassolutions.util.Logger;
+import com.barassolutions.util.Logger.LogLevel;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.Callable;
@@ -21,8 +21,6 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /* Read the Picocli documentation at https://picocli.info/ */
-//TODO generate specific exit codes for custom exceptions ? https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
-//TODO customize standard help message color scheme ? https://picocli.info/#_configuring_fixed_elements
 @Command(name = "nozc",//name = "main/java/nozc",
     synopsisHeading = "@|bold,underline Usage:|@%n%n",
     descriptionHeading = "%n@|bold,underline Description:|@%n%n",
@@ -37,11 +35,6 @@ import picocli.CommandLine.Parameters;
     sortOptions = false,
     usageHelpAutoWidth = true)
 public class Nozc implements Callable<Integer> {
-
-  // see mixinStandardHelpOptions
-    /*@Option(names = {"-h", "--help"}, usageHelp = true, description = "display a description of valid command usages")
-    private boolean printHelp = false;
-    */
 
   public static boolean errorHasOccurred;
 
@@ -181,7 +174,7 @@ public class Nozc implements Callable<Integer> {
       JavaCCParser parser;
       try {
         //This is not actually an error : IntelliJ just tries to match this with the class
-        // in newoz.jj, instead of the valid constructor in JavaCC.java.
+        // in newoz.jj, instead of the valid constructor in JavaCC.java (for some reason).
         // This does not cause an error at runtime.
         parser = new JavaCCParser(scanner);
         parser.fileName(inputFile.getName());
@@ -302,7 +295,7 @@ public class Nozc implements Callable<Integer> {
       String version = props.get("version").toString();
 
       return new String[]{"@|yellow ${COMMAND-FULL-NAME} " + version + "|@",
-          "(c) Martin \"Barsingha\" Vandenbussche 2021",
+          "(c) Martin \"Barasingha\" Vandenbussche 2021",
           "Run via Picocli " + CommandLine.VERSION,
           "JVM: ${java.version} (${java.vendor} ${java.vm.name} ${java.vm.version})",
           "OS: ${os.name} ${os.version} ${os.arch}",

@@ -21,8 +21,6 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /* Read the Picocli documentation at https://picocli.info/ */
-//TODO generate specific exit codes for custom exceptions ? https://picocli.info/#_exception_exit_codes and https://picocli.info/#_business_logic_exceptions
-//TODO customize standard help message color scheme ? https://picocli.info/#_configuring_fixed_elements
 @Command(name = "nozc",//name = "main/java/nozc",
     synopsisHeading = "@|bold,underline Usage:|@%n%n",
     descriptionHeading = "%n@|bold,underline Description:|@%n%n",

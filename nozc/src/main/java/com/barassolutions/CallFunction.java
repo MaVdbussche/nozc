@@ -38,7 +38,7 @@ public class CallFunction extends
     FunctionDef method = context.functionFor(name, args.size());
     if (method == null) {
       interStatement.reportSemanticError(line(),
-          "Could not find function for: <name:" + name + " args:" + args.size() + ">");
+          "Could not find function for: <name:" + name + " nbArgs:" + args.size() + ">");
     } else {
       this.type = method.returnType();
     }

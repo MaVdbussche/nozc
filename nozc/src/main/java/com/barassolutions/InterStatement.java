@@ -1,5 +1,6 @@
 package com.barassolutions;
 
+import com.barassolutions.util.BuiltIns;
 import com.barassolutions.util.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,8 +70,8 @@ public class InterStatement extends AST {
   /**
    * Report a semantic error.
    *
-   * @param line      line in which the error occurred in the source file.
-   * @param message   message identifying the error.
+   * @param line    line in which the error occurred in the source file.
+   * @param message message identifying the error.
    */
   public void reportSemanticError(int line, String message, Object... args) {
     var arguments = new ArrayList<>();
@@ -78,19 +79,45 @@ public class InterStatement extends AST {
     arguments.addAll(Arrays.asList(args));
 
     isInError = true;
-    Logger.error("%d: "+message, arguments.toArray());
+    Logger.error("%d: " + message, arguments.toArray());
   }
 
   public void preAnalyze() {
     globalContext = new GlobalContext();
 
-    //context.addFunction();
-    globalContext.addProcedure(new ProcedureDef(-1, "browse",
-            Arrays.asList(new Pattern[]{new Variable(-1, "Target", true, true)}),
-            null),
-            new MethodContext(null)
-        );
-    //TODO all implicit functions/procs in Oz (Browse etc.)
+    for (BuiltIns b : BuiltIns.values()) {
+      switch (b.type()) {
+        case FUNCTION -> {
+          globalContext.addFunction(new FunctionDef(-1, b.nozString(),
+                  /*Function arguments*/
+                  b.args(),
+                  /*Function content is not important for Nozc*/
+                  null,
+                  /*We don't care if lazy or not*/
+                  false),
+              new MethodContext(null));
+        }
+        case PROCEDURE -> {
+          globalContext.addProcedure(new ProcedureDef(-1, b.nozString(),
+                  /*Procedure arguments*/
+                  b.args(),
+                  /*Procedure content is not important for Nozc*/
+                  null),
+              new MethodContext(null));
+        }
+        case FUNCTOR -> {
+          //TODO necessary ?
+        }
+        case CLASS -> {
+          globalContext.addClass(new ClassDef(-1, b.ozString(),
+                  /*Class descriptors*/
+                  b.descrs(),
+                  /*Class methods*/
+                  b.meths()),
+              new ClassContext(null));
+        }
+      }
+    }
     //TODO also add system calls etc, things directly available without imports
 
     //Launch recursive preAnalyze
@@ -123,9 +150,9 @@ public class InterStatement extends AST {
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<InteractiveStatement line=\"%d\">\n", line());
 
-    if (statements!=null) {
+    if (statements != null) {
       statements.forEach(s -> s.writeToStdOut(p));
-    } else if (statement!=null) {
+    } else if (statement != null) {
       statement.writeToStdOut(p);
     }
     p.printf("</InteractiveStatement>\n");

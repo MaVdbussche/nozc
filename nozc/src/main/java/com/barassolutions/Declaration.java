@@ -1,5 +1,6 @@
 package com.barassolutions;
 
+import com.barassolutions.util.BuiltIns;
 import com.barassolutions.util.Logger;
 import com.barassolutions.util.Utils;
 import java.util.Map;
@@ -63,7 +64,7 @@ public class Declaration extends Statement {
         output.literal(Utils.ozFriendlyName(k.name()));
         output.token(TokenOz.ASSIGN);
         output.token(TokenOz.LCURLY);
-        output.literal(BuiltIns.newCell(true));
+        output.literal(BuiltIns.NEWCELL.ozString());
         output.space();
         if (v == null) {
           output.token(TokenOz.UNDERSCORE);

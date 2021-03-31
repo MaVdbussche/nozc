@@ -54,7 +54,7 @@ public class Call extends Expression {
         MethodDef method = classContext.methodFor(name, arguments.size());
         if (method == null) {
           interStatement.reportSemanticError(line(),
-              "Could not find method for: <name:" + name + " args:" + arguments.size()
+              "Could not find method for: <name:" + name + " nbArgs:" + arguments.size()
                   + "> in Class \"" + classContext.name + "\"");
         } else {
           if (method.isAFunction()) {
@@ -74,7 +74,7 @@ public class Call extends Expression {
             MethodDef method = classContext.methodFor(name, arguments.size());
             if (method == null) {
               interStatement.reportSemanticError(line(),
-                  "Could not find method for: <name:" + name + " args:" + arguments.size()
+                  "Could not find method for: <name:" + name + " nbArgs:" + arguments.size()
                       + "> in Class \"" + superClassName + "\"");
             } else {
               if (method.isAFunction()) {

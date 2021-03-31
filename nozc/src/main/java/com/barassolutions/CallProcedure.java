@@ -37,7 +37,7 @@ public class CallProcedure extends Statement {
     ProcedureDef method = context.procedureFor(name, args.size());
     if (method == null) {
       interStatement.reportSemanticError(line(),
-          "Could not find procedure for: <name:" + name + " args:" + args.size() + ">");
+          "Could not find procedure for: <name:" + name + " nbArgs:" + args.size() + ">");
     }
     //No return type for procedures
 

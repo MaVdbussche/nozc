@@ -10,10 +10,14 @@ public class PrettyPrinter {
 
   private final PrintStream out;
 
-  /** Width of an indentation. */
+  /**
+   * Width of an indentation.
+   */
   private final int indentWidth;
 
-  /** Current indentation (number of blank spaces). */
+  /**
+   * Current indentation (number of blank spaces).
+   */
   private int indent;
 
   /**
@@ -26,8 +30,7 @@ public class PrettyPrinter {
   /**
    * Construct a PrettyPrinter given the indentation width.
    *
-   * @param indentWidth
-   *            number of blank spaces for an indent.
+   * @param indentWidth number of blank spaces for an indent.
    */
   public PrettyPrinter(int indentWidth) {
     out = System.out;
@@ -38,8 +41,7 @@ public class PrettyPrinter {
   /**
    * Construct a PrettyPrinter given the output Stream and an indentation width of 2.
    *
-   * @param out
-   *            PrintStream to use for printing.
+   * @param out PrintStream to use for printing.
    */
   public PrettyPrinter(PrintStream out) {
     this(out, 2);
@@ -48,10 +50,8 @@ public class PrettyPrinter {
   /**
    * Construct a PrettyPrinter given the output Stream and indentation width.
    *
-   * @param out
-   *            PrintStream to use for printing.
-   * @param indentWidth
-   *            number of blank spaces for an indent.
+   * @param out         PrintStream to use for printing.
+   * @param indentWidth number of blank spaces for an indent.
    */
   public PrettyPrinter(PrintStream out, int indentWidth) {
     this.out = out;
@@ -80,41 +80,72 @@ public class PrettyPrinter {
    */
   public void println() {
     doIndent();
+    this.printRawLn();
+  }
+
+  /**
+   * Print an empty line to the output stream, ignoring indentation.
+   */
+  public void printRawLn() {
     out.println();
   }
 
   /**
    * Print the specified string (followed by a newline) to the output stream.
    *
-   * @param s
-   *            string to print.
+   * @param s string to print.
    */
   public void println(@NotNull String s) {
     doIndent();
+    this.printRawLn(s);
+  }
+
+  /**
+   * Print the specified string (followed by a newline) to the output stream, ignoring indentation.
+   *
+   * @param s string to print.
+   */
+  public void printRawLn(@NotNull String s) {
     out.println(s);
   }
 
   /**
    * Print the specified string to the output stream.
    *
-   * @param s
-   *            string to print.
+   * @param s string to print.
    */
   public void print(@NotNull String s) {
-    //doIndent();
+    doIndent();
+    this.printRaw(s);
+  }
+
+  /**
+   * Print the specified string to the output stream, ignoring indentation.
+   *
+   * @param s string to print.
+   */
+  public void printRaw(@NotNull String s) {
     out.print(s);
   }
 
   /**
    * Print args to the output stream according to the specified format.
    *
-   * @param format
-   *            format specifier.
-   * @param args
-   *            values to print.
+   * @param format format specifier.
+   * @param args   values to print.
    */
   public void printf(@NotNull String format, Object... args) {
     doIndent();
+    this.printRawF(format, args);
+  }
+
+  /**
+   * Print args to the output stream according to the specified format, ignoring indentation.
+   *
+   * @param format format specifier.
+   * @param args   values to print.
+   */
+  public void printRawF(@NotNull String format, Object... args) {
     out.printf(format, args);
   }
 
@@ -131,8 +162,8 @@ public class PrettyPrinter {
    * Close files, not STDOUT.
    */
   public void close() {
-    if (! out.equals(System.out)) {
-        out.close();
+    if (!out.equals(System.out)) {
+      out.close();
     }
   }
 

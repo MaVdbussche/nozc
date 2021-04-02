@@ -58,12 +58,13 @@ public class FunctionDef extends Declaration {
       methContext.addArgument(a);
     });
 
+    context.addFunction(this, methContext);
+
     expression = (InExpression) expression.analyze(methContext);
 
     returnType = expression.type();
     methContext.setReturnType(returnType);
 
-    context.addFunction(this, methContext);
     return this;
   }
 

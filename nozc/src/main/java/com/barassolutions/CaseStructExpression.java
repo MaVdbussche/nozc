@@ -7,21 +7,20 @@ public class CaseStructExpression extends Expression {
 
 
   /**
-   * Expression to be matched against.
-   */
-  private Expression expression;
-
-  /**
    * Clauses to test against <code>expression</code>
    */
   private final ArrayList<CaseExpressionClause> clauses;
-
+  /**
+   * Expression to be matched against.
+   */
+  private Expression expression;
   /**
    * Optional, default clause
    */
   private InExpression defaultExpression;
 
-  public CaseStructExpression(int line, Expression expression, ArrayList<CaseExpressionClause> clauses,
+  public CaseStructExpression(int line, Expression expression,
+      ArrayList<CaseExpressionClause> clauses,
       @Nullable InExpression defaultExpression) {
     super(line);
     this.expression = expression;
@@ -59,14 +58,20 @@ public class CaseStructExpression extends Expression {
     output.token(TokenOz.OF);
     output.newLine();
     output.indentRight();
-    clauses.forEach(c -> c.codegen(output));
+    clauses.forEach(c -> {
+      c.codegen(output);
+      if (clauses.indexOf(c) != clauses.size() - 1
+          || (clauses.indexOf(c) == clauses.size() - 1 && defaultExpression != null)) {
+        output.newLine();
+      }
+    });
     if (defaultExpression != null) {
       output.token(TokenOz.ELSE);
+      output.space();
       defaultExpression.codegen(output);
       output.newLine();
     }
     output.token(TokenOz.END);
-    output.newLine();
   }
 
   @Override

@@ -47,17 +47,18 @@ public class FunctorDef extends Declaration {
   @Override
   public AST analyze(Context context) {
     FunctorContext fContext = new FunctorContext(context);
-    context.addFunctor(this, fContext);
 
     imports.forEach(i -> {
-      i = (ImportClause) i.analyze(context);
+      i = (ImportClause) i.analyze(context); //Shouldn't we analyze in inner context ?
       fContext.addImport(i);
     });
+
+    context.addFunctor(this, fContext);
 
     statement.analyze(fContext);
 
     exports.forEach(e -> {
-      e = (ExportClause) e.analyze(context);
+      e = (ExportClause) e.analyze(context); //Shouldn't we analyze in inner context ?
       fContext.ensureExistsHere(line(), e.exportedValue().name());
     });
 

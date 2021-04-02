@@ -19,7 +19,7 @@ public class LoopStructure extends Statement {
   /**
    * The loop declarations
    */
-  private ArrayList<LoopDeclaration> loopDecs;
+  private final ArrayList<LoopDeclaration> loopDecs;
 
   /**
    * The body of the loop

@@ -57,12 +57,13 @@ public class FunctionDefAnonym extends DeclarationAnonym {
       methContext.addArgument(a);
     });
 
+    context.addFunction(new FunctionDef(this), methContext);
+
     expression = (InExpression) expression.analyze(methContext);
 
     Type returnType = this.expression.type();
     methContext.setReturnType(returnType);
 
-    context.addFunction(new FunctionDef(this), methContext);
     return this;
   }
 

@@ -2,6 +2,7 @@ package com.barassolutions;
 
 import com.barassolutions.util.Logger;
 import com.barassolutions.util.Utils;
+import java.util.Collections;
 
 public class Variable extends Pattern implements Lhs {
 
@@ -51,6 +52,11 @@ public class Variable extends Pattern implements Lhs {
 
   public boolean usedAsPattern() {
     return usedAsPattern;
+  }
+
+  @Override
+  public Iterable<Pattern> patterns() {
+    return Collections.singleton(this);
   }
 
   /**

@@ -1,6 +1,5 @@
 package com.barassolutions;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class Record extends Pattern {
@@ -32,6 +31,11 @@ public class Record extends Pattern {
 
   public String name() {
     return name;
+  }
+
+  @Override
+  public Iterable<Pattern> patterns() {
+    return this.patterns.values();
   }
 
   @Override

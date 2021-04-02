@@ -54,12 +54,13 @@ public class FunctorDefAnonym extends DeclarationAnonym {
   @Override
   public Expression analyze(Context context) {
     FunctorContext fContext = new FunctorContext(context);
-    context.addFunctor(new FunctorDef(this), fContext);
 
     imports.forEach(i -> {
       i = (ImportClause) i.analyze(context);
       fContext.addImport(i);
     });
+
+    context.addFunctor(new FunctorDef(this), fContext);
 
     statement.analyze(fContext);
 

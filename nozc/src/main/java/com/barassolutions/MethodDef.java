@@ -72,7 +72,12 @@ public class MethodDef extends Declaration implements ClassElement {
     head.args().forEach(a -> {
       a = a.analyze(context);
       methContext.addArgument(a);
+      a.patterns().forEach(methContext::addVariable);
     });
+
+    if (classContext != null) {
+      classContext.addMethod(this, methContext);
+    }
 
     if (statement != null && !isAFunction) {
       statement = (InStatement) statement
@@ -83,9 +88,6 @@ public class MethodDef extends Declaration implements ClassElement {
       methContext.setReturnType(returnType);
     }
 
-    if (classContext != null) {
-      classContext.addMethod(this, methContext);
-    }
     return this;
   }
 

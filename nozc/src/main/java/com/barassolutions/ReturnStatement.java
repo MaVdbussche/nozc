@@ -1,5 +1,6 @@
 package com.barassolutions;
 
+@Deprecated
 public class ReturnStatement extends Statement {
 
   /**

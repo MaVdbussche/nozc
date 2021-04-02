@@ -6,21 +6,20 @@ import org.jetbrains.annotations.Nullable;
 public class CaseStructStatement extends Statement {
 
   /**
-   * Expression to be matched against.
-   */
-  private Expression expression;
-
-  /**
    * Clauses to test against <code>expression</code>
    */
   private final ArrayList<CaseStatementClause> clauses;
-
+  /**
+   * Expression to be matched against.
+   */
+  private Expression expression;
   /**
    * Optional, default clause
    */
   private InStatement defaultStatement;
 
-  public CaseStructStatement(int line, Expression expression, ArrayList<CaseStatementClause> clauses,
+  public CaseStructStatement(int line, Expression expression,
+      ArrayList<CaseStatementClause> clauses,
       @Nullable InStatement statement) {
     super(line);
     this.expression = expression;
@@ -58,14 +57,19 @@ public class CaseStructStatement extends Statement {
     output.token(TokenOz.OF);
     output.newLine();
     output.indentRight();
-    clauses.forEach(c -> c.codegen(output));
-    if (defaultStatement!=null) {
+    clauses.forEach(c -> {
+      c.codegen(output);
+      if(clauses.indexOf(c)!=clauses.size()-1) {
+        output.newLine();
+      }
+    });
+    if (defaultStatement != null) {
       output.token(TokenOz.ELSE);
+      output.space();
       defaultStatement.codegen(output);
       output.newLine();
     }
     output.token(TokenOz.END);
-    output.newLine();
   }
 
   @Override

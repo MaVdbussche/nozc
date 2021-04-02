@@ -14,7 +14,7 @@ public class Literal extends Pattern {
     this.type = type;
     switch (type) {
       case NIL -> {
-        //this.image = TokenOz.NIL.image(); TODO
+        this.image = TokenOz.NIL.image();
         this.type = Type.ANY;
       }
       case UNIT -> this.image = TokenOz.UNIT.image();
@@ -40,6 +40,11 @@ public class Literal extends Pattern {
 
   public String image() {
     return image;
+  }
+
+  @Override
+  public Iterable<Pattern> patterns() throws UnsupportedOperationException {
+    throw new UnsupportedOperationException();
   }
 
   @Override

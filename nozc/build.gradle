@@ -3,6 +3,9 @@ plugins {
     id 'java-library'
     //id 'org.beryx.runtime' version '1.12.2'
 }
+repositories {
+    mavenCentral()
+}
 
 group 'com.barassolutions'
 version = project.property("version")
@@ -27,6 +30,14 @@ task javaccGen {
     }
 }
 compileJava.dependsOn javaccGen
+
+processResources {
+    filesMatching('**/app.properties') {
+        filter {
+            it.replace('%APP_VERSION_TOKEN%', version)
+        }
+    }
+}
 
 tasks.withType(JavaCompile).all {
     options.warnings = true
@@ -63,16 +74,13 @@ task uberJar(type: Jar) {
     }
 }
 
-processResources {
-    filesMatching('**/app.properties') {
-        filter {
-            it.replace('%APP_VERSION_TOKEN%', version)
+distributions {
+    main {
+        distributionBaseName = 'nozc'
+        contents {
+            from 'src/readme'
         }
     }
-}
-
-repositories {
-    mavenCentral()
 }
 
 dependencies {

@@ -39,7 +39,7 @@ This compiler was developed in the context of my master thesis, which can be fou
 
 ## Install
 
-This application does not need to be installe _per se_.
+This application does not need to be installed _per se_.
 Instead, you will find in the [releases](releases) folder all versions of nozc published to date, both in `.tar` and `.zip` formats.\
 Please take note that the last version should always be used; no support will be offered for outdated versions.
 

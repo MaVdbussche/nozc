@@ -260,7 +260,7 @@ TOKEN : {
 TOKEN : {
   < VARIABLESTRICT: ((<UPPERCASE>(<ALPHANUM>)*) | "`"(<ESC> | <PSEUDO_CHAR> | ~["`","\\","\n","\r"])"`") >
 | < VARIABLE: <LOWERCASE>(<ALPHANUM>)* >
-| < ATOM: (<ATOMLISP> | "´" (<ESC>| <PSEUDO_CHAR> | ~["´","\\","\n","\r"]) "´") >
+| < ATOM: (<ATOMLISP> | "´" (<ESC>| <PSEUDO_CHAR> | ~["\\","\n","\r"]) "´") >
 | < ATOMLISP: <APOSTROPHE> (<LOWERCASE>|<UPPERCASE>) (<ALPHANUM>)* >
 //| < LABEL: (<VARIABLE>|<ATOM>|<BOOLEAN>|<UNIT>) >
 | < STRING: "\"" (<ESC>| <PSEUDO_CHAR> | ~["\"","\\","\n","\r"]) "\"" >

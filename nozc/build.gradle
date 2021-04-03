@@ -24,8 +24,13 @@ java {
 task javaccGen {
     doFirst {
         exec {
-            workingDir = './src/main/java/com/barassolutions'
-            commandLine 'javacc', '-static=false', 'newoz.jj'
+            if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+                workingDir = './src/main/java/com/barassolutions'
+                commandLine 'cmd', '/c', '..\\..\\..\\..\\..\\..\\bin\\javacc.bat', '-static:false', 'newoz.jj'
+            } else {
+                workingDir = './src/main/java/com/barassolutions'
+                commandLine '../bin/javacc', '-static:false', 'newoz.jj'
+            }
         }
     }
 }
@@ -79,6 +84,14 @@ distributions {
         distributionBaseName = 'nozc'
         contents {
             from 'src/readme'
+        }
+    }
+}
+assembleDist {
+    doLast {
+        copy {
+            from './build/distributions'
+            into '../releases'
         }
     }
 }

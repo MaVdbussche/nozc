@@ -5,6 +5,7 @@ located at https://github.com/MaVdbussche/nozc.
 
 ## Requirements
 *Those are the requirements for running Nozc. If you are looking for the requirements to build Nozc locally, head over to https://github.com/MaVdbussche/nozc/blob/master/BUILD.md*
+
 * This application requires **Java 16 or higher** to run. You can download it from
   [Oracle's website](https://www.oracle.com/java/technologies/javase-downloads.html),
   or from other vendors like [AdoptOpenJDK](https://adoptopenjdk.net).

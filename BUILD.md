@@ -19,6 +19,9 @@ file is situated), run the following commands :
 >This command will create a distributable, under both `.zip` and `.tar` formats, under `./nozc/build/distributions`,
 > then copies them to the `releases` folder.
 
+>Gradle might signal you that some files are obsolete. If so, navigate to `nozc/src/main/java/com/barassolutions` and delete them.
+> Then, rerun `.\gradlew assembleDist`
+
 You may see all available Gradle tasks by running :
 ```
 ./gradlew tasks

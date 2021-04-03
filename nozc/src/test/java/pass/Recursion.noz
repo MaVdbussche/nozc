@@ -9,6 +9,6 @@ declare {
   def sumList(l) {
     acc(l, 0)
   }
-  var list = [1,2,3]
+  var list = (1::2::3::nil)
   browse(sumList(list))
 }

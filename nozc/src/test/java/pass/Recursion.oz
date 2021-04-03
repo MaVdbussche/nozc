@@ -11,6 +11,6 @@ end
 fun{SumList L}
 {Acc L 0}
 end
-List={NewCell [1 2 3]}
+List={NewCell 1|2|3|nil}
 in
 {Browse {SumList @List}}

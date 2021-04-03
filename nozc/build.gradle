@@ -79,14 +79,6 @@ task uberJar(type: Jar) {
     }
 }
 
-distributions {
-    main {
-        distributionBaseName = 'nozc'
-        contents {
-            from 'src/readme'
-        }
-    }
-}
 assembleDist {
     doLast {
         copy {

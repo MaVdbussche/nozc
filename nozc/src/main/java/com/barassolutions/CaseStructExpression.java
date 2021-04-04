@@ -1,27 +1,29 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import org.jetbrains.annotations.Nullable;
 
 public class CaseStructExpression extends Expression {
 
 
   /**
-   * Expression to be matched against.
-   */
-  private Expression expression;
-
-  /**
    * Clauses to test against <code>expression</code>
    */
   private final ArrayList<CaseExpressionClause> clauses;
-
+  /**
+   * Expression to be matched against.
+   */
+  private Expression expression;
   /**
    * Optional, default clause
    */
+  @Nullable
   private InExpression defaultExpression;
 
-  public CaseStructExpression(int line, Expression expression, ArrayList<CaseExpressionClause> clauses,
+  public CaseStructExpression(int line, Expression expression,
+      ArrayList<CaseExpressionClause> clauses,
       @Nullable InExpression defaultExpression) {
     super(line);
     this.expression = expression;
@@ -39,9 +41,36 @@ public class CaseStructExpression extends Expression {
   public Expression analyze(Context context) {
     expression = expression.analyze(context);
 
-    clauses.forEach(c -> c = (CaseExpressionClause) c.analyze(context));
+    AtomicReference<Type> returnedType = new AtomicReference<>();
+    returnedType.set(null);
+    clauses.forEach(c -> {
+          c = (CaseExpressionClause) c.analyze(context);
+          if (returnedType.get() == null) {
+            returnedType.set(c.type());
+          } else {
+            if (!c.type().matchesExpected(returnedType.get())) {
+              Logger.warn(
+                  "Line %d : All the returned expressions in a given method should be of the same type. this is not an error, but it might have unpredictable results.",
+                  line());
+            }
+          }
+        }
+    );
 
-    defaultExpression = (InExpression) defaultExpression.analyze(context);
+    if(defaultExpression!=null) {
+      defaultExpression = (InExpression) defaultExpression.analyze(context);
+      if (returnedType.get() == null) {
+        returnedType.set(defaultExpression.type());
+      } else {
+        if (!defaultExpression.type().matchesExpected(returnedType.get())) {
+          Logger.warn(
+              "Line %d : All the returned expressions in a given method should be of the same type. this is not an error, but it might have unpredictable results.",
+              line());
+        }
+      }
+    }
+
+    this.type = returnedType.get();
     return this;
   }
 
@@ -59,14 +88,20 @@ public class CaseStructExpression extends Expression {
     output.token(TokenOz.OF);
     output.newLine();
     output.indentRight();
-    clauses.forEach(c -> c.codegen(output));
+    clauses.forEach(c -> {
+      c.codegen(output);
+      if (clauses.indexOf(c) != clauses.size() - 1
+          || (clauses.indexOf(c) == clauses.size() - 1 && defaultExpression != null)) {
+        output.newLine();
+      }
+    });
     if (defaultExpression != null) {
       output.token(TokenOz.ELSE);
+      output.space();
       defaultExpression.codegen(output);
       output.newLine();
     }
     output.token(TokenOz.END);
-    output.newLine();
   }
 
   @Override

@@ -2,10 +2,12 @@ package com.barassolutions;
 
 import com.barassolutions.util.Logger;
 import com.barassolutions.util.Logger.LogLevel;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -45,6 +47,9 @@ public class Nozc implements Callable<Integer> {
   @Option(names = {
       "--no-keep"}, negatable = true, description = "Keep the intermediary Oz files in the output folder. True by default")
   boolean deleteOzFiles;
+  @Option(names = {
+      "--no-compile"}, negatable = true, description = "Continue the program after Oz code generation. The actual Oz code compilation will be executed. True by default")
+  boolean dontRunOzc;
   @Option(names = {"-t",
       "--tokenize"}, description = "Tokenize the NewOz input, print the tokens to STDOUT, and then stop the compilation")
   boolean stopAtTokenizer;
@@ -61,10 +66,11 @@ public class Nozc implements Callable<Integer> {
       "--verbosity"}, description = "The verbosity you want to see in output.\nAvailable levels : [OFF, FATAL, ERROR, WARN, INFO, DEBUG, ALL] (default: INFO)", arity = "1", defaultValue = "INFO")
   String verbosity;
   @Parameters(description = "The .noz file(s) to compile or translate.", paramLabel = "FILE", arity = "1..*")
-  private File[] inputFiles;
+  private String[] inputFilesNames;
   @Option(names = {"-o",
-      "--out"}, description = "Name of the output file. This option will be ignored if you pass more than one input file.")
-  private File outputFile;
+      "--out"}, description = "Name of the output file (WITHOUT ANY EXTENSION !). This option will be ignored if you pass more than one input file.")
+  //TODO enforce non-extension
+  private String outputFileName;
   @Option(names = {"-d",
       "--directory"}, description = "Output directory for compiled and/or translated files (default: .)", arity = "1", defaultValue = ".")
   private File destDirectory;
@@ -116,15 +122,22 @@ public class Nozc implements Callable<Integer> {
     }
 
     Logger.info(
-        "Compiling " + inputFiles.length + " NewOz files to destination directory \"" + destDirectory
+        "Compiling " + inputFilesNames.length + " NewOz file(s) to destination directory \""
+            + destDirectory
             .getPath() + "\"");
-    for (File inputFile : inputFiles) {
+    File[] ozFiles = new File[inputFilesNames.length];
+    File outputFile;
+
+    for (int i = 0; i < inputFilesNames.length; i++) {
       errorHasOccurred = false;
-      if (outputFile == null) {
+      if (outputFileName == null || inputFilesNames.length > 1) {
         outputFile = new File(destDirectory,
-            inputFile.getName().substring(0, inputFile.getName().lastIndexOf('.')) + ".oz");
+            inputFilesNames[i].substring(inputFilesNames[i].lastIndexOf(File.separatorChar) + 1,
+                inputFilesNames[i].lastIndexOf('.')) + ".oz");
+        ozFiles[i] = outputFile;
       } else {
-        outputFile = new File(destDirectory, outputFile.getName());
+        outputFile = new File(destDirectory, outputFileName + ".oz");
+        ozFiles[i] = outputFile;
       }
       Logger.info(getSuccessString("Created output file " + outputFile.toString()));
 
@@ -134,7 +147,7 @@ public class Nozc implements Callable<Integer> {
       JavaCCParserTokenManager scanner;
       try {
         scanner = new JavaCCParserTokenManager(new SimpleCharStream(
-            new FileInputStream(inputFile),
+            new FileInputStream(inputFilesNames[i]),
             1,
             1)
         );
@@ -154,7 +167,8 @@ public class Nozc implements Callable<Integer> {
           token = scanner.getNextToken();
           if (token.kind == JavaCCParserConstants.ERROR) {
             Logger.error(getErrorString(
-                inputFile + ":" + token.beginLine + ": Unidentified input token: '" + token.image
+                inputFilesNames[i] + ":" + token.beginLine + ": Unidentified input token: '"
+                    + token.image
                     + "'"));
             errorHasOccurred = true;
           } else {
@@ -177,7 +191,7 @@ public class Nozc implements Callable<Integer> {
         // in newoz.jj, instead of the valid constructor in JavaCC.java (for some reason).
         // This does not cause an error at runtime.
         parser = new JavaCCParser(scanner);
-        parser.fileName(inputFile.getName());
+        parser.fileName(inputFilesNames[i]);
         ast = parser.interStatement();
         errorHasOccurred |= parser.errorHasOccurred();
       } catch (ParseException e) {
@@ -201,7 +215,7 @@ public class Nozc implements Callable<Integer> {
       /* Pre-analyze the input */
       Logger.info("==========Pre-analyzing input==========");
       time = System.nanoTime();
-      ast.setFileName(inputFile.getName());
+      ast.setFileName(inputFilesNames[i]);
       ast.preAnalyze();
       errorHasOccurred |= ast.errorHasOccurred();
 
@@ -241,21 +255,59 @@ public class Nozc implements Callable<Integer> {
       }
       Logger.info("==========Code generation done %s==========", getTimeString(time));
 
-      /**
-       //TODO now launch to Oz compiler (ozc)
-       * Use -c flag on ozc compiler if isFunctor==true
-       **/
+      Logger
+          .info(getSuccessString("Translation of file %s completed in " + getTimeString(startTime)),
+              inputFilesNames[i]);
+    }
 
-      /* Delete the generated Oz files if so required */
-      if (deleteOzFiles) {
+    // Part of this codehas been found on https://stackabuse.com/executing-shell-commands-with-java/
+    if (false) {
+    //if (!dontRunOzc) {
+      Logger.info("We will now run the Mozart Oz compiler.");
+      for (File file : ozFiles) {
+        String fileName = file.toString();
+        Logger.info("Now compiling " + fileName);
+        StringBuilder cmd = new StringBuilder();
+        cmd.append("ozc -c ");
+        cmd.append(fileName);
+        cmd.append(" -o ");
+        if (outputFileName == null || inputFilesNames.length > 1) {
+          cmd.append(file.getName(), 0, file.getName().lastIndexOf("."));
+        } else {
+          cmd.append(outputFileName);
+        }
+        cmd.append(".ozf");
+        Logger.debug("Executing command \"" + cmd.toString() + "\"");
+        Logger.info("==========Below is the output of the Mozart compiler :==========");
+
+        Process process = Runtime.getRuntime().exec(cmd.toString());
+        BufferedReader bfr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        String line;
+        while ((line = bfr.readLine()) != null) {
+          System.out.println(line);
+        }
+
+        Logger.debug("Waiting for Mozart compiler to exit...");
+        process.waitFor();
+        Logger.info("==========Mozart compiler exited with code %d==========", process.exitValue());
+        if (process.exitValue() != 0) {
+          return process.exitValue();
+        }
+      }
+    } else {
+      Logger.info("Skipping Mozart Oz compilation, as requested.");
+    }
+
+    /* Delete the generated Oz files if so required */
+    if (deleteOzFiles) {
+      for (File ozFile : ozFiles) {
         Logger.info(
-            getSuccessString("Deleting file \"" + outputFile.getName() + "\" as requested..."));
-        Files.delete(outputFile.toPath());
+            getSuccessString("Deleting file \"" + ozFile.getName() + "\" as requested..."));
+        Files.delete(ozFile.toPath());
       }
     }
 
     // No error occurred
-    Logger.info(getSuccessString("Compilation completed in " + getTimeString(startTime)));
     return 0;
   }
 

@@ -25,6 +25,7 @@ This compiler was developed in the context of my master thesis, which can be fou
 ## Project structure
 
     .
+    ├── bin                     # Binaries used to compile the program, shipped to ease the installation process
     ├── examples                # Examples of NewOz programs, useful to get familiar with the syntax
     ├── gradle                  # A Gradle distribution used to simplify to build process
     ├── nozc
@@ -40,7 +41,7 @@ This compiler was developed in the context of my master thesis, which can be fou
 ## Install
 
 This application does not need to be installed _per se_.
-Instead, you will find in the [releases](releases) folder all versions of nozc published to date, both in `.tar` and `.zip` formats.\
+Instead, you will find in the [releases](releases) folder all versions of Nozc published to date, both in `.tar` and `.zip` formats.\
 Please take note that the last version should always be used; no support will be offered for outdated versions.
 
 ### By downloading files
@@ -51,7 +52,8 @@ The downloaded archive will have this form :
     ├── bin
     │   ├── nozc                # Unix executable file (shell script)
     │   └── nozc.bat            # Windows executable
-    └── lib                     # Librairies and JARs necessary to run the app
+    ├── lib                     # Librairies and JARs necessary to run the app
+    └── README.md               # A small installation guide and contribution invite
 > Please note that the Windows version of the program, although it should behave exactly the same way,
 > has not been as thoroughly tested as the Linux one, and is thus more susceptible to bugs. 
 

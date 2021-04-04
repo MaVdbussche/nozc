@@ -72,6 +72,18 @@ public class Context {
     }
   }
 
+  public void assignFunctionAnonym(FunctionDef fAnonym, MethodContext c) {
+    Variable var = variableFor(fAnonym.name());
+    if (var != null) {
+      definedVars.remove(var);
+      definedFunctions.put(fAnonym, c);
+      Logger.debug("Correctly reassigned variable as function : " +
+          (variableFor(fAnonym.name()) == null) + " returnType:"+ fAnonym.returnType());
+    } else {
+      Logger.error("Could not find variable " + fAnonym.name() + " to reassign.");
+    }
+  }
+
   public boolean addProcedure(ProcedureDef p, MethodContext c) {
     boolean notExistsHere = this.ensureNotExistsHere(p.line(), p.name());
     Logger.debug("Adding Procedure in context <name:" + p.name() + " nbArgs:" + p.nbArgs() + ">");
@@ -101,6 +113,18 @@ public class Context {
       Logger.error(
           "There is already a Procedure matching <name:" + f.name() + " nbArgs:" + f.nbArgs()
               + ">. Ignoring this one.");
+    }
+  }
+
+  public void assignProcedureAnonym(ProcedureDef pAnonym, MethodContext c) {
+    Variable var = variableFor(pAnonym.name());
+    if (var != null) {
+      definedVars.remove(var);
+      definedProcedures.put(pAnonym, c);
+      Logger.debug("Correctly reassigned variable as procedure : " +
+          (variableFor(pAnonym.name()) == null));
+    } else {
+      Logger.error("Could not find variable " + pAnonym.name() + " to reassign.");
     }
   }
 
@@ -135,6 +159,18 @@ public class Context {
     }
   }
 
+  public void assignFunctorAnonym(FunctorDef fAnonym, FunctorContext c) {
+    Variable var = variableFor(fAnonym.name());
+    if (var != null) {
+      definedVars.remove(var);
+      definedFunctors.put(fAnonym, c);
+      Logger.debug("Correctly reassigned variable as functor : " +
+          (variableFor(fAnonym.name()) == null));
+    } else {
+      Logger.error("Could not find variable " + fAnonym.name() + " to reassign.");
+    }
+  }
+
   public boolean addClass(ClassDef f, ClassContext c) {
     boolean notExistsHere = this.ensureNotExistsHere(f.line(), f.name());
     Logger.debug("Adding Class in context <name:" + f.name() + ">");
@@ -162,6 +198,18 @@ public class Context {
       this.definedClasses.put(f, c);
     } else {
       Logger.error("There is already a Class matching <name:" + f.name() + ">. Ignoring this one.");
+    }
+  }
+
+  public void assignClassAnonym(ClassDef cAnonym, ClassContext c) {
+    Variable var = variableFor(cAnonym.name());
+    if (var != null) {
+      definedVars.remove(var);
+      definedClasses.put(cAnonym, c);
+      Logger.debug("Correctly reassigned variable as functor : " +
+          (variableFor(cAnonym.name()) == null));
+    } else {
+      Logger.error("Could not find variable " + cAnonym.name() + " to reassign.");
     }
   }
 

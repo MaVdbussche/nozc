@@ -16,10 +16,21 @@ public class CallProcedure extends Statement {
    */
   private final ArrayList<Expression> args;
 
+  private boolean isActuallyAFunction;
+  private Type returnType; //!!!Only makes sense if it is actually a function TODO
+
   public CallProcedure(int line, String name, ArrayList<Expression> args) {
     super(line);
     this.name = name;
     this.args = args;
+  }
+
+  public boolean isActuallyAFunction() {
+    return isActuallyAFunction;
+  }
+
+  public Type returnType() {
+    return returnType;
   }
 
   /**
@@ -34,10 +45,20 @@ public class CallProcedure extends Statement {
   public AST analyze(Context context) {
     //Find appropriate method in the context, given the name and the nb of arguments.
     //We could check the type to allow overloading, but Oz does not allow so. Instead, it will produce an error at runtime
-    ProcedureDef method = context.procedureFor(name, args.size());
-    if (method == null) {
-      interStatement.reportSemanticError(line(),
-          "Could not find procedure for: <name:" + name + " nbArgs:" + args.size() + ">");
+    ProcedureDef proc = context.procedureFor(name, args.size());
+    if (proc == null) {
+      FunctionDef function = context.functionFor(name, args.size());
+      if (function == null) { //TODO refactor this when we merge CallFunction and CallProcedure
+        interStatement.reportSemanticError(line(),
+            "Could not find procedure or function for: <name:" + name + " nbArgs:" + args.size()
+                + ">");
+      } else {
+        isActuallyAFunction = true;
+        this.returnType = function.returnType();
+        Logger.debug("Could not find procedure for: <name:" + name + " nbArgs:" + args.size()
+                + ">, but found a matching function with returnType \"%s\". Using that one, but this may lead to problems down the line.",
+            function.returnType());
+      }
     }
     //No return type for procedures
 
@@ -54,7 +75,7 @@ public class CallProcedure extends Statement {
    */
   @Override
   public void codegen(Emitter output) {
-    Logger.debug("Generating code for a procedure call <name:"+name+">");
+    Logger.debug("Generating code for a procedure call <name:" + name + ">");
     output.token(TokenOz.LCURLY);
     output.literal(Utils.ozFriendlyName(name));
     args.forEach(a -> {
@@ -66,7 +87,6 @@ public class CallProcedure extends Statement {
       } //Can't remember the purpose of this. But at this point I'm too afraid to ask
     });
     output.token(TokenOz.RCURLY);
-    output.newLine();
   }
 
   @Override

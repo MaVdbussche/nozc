@@ -50,7 +50,7 @@ public class ClassDefAnonym extends DeclarationAnonym {
   @Override
   public Expression analyze(Context context) {
     ClassContext classContext = new ClassContext(context, name);
-    context.addClass(new ClassDef(this), classContext);
+    context.assignClassAnonym(new ClassDef(this), classContext);
 
     int extensionsFound = (int) descriptors.stream()
         .map(d -> (ClassDescriptor) d.analyze(classContext)) //Analyze each of them

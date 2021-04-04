@@ -1,23 +1,22 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
 import java.util.ArrayList;
 import org.jetbrains.annotations.Nullable;
 
 public class FunctionDefAnonym extends DeclarationAnonym {
 
-  private String name;
-
   /**
    * The arguments of this procedure.
    */
   private final ArrayList<Pattern> args;
-
+  private final boolean lazy;
+  private String name;
   /**
    * The expression constituting the procedure's body.
    */
   private InExpression expression;
-
-  private final boolean lazy;
+  private Type returnType;
 
   public FunctionDefAnonym(int line, ArrayList<Pattern> args, InExpression expression,
       boolean lazy, @Nullable String name) {
@@ -26,6 +25,10 @@ public class FunctionDefAnonym extends DeclarationAnonym {
     this.expression = expression;
     this.lazy = lazy;
     this.name = name;
+  }
+
+  public Type returnType() {
+    return returnType;
   }
 
   public String name() {
@@ -51,18 +54,26 @@ public class FunctionDefAnonym extends DeclarationAnonym {
   @Override
   public Expression analyze(Context context) {
     MethodContext methContext = new MethodContext(context);
+    returnType = Type.ANY; //Temporary assigning a type to allow analysis of potential recursive calls
+    methContext.setReturnType(returnType);
+    Logger.debug("Temporarily assigned a type to FunctionDefAnonym");
 
     args.forEach(a -> {
       a = (Pattern) a.analyze(context);
       methContext.addArgument(a);
     });
 
+    FunctionDef f = new FunctionDef(this);
+    f.setReturnType(returnType);
+    context.assignFunctionAnonym(f, methContext);
+
     expression = (InExpression) expression.analyze(methContext);
 
-    Type returnType = this.expression.type();
+    returnType = expression.type(); //Kinda useless
+    f.setReturnType(returnType);
     methContext.setReturnType(returnType);
+    Logger.debug("FunctionAnonym return type is now " + returnType);
 
-    context.addFunction(new FunctionDef(this), methContext);
     return this;
   }
 

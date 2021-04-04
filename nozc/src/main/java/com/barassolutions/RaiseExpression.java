@@ -25,7 +25,7 @@ public class RaiseExpression extends Expression {
    */
   @Override
   public Expression analyze(Context context) {
-    expression = (Expression) expression.analyze(context);
+    expression = expression.analyze(context);
 
     return this;
   }

@@ -69,7 +69,7 @@ public class CaseStatementClause extends Statement {
     Context innerContext = new Context(context);
 
     pattern = (Pattern) pattern.analyze(context);
-    innerContext.addVariable(pattern);
+    pattern.patterns().forEach(innerContext::addVariable);
 
     operators.forEach(o -> {
       if (!(o == Operator.LAND || o == Operator.LOR)) {
@@ -84,7 +84,7 @@ public class CaseStatementClause extends Statement {
       e.type().mustMatchExpected(line(), Type.BOOLEAN);
     });
 
-    statement = (InStatement) statement.analyze(context);
+    statement = (InStatement) statement.analyze(innerContext);
     return this;
   }
 
@@ -114,7 +114,6 @@ public class CaseStatementClause extends Statement {
     output.token(TokenOz.THEN);
     output.space();
     statement.codegen(output);
-    output.newLine();
   }
 
   @Override

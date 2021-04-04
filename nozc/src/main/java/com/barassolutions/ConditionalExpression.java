@@ -1,6 +1,8 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ConditionalExpression extends Expression {
 
@@ -53,7 +55,23 @@ public class ConditionalExpression extends Expression {
           c.type().mustMatchExpected(line(), Type.BOOLEAN);
         }
     );
-    consequences.forEach(c -> c = (InExpression) c.analyze(context));
+
+    AtomicReference<Type> returnedType = new AtomicReference<>();
+    returnedType.set(null);
+    consequences.forEach(c -> {
+      c = (InExpression) c.analyze(context);
+      if (returnedType.get() == null) {
+        returnedType.set(c.type());
+      } else {
+        if (!c.type().matchesExpected(returnedType.get())) {
+          Logger.warn(
+              "Line %d : All the returned expressions in a given method should be of the same type. this is not an error, but it might have unpredictable results.",
+              line());
+        }
+      }
+    });
+
+    this.type = returnedType.get();
     return this;
   }
 
@@ -82,12 +100,12 @@ public class ConditionalExpression extends Expression {
         output.token(TokenOz.ELSE);
         output.newLine();
         output.indentRight();
-        consequences.get(i).codegen(output);
+        consequences.get(i+1).codegen(output);
         output.newLine();
         output.indentLeft();
         output.token(TokenOz.END);
         break;
-      } else if (i == conditions.size()-1) { //We are done
+      } else if (i == conditions.size() - 1) { //We are done
         output.token(TokenOz.END);
         break;
       }

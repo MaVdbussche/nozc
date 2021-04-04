@@ -1,7 +1,14 @@
-declare
-{
-def sum(l) {
-  browse(l.1)
-  l.1
-}
+declare {
+  def acc(l, n) {
+    match l {
+      case (l1::nil) && true => {val a=0 n+l1}
+      case (l1::l2) => {acc(l2, n+l1)}
+      else {0}
+    }
+  }
+  def sumList(l) {
+    acc(l, 0)
+  }
+  var list = (1::2::3::nil)
+  browse(sumList(list))
 }

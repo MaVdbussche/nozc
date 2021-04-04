@@ -1,7 +1,6 @@
 package com.barassolutions;
 
 import java.util.ArrayList;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class InExpression extends Expression {
@@ -58,9 +57,15 @@ public class InExpression extends Expression {
 
     statements.forEach(s -> s = (Statement) s.analyze(this.context));
 
-    if(expression!=null) {
+    if (expression != null) {
       expression = expression.analyze(this.context);
       this.type = expression.type();
+    } else if (statements.get(statements.size() - 1) instanceof CallProcedure cp) {
+      if (cp.isActuallyAFunction()) {
+        this.type = cp.returnType();
+      } else {//TODO ugly hack to remove once we merge CallFunction and CallProcedure
+        interStatement.reportSemanticError(line(), "Missing expression or return value in block");
+      }
     } else {
       interStatement.reportSemanticError(line(), "Missing expression or return value in block");
     }
@@ -76,7 +81,12 @@ public class InExpression extends Expression {
    */
   @Override
   public void codegen(Emitter output) {
-    declarations.forEach(e -> e.codegen(output));
+    declarations.forEach(e -> {
+      e.codegen(output);
+      if (declarations.indexOf(e) != declarations.size() - 1) {
+        output.newLine();
+      }
+    });
     if (declarations.size() > 0) {
       output.indentLeft();
       output.token(TokenOz.IN);
@@ -85,7 +95,7 @@ public class InExpression extends Expression {
     }
     statements.forEach(s -> s.codegen(output));
 
-    if(expression!=null) {
+    if (expression != null) {
       expression.codegen(output);
     }
   }
@@ -101,7 +111,7 @@ public class InExpression extends Expression {
     p.indentRight();
     declarations.forEach(decl -> decl.writeToStdOut(p));
     statements.forEach(s -> s.writeToStdOut(p));
-    if(expression!=null) {
+    if (expression != null) {
       expression.writeToStdOut(p);
     }
     p.indentLeft();

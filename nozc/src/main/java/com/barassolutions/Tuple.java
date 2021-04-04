@@ -22,6 +22,11 @@ public class Tuple extends Pattern {
   }
 
   @Override
+  public Iterable<Pattern> patterns() {
+    return this.patterns;
+  }
+
+  @Override
   public Expression analyze(Context context) {
     if(!usedAsPattern) {
       args.forEach(a -> a = (Expression) a.analyze(context));

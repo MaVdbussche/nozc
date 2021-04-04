@@ -10,4 +10,10 @@ public abstract class Pattern extends Expression {
   protected Pattern(int line) {
     super(line);
   }
+
+  /**
+   * Returns an <code>Iterable</code> of the patterns constituting this <code>Pattern</code>.
+   * This mostly makes sense for structures like tuples, lists, etc., subclasses are allowed to throw an {@link UnsupportedOperationException}.
+   */
+  public abstract Iterable<Pattern> patterns();
 }

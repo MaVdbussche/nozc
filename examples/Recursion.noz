@@ -1,15 +1,14 @@
 declare {
   def acc(l, n) {
     match l {
-      case l1|nil && true => {n+l1}
-      case l1|l2 => {acc(l2, n+l1)}
+      case (l1::nil) && true => {val a=0 n+l1}
+      case (l1::l2) => {acc(l2, n+l1)}
       else {0}
     }
   }
   def sumList(l) {
-    return acc(l, 0)
+    acc(l, 0)
   }
-  var list = 1::2::3::4::5::nil
-  var list = [1,2,3,4,5]
-  browse(sumList(lists))
+  var list = [1,2,3]
+  browse(sumList(list))
 }

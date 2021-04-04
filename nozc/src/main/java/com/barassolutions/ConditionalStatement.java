@@ -85,7 +85,7 @@ public class ConditionalStatement extends Statement {
         output.token(TokenOz.ELSE);
         output.newLine();
         output.indentRight();
-        consequences.get(i).codegen(output);
+        consequences.get(i+1).codegen(output);
         output.newLine();
         output.indentLeft();
         output.token(TokenOz.END);

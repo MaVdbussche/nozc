@@ -3,6 +3,9 @@ plugins {
     id 'java-library'
     //id 'org.beryx.runtime' version '1.12.2'
 }
+repositories {
+    mavenCentral()
+}
 
 group 'com.barassolutions'
 version = project.property("version")
@@ -21,12 +24,25 @@ java {
 task javaccGen {
     doFirst {
         exec {
-            workingDir = './src/main/java/com/barassolutions'
-            commandLine 'javacc', '-static=false', 'newoz.jj'
+            if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+                workingDir = './src/main/java/com/barassolutions'
+                commandLine 'cmd', '/c', '..\\..\\..\\..\\..\\..\\bin\\javacc.bat', '-static:false', 'newoz.jj'
+            } else {
+                workingDir = './src/main/java/com/barassolutions'
+                commandLine '../../../../../../bin/javacc', '-static:false', 'newoz.jj'
+            }
         }
     }
 }
 compileJava.dependsOn javaccGen
+
+processResources {
+    filesMatching('**/app.properties') {
+        filter {
+            it.replace('%APP_VERSION_TOKEN%', version)
+        }
+    }
+}
 
 tasks.withType(JavaCompile).all {
     options.warnings = true
@@ -61,18 +77,6 @@ task uberJar(type: Jar) {
     from {
         configurations.runtimeClasspath.findAll {it.name.endsWith('jar')}.collect {zipTree(it)}
     }
-}
-
-processResources {
-    filesMatching('**/app.properties') {
-        filter {
-            it.replace('%APP_VERSION_TOKEN%', version)
-        }
-    }
-}
-
-repositories {
-    mavenCentral()
 }
 
 dependencies {

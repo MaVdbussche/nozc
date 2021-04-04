@@ -1,6 +1,7 @@
 package com.barassolutions;
 
 import com.barassolutions.util.Utils;
+import java.util.Collections;
 import org.jetbrains.annotations.Nullable;
 
 public class MethodArg extends Pattern {
@@ -19,6 +20,11 @@ public class MethodArg extends Pattern {
     this.feature = feature;
     this.name = name;
     this.defaultValue = defaultValue;
+  }
+
+  @Override
+  public Iterable<Pattern> patterns() {
+    return Collections.singleton(this);
   }
 
   public MethodArg analyze(Context context) {

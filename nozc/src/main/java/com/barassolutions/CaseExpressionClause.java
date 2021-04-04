@@ -69,7 +69,7 @@ public class CaseExpressionClause extends Expression {
     Context innerContext = new Context(context);
 
     pattern = (Pattern) pattern.analyze(context);
-    innerContext.addVariable(pattern);
+    pattern.patterns().forEach(innerContext::addVariable);
 
     operators.forEach(o -> {
       if (!(o == Operator.LAND || o == Operator.LOR)) {
@@ -84,7 +84,8 @@ public class CaseExpressionClause extends Expression {
       e.type().mustMatchExpected(line(), Type.BOOLEAN);
     });
 
-    expression = (InExpression) expression.analyze(context);
+    expression = (InExpression) expression.analyze(innerContext);
+    this.type = expression.type();
     return this;
   }
 
@@ -114,7 +115,6 @@ public class CaseExpressionClause extends Expression {
     output.token(TokenOz.THEN);
     output.space();
     expression.codegen(output);
-    output.newLine();
   }
 
   @Override

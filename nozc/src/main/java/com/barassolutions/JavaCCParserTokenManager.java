@@ -651,9 +651,6 @@ static final long[] jjbitVec1 = {
 static final long[] jjbitVec2 = {
    0x0L, 0x0L, 0x10000000000000L, 0x0L
 };
-static final long[] jjbitVec3 = {
-   0x0L, 0x0L, 0xffefffffffffffffL, 0xffffffffffffffffL
-};
 private int jjMoveNfa_0(int startState, int curPos)
 {
    int startsAt = 0;
@@ -1193,7 +1190,7 @@ private int jjMoveNfa_0(int startState, int curPos)
                      jjAddStates(26, 27);
                   break;
                case 22:
-                  if ((jjbitVec3[i2] & l2) != 0L)
+                  if ((jjbitVec0[i2] & l2) != 0L)
                      jjCheckNAdd(23);
                   break;
                case 9:

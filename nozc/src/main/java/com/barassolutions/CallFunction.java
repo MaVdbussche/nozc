@@ -35,16 +35,25 @@ public class CallFunction extends
   public Expression analyze(Context context) {
     //Find appropriate function in the context, given the name and the nb of arguments.
     //We could check the type to allow overloading, but Oz does not allow so. Instead, it will produce an error at runtime
-    FunctionDef method = context.functionFor(name, args.size());
-    if (method == null) {
-      interStatement.reportSemanticError(line(),
-          "Could not find function for: <name:" + name + " nbArgs:" + args.size() + ">");
+    FunctionDef function = context.functionFor(name, args.size());
+    if (function == null) {
+      ProcedureDef proc = context.procedureFor(name, args.size());
+      if (proc == null) {
+        interStatement.reportSemanticError(line(),
+            "Could not find function or procedure for: <name:" + name + " nbArgs:" + args.size()
+                + ">");
+      } else {
+        Logger.debug("Could not find function for: <name:" + name + " nbArgs:" + args.size()
+            + ">, but found a matching procedure. Using that one, but this may lead to problems down the line.");
+        this.type = Type.ANY;
+      }
     } else {
-      this.type = method.returnType();
+      Logger.debug("CallFunction to " + name + ": return type is " + function.returnType());
+      this.type = function.returnType();
     }
 
     // Analyzing the arguments
-    args.forEach(a -> a = (Expression) a.analyze(context));
+    args.forEach(a -> a = a.analyze(context));
 
     return this;
   }
@@ -56,7 +65,7 @@ public class CallFunction extends
    */
   @Override
   public void codegen(Emitter output) {
-    Logger.debug("Generating code for a function call <name:"+name+">");
+    Logger.debug("Generating code for a function call <name:" + name + ">");
     output.token(TokenOz.LCURLY);
     output.literal(Utils.ozFriendlyName(name));
     args.forEach(a -> {
@@ -64,7 +73,6 @@ public class CallFunction extends
       a.codegen(output);
     });
     output.token(TokenOz.RCURLY);
-    output.newLine();
   }
 
   @Override

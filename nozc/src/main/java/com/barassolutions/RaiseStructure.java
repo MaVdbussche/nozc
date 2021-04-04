@@ -20,7 +20,7 @@ public class RaiseStructure extends Statement {
    */
   @Override
   public AST analyze(Context context) {
-    expression = (Expression) expression.analyze(context);
+    expression = expression.analyze(context);
 
     return this;
   }

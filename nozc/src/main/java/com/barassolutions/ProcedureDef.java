@@ -46,12 +46,14 @@ public class ProcedureDef extends Declaration {
     args.forEach(a -> {
       a = (Pattern) a.analyze(context);
       methContext.addArgument(a);
+      a.patterns().forEach(methContext::addVariable);
     });
+
+    context.addProcedure(this, methContext);
 
     statement = (InStatement) statement
         .analyze(methContext);
 
-    context.addProcedure(this, methContext);
     return this;
   }
 

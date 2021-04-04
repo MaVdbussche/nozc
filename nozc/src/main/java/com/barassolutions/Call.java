@@ -1,5 +1,6 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
 import java.util.ArrayList;
 
 /**
@@ -58,6 +59,7 @@ public class Call extends Expression {
                   + "> in Class \"" + classContext.name + "\"");
         } else {
           if (method.isAFunction()) {
+            Logger.debug("Call : return type is " + method.returnType());
             this.type = method.returnType();
           }
         }
@@ -78,6 +80,7 @@ public class Call extends Expression {
                       + "> in Class \"" + superClassName + "\"");
             } else {
               if (method.isAFunction()) {
+                Logger.debug("Call : return type is " + method.returnType());
                 this.type = method.returnType();
               }
             }

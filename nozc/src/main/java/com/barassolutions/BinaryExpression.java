@@ -90,7 +90,7 @@ class OperationPlus extends BinaryExpression {
     } else{
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
-          "Invalid operand types for addition");
+          "Invalid operand types for addition : " + lhs.type() + " and " + rhs.type());
     }
     return this;
   }
@@ -133,7 +133,7 @@ class OperationMinus extends BinaryExpression {
     } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
-          "Invalid operand types for subtraction");
+          "Invalid operand types for subtraction : " + lhs.type() + " and " + rhs.type());
     }
     return this;
   }
@@ -176,7 +176,7 @@ class OperationMultiplication extends BinaryExpression {
     } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
-          "Invalid operand types for multiplication");
+          "Invalid operand types for multiplication : " + lhs.type() + " and " + rhs.type());
     }
     return this;
   }
@@ -217,7 +217,7 @@ class OperationModulo extends BinaryExpression {
     } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
-          "Invalid operand types for modulo");
+          "Invalid operand types for modulo : " + lhs.type() + " and " + rhs.type());
     }
     return this;
   }
@@ -260,7 +260,7 @@ class OperationDivision extends BinaryExpression {
     } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
-          "Invalid operand types for division");
+          "Invalid operand types for division : " + lhs.type() + " and " + rhs.type());
     }
     return this;
   }

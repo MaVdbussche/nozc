@@ -85,6 +85,7 @@ public class CaseExpressionClause extends Expression {
     });
 
     expression = (InExpression) expression.analyze(innerContext);
+    this.type = expression.type();
     return this;
   }
 

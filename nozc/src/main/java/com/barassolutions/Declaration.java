@@ -39,8 +39,12 @@ public class Declaration extends Statement {
   @Override
   public AST analyze(Context context) {
     map.forEach((v, e) -> {
-      map.put(v, e.analyze(context));
-      v.type = e.type();
+      if(e != null) {
+        map.put(v, e.analyze(context));
+        v.type = e.type();
+      } else {
+        v.type = Type.ANY;
+      }
       context.addVariable(v);
       Logger.debug("Added Variable to context : <name:"+v.name()+" constant:"+v.isConstant()+" readMode:"+v.readMode()+">");
     });

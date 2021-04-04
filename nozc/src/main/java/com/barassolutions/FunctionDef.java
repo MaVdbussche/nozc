@@ -1,5 +1,6 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
 import com.barassolutions.util.Utils;
 import java.util.List;
 
@@ -41,6 +42,10 @@ public class FunctionDef extends Declaration {
     return returnType;
   }
 
+  public void setReturnType(Type t) {
+    this.returnType = t;
+  }
+
   public String name() {
     return name;
   }
@@ -52,6 +57,9 @@ public class FunctionDef extends Declaration {
   @Override
   public AST analyze(Context context) {
     MethodContext methContext = new MethodContext(context);
+    returnType = Type.ANY; //Temporary assigning a type to allow analysis of potential recursive calls
+    methContext.setReturnType(returnType);
+    Logger.debug("Temporarily assigned a type to FunctionDef");
 
     args.forEach(a -> {
       a = (Pattern) a.analyze(context);
@@ -63,6 +71,7 @@ public class FunctionDef extends Declaration {
     expression = (InExpression) expression.analyze(methContext);
 
     returnType = expression.type();
+    Logger.debug("Function return type is now " + returnType);
     methContext.setReturnType(returnType);
 
     return this;

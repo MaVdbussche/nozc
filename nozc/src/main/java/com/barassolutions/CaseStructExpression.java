@@ -1,6 +1,8 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import org.jetbrains.annotations.Nullable;
 
 public class CaseStructExpression extends Expression {
@@ -17,6 +19,7 @@ public class CaseStructExpression extends Expression {
   /**
    * Optional, default clause
    */
+  @Nullable
   private InExpression defaultExpression;
 
   public CaseStructExpression(int line, Expression expression,
@@ -38,9 +41,36 @@ public class CaseStructExpression extends Expression {
   public Expression analyze(Context context) {
     expression = expression.analyze(context);
 
-    clauses.forEach(c -> c = (CaseExpressionClause) c.analyze(context));
+    AtomicReference<Type> returnedType = new AtomicReference<>();
+    returnedType.set(null);
+    clauses.forEach(c -> {
+          c = (CaseExpressionClause) c.analyze(context);
+          if (returnedType.get() == null) {
+            returnedType.set(c.type());
+          } else {
+            if (!c.type().matchesExpected(returnedType.get())) {
+              Logger.warn(
+                  "Line %d : All the returned expressions in a given method should be of the same type. this is not an error, but it might have unpredictable results.",
+                  line());
+            }
+          }
+        }
+    );
 
-    defaultExpression = (InExpression) defaultExpression.analyze(context);
+    if(defaultExpression!=null) {
+      defaultExpression = (InExpression) defaultExpression.analyze(context);
+      if (returnedType.get() == null) {
+        returnedType.set(defaultExpression.type());
+      } else {
+        if (!defaultExpression.type().matchesExpected(returnedType.get())) {
+          Logger.warn(
+              "Line %d : All the returned expressions in a given method should be of the same type. this is not an error, but it might have unpredictable results.",
+              line());
+        }
+      }
+    }
+
+    this.type = returnedType.get();
     return this;
   }
 

@@ -1,6 +1,6 @@
 declare
 {
-var i=5, a=2
+var i=5, a
 val k=1
 browse(i)
 }

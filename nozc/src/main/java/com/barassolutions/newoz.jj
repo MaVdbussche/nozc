@@ -333,7 +333,7 @@ InterStatement interStatement(): {
       |
         //LOOKAHEAD( nestConStatement() )
         ( aStatement = nestConStatement()
-        { statements.add(aStatement); Logger.debug("Found a statement"); } //Stand-alone statements
+        { statements.add(aStatement); Logger.debug("Found a stand-alone statement"); } //Stand-alone statements
         )+
         { out = new InterStatement(line, statements); }
     }
@@ -409,7 +409,8 @@ private Expression expression(): {
         | LOOKAHEAD( term() )
           {Logger.debug("Found a term");}
           expression = term()
-        | LOOKAHEAD( nestDecAnonym() )
+        | LOOKAHEAD( (<DEFPROC>|<DEF>|<FUNCTOR>|<CLASS>) <DOLLAR> )
+          {Logger.debug("Found a nestDecAnonym()");}
           expression = nestDecAnonym()
     }
     catch ( ParseException e ) {
@@ -504,12 +505,12 @@ private InExpression inExpression(): {
           { Logger.debug("Found a declarationPart in inExpression()"); }
           aDecl = declarationPart() { decls.add(aDecl); }
         )*
-        ( LOOKAHEAD( statement() )
+        ( LOOKAHEAD( <SKP> | nestConStatement() )
           { Logger.debug("Found a statement in inExpression()"); }
           statement = statement() { statements.add(statement); }
         )*
         [
-          LOOKAHEAD( expression() )
+          LOOKAHEAD( <DOLLAR> | inExpression() | nestConExpression() | term() | nestDecAnonym() | <LPAREN> term() <RPAREN> )
           { Logger.debug("Found the returned expression in inExpression()"); }
           expression = expression()
         ]
@@ -564,6 +565,7 @@ private Statement nestConStatement(): {
     ArrayList<CaseStatementClause> clauses = new ArrayList<CaseStatementClause>();
     LoopDeclaration loopDec = null;
     ArrayList<LoopDeclaration> loopDecs = new ArrayList<LoopDeclaration>();
+    {Logger.debug("Entering nestConStatement()");}
 }
 {
     try {
@@ -580,7 +582,7 @@ private Statement nestConStatement(): {
           ]
           <RPAREN>
           { out = new CallProcedure(line, name, args); }
-        | LOOKAHEAD( inStatement() )
+        | LOOKAHEAD( <LCURLY> )
           statement2 = inStatement()
           { out = statement2; }
         | LOOKAHEAD( <IF> parExpression() inStatement() )
@@ -593,7 +595,7 @@ private Statement nestConStatement(): {
             { conds.add(expression); consq.add(statement2); }
           )*
           [
-            LOOKAHEAD( <ELSE> inStatement() )
+            LOOKAHEAD( <ELSE> )
             <ELSE> statement2 = inStatement()
             { consq.add(statement2); }
           ]
@@ -653,7 +655,7 @@ private Statement nestConStatement(): {
           ]
           statement2 = inStatement()
           { out = new LockStructure(line, expression, statement2); }
-        | LOOKAHEAD( assignmentStatement() )
+        | LOOKAHEAD( <VARIABLE> <ASSIGN> )
           { Logger.debug("Found an assignmentStatement()"); }
           out = assignmentStatement()
               }
@@ -703,23 +705,26 @@ private Expression nestConExpression(): {
 {
     try {
           LOOKAHEAD( <IF> parExpression() inExpression() )
-          <IF> { line = token.beginLine;
+            <IF> { line = token.beginLine;
             Logger.debug("Found if expression"); }
-            expression = parExpression() expression2 = inExpression()
-          { conds.add(expression); consq.add(expression2); }
-          (
-            LOOKAHEAD( <ELSE> <IF> )
-            <ELSE> <IF> <LPAREN> expression = expression() <RPAREN> expression2 = inExpression()
+            expression = parExpression()
+            expression2 = inExpression()
             { conds.add(expression); consq.add(expression2); }
-          )*
-          [
-            LOOKAHEAD( <ELSE> inExpression() )
-            <ELSE> expression2 = inExpression()
-            { consq.add(expression2); }
-          ]
-          { out = new ConditionalExpression(line, conds, consq); }
+            ( LOOKAHEAD( <ELSE> <IF> )
+              { Logger.debug("Found else if block"); }
+              <ELSE> <IF> expression = parExpression() expression2 = inExpression()
+              { conds.add(expression); consq.add(expression2); }
+            )*
+            { Logger.debug("Done with elseif blocks"); }
+            [
+              LOOKAHEAD( <ELSE> )
+              { Logger.debug("Found else block"); }
+              <ELSE> expression2 = inExpression()
+              { consq.add(expression2); }
+            ]
+            { out = new ConditionalExpression(line, conds, consq); }
         | LOOKAHEAD( <MATCH> )
-          <MATCH> { line = token.beginLine; }
+            <MATCH> { line = token.beginLine; }
           expression = expression() <LCURLY>
           (
             LOOKAHEAD( <CASE> caseExpressionClause() )
@@ -1202,7 +1207,7 @@ private Expression assignmentExpression(): {
  * Parse an assignment statement.
  *
  * <pre>
- *   assignmentStatement ::= variable ASSIGN assignmentExpression
+ *   assignmentStatement ::= variable ASSIGN expression
  * </pre>
  *
  * @return an AST for an AssignmentStatement.
@@ -1219,7 +1224,7 @@ private Statement assignmentStatement(): {
         <VARIABLE>
         { lhs = new Variable(token.beginLine, token.image, false, false); }
         //Do not activate readmode : OperationAssignment#codegen() will handle the correct operator t write (= vs :=)
-        <ASSIGN> rhs = assignmentExpression()
+        <ASSIGN> rhs = expression()
         { out = new OperationAssignment(line, lhs, rhs); }
     }
     catch ( ParseException e ) {
@@ -1547,6 +1552,7 @@ private Expression postfixExpression(): {
  *
  * <pre>
  *   primary ::= variable | int | float | character | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
+ *             | variable LPAREN [expression {COMMA expression}] RPAREN
  *             | variable DOT variable [LPAREN [expression {COMMA expression}] RPAREN]
  *             | THIS DOT variable LPAREN [expression {COMMA expression}] RPAREN
  *             | SUPER [LPAREN variableStrict RPAREN]
@@ -1596,6 +1602,18 @@ private Expression primary(): {
               <RPAREN>
               { out = new ExpressionSelectionMethod(line, variable, name, args); }
           ]
+        | LOOKAHEAD( <VARIABLE> <LPAREN> expression() )
+          <VARIABLE> { line = token.beginLine; name = token.image;
+            Logger.debug("Found a CallFunction to "+name+" at line "+line); }
+          <LPAREN>
+          [
+            expr = expression() { args.add(expr); }
+            (
+              <COMMA> expr = expression() { args.add(expr); }
+            )*
+          ]
+          <RPAREN>
+          { out = new CallFunction(line, name, args); }
         | LOOKAHEAD( <THIS> [<DOT> (<VARIABLE>|<VARIABLESTRICT>) <LPAREN>] )
           <THIS> { line = token.beginLine; out = new ThisExpression(line); }
             [
@@ -1647,7 +1665,6 @@ private Expression primary(): {
  *
  * <pre>
  *   term ::= assignmentExpression
- *            | variable LPAREN [expression {COMMA expression}] RPAREN
  *            | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN //TODO enforce atomLisp for records
  *            | LPAREN expression {HASHTAG expression}+ RPAREN
  *            | LPAREN expression {COLCOL expression}+ RPAREN
@@ -1704,18 +1721,6 @@ private Expression term(): {
           ]
           <RPAREN>
           { out = new Record(line, value, map, more); }
-        | LOOKAHEAD( <VARIABLE> <LPAREN> expression() )
-          <VARIABLE> { line = token.beginLine; value = token.image;
-            Logger.debug("Found a CallFunction to "+value+" at line "+line); }
-          <LPAREN>
-          [
-          val = expression() { args.add(val); }
-          (
-            <COMMA> val = expression() { args.add(val); }
-          )*
-          ]
-          <RPAREN>
-          { out = new CallFunction(line, value, args); }
         | LOOKAHEAD( <LPAREN> expression() (<HASHTAG> expression())+ <RPAREN> )
           <LPAREN> { line = token.beginLine; }
           val = expression() { args.add(val); }

@@ -54,6 +54,7 @@ public class OperationAssignment extends Expression {
     }
     output.space();
     rhs.codegen(output);
+    output.newLine();
   }
 
   @Override

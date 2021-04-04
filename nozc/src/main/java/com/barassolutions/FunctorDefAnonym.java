@@ -60,7 +60,7 @@ public class FunctorDefAnonym extends DeclarationAnonym {
       fContext.addImport(i);
     });
 
-    context.addFunctor(new FunctorDef(this), fContext);
+    context.assignFunctorAnonym(new FunctorDef(this), fContext);
 
     statement.analyze(fContext);
 

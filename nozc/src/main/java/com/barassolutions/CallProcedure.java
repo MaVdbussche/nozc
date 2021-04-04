@@ -17,6 +17,7 @@ public class CallProcedure extends Statement {
   private final ArrayList<Expression> args;
 
   private boolean isActuallyAFunction;
+  private Type returnType; //!!!Only makes sense if it is actually a function TODO
 
   public CallProcedure(int line, String name, ArrayList<Expression> args) {
     super(line);
@@ -26,6 +27,10 @@ public class CallProcedure extends Statement {
 
   public boolean isActuallyAFunction() {
     return isActuallyAFunction;
+  }
+
+  public Type returnType() {
+    return returnType;
   }
 
   /**
@@ -49,8 +54,10 @@ public class CallProcedure extends Statement {
                 + ">");
       } else {
         isActuallyAFunction = true;
+        this.returnType = function.returnType();
         Logger.debug("Could not find procedure for: <name:" + name + " nbArgs:" + args.size()
-            + ">, but found a matching function. Using that one, but this may lead to problems down the line.");
+                + ">, but found a matching function with returnType \"%s\". Using that one, but this may lead to problems down the line.",
+            function.returnType());
       }
     }
     //No return type for procedures

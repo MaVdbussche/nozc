@@ -61,8 +61,9 @@ public class InExpression extends Expression {
       expression = expression.analyze(this.context);
       this.type = expression.type();
     } else if (statements.get(statements.size() - 1) instanceof CallProcedure cp) {
-      if (!cp
-          .isActuallyAFunction()) { //TODO ugly hack to remove once we merge CallFunction and CallProcedure
+      if (cp.isActuallyAFunction()) {
+        this.type = cp.returnType();
+      } else {//TODO ugly hack to remove once we merge CallFunction and CallProcedure
         interStatement.reportSemanticError(line(), "Missing expression or return value in block");
       }
     } else {
@@ -82,7 +83,7 @@ public class InExpression extends Expression {
   public void codegen(Emitter output) {
     declarations.forEach(e -> {
       e.codegen(output);
-      if(declarations.indexOf(e)!=declarations.size()-1) {
+      if (declarations.indexOf(e) != declarations.size() - 1) {
         output.newLine();
       }
     });

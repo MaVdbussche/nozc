@@ -1,0 +1,12 @@
+declare {
+  val fibo, out
+  fibo = def $ (n) {
+           if(n<2) {
+             1
+           } else {
+             (fibo(n-1)+fibo(n-2))
+           }
+         }
+  out = fibo(30)
+  browse(out)
+}

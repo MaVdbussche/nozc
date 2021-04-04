@@ -1,5 +1,6 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
 import com.barassolutions.util.Utils;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,6 +84,10 @@ public class MethodDef extends Declaration implements ClassElement {
       statement = (InStatement) statement
           .analyze(methContext);
     } else if (expression != null && isAFunction) {
+      returnType = Type.ANY; //Temporary assigning a type to allow analysis of potential recursive calls
+      methContext.setReturnType(returnType);
+      Logger.debug("Temporarily assigned a type to MethodDef");
+
       expression = (InExpression) expression.analyze(methContext);
       returnType = expression.type();
       methContext.setReturnType(returnType);

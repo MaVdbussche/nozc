@@ -50,7 +50,7 @@ public class ProcedureDefAnonym extends DeclarationAnonym {
       methContext.addArgument(a);
     });
 
-    context.addProcedure(new ProcedureDef(this), methContext);
+    context.assignProcedureAnonym(new ProcedureDef(this), methContext);
 
     statement = (InStatement) statement
         .analyze(methContext);

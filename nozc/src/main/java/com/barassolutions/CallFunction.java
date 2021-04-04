@@ -38,7 +38,7 @@ public class CallFunction extends
     FunctionDef function = context.functionFor(name, args.size());
     if (function == null) {
       ProcedureDef proc = context.procedureFor(name, args.size());
-      if (proc==null) {
+      if (proc == null) {
         interStatement.reportSemanticError(line(),
             "Could not find function or procedure for: <name:" + name + " nbArgs:" + args.size()
                 + ">");
@@ -48,6 +48,7 @@ public class CallFunction extends
         this.type = Type.ANY;
       }
     } else {
+      Logger.debug("CallFunction to " + name + ": return type is " + function.returnType());
       this.type = function.returnType();
     }
 
@@ -64,7 +65,7 @@ public class CallFunction extends
    */
   @Override
   public void codegen(Emitter output) {
-    Logger.debug("Generating code for a function call <name:"+name+">");
+    Logger.debug("Generating code for a function call <name:" + name + ">");
     output.token(TokenOz.LCURLY);
     output.literal(Utils.ozFriendlyName(name));
     args.forEach(a -> {

@@ -31,7 +31,7 @@ Use the `-help` option to print help on the correct usage.
 ## Want to contribute ?
 Nozc, and NewOz as a language, are still in the early days of their development. Any help and suggestions are welcome !\
 In particular, we are looking for feedback on the syntax : what looks good to you, what could be improved, what should be removed,...
-You can post all your thoughts as GitHub issues on the project page : https://github.com/MaVdbussche/nozc/issues.
+If you would like to contribute to this project, you are welcomed to do so by reading the contribution guildelines located at [LINK]()(_coming soon_).
 I will try my best to address them as fast as I can.\
 For now, Nozc is being developed in the context of my master thesis.
 In the future, this compiler and new syntax might be fully integrated into the **Mozart** ecosystem,

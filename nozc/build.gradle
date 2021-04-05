@@ -1,5 +1,5 @@
-plugins {
-    id 'application' //TODO copy README into the distributed archive
+plugins { // Gradle plugins to add the pre-created tasks we need
+    id 'application'
     id 'java-library'
     //id 'org.beryx.runtime' version '1.12.2'
 }
@@ -8,20 +8,20 @@ repositories {
 }
 
 group 'com.barassolutions'
-version = project.property("version")
+version = project.property("version") // Property in ./gradle.properties
 
-application {
+application { // Allowing to create the shell script top launch the jar automagically
     mainClass = 'com.barassolutions.Nozc'
     applicationName = 'nozc'
     applicationDefaultJvmArgs = []
 }
 
-java {
+java { // Asking the build task to create other jars as well
     //withJavadocJar()
     withSourcesJar()
 }
 
-task javaccGen {
+task javaccGen { // Run JavaCC to reflect changes in newoz.jj
     doFirst {
         exec {
             if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
@@ -34,9 +34,10 @@ task javaccGen {
         }
     }
 }
-compileJava.dependsOn javaccGen
+compileJava.dependsOn javaccGen // Run JavaCC before each compilation
 
-processResources {
+processResources { // Uploading the version number to the resources folder
+    outputs.upToDateWhen { false } // Run this every time (fixes a weird glitch where task stayed "UP-TO-DATE" even after changes)
     filesMatching('**/app.properties') {
         filter {
             it.replace('%APP_VERSION_TOKEN%', version)
@@ -44,7 +45,16 @@ processResources {
     }
 }
 
-tasks.withType(JavaCompile).all {
+distributions { // Add specified files to the distributions
+    main {
+        distributionBaseName = 'nozc'
+        contents {
+            from 'src/readme'
+        }
+    }
+}
+
+tasks.withType(JavaCompile).all { // Options for compilation tasks
     options.warnings = true
     options.deprecation = true
     options.debug = true
@@ -52,11 +62,15 @@ tasks.withType(JavaCompile).all {
     //options.compilerArgs += ['--enable-preview']
     options.release = 16
 }
-tasks.withType(JavaExec) {
+tasks.withType(JavaExec) { // Options for run tasks
     //jvmArgs += '--enable-preview'
 }
-tasks.withType(Test) {
+tasks.withType(Test) { // Options for test tasks
     //jvmArgs += '--enable-preview'
+}
+javadoc.options { // Options for Javadoc tasks
+    //addBooleanOption('-enable-preview', true)
+    //addStringOption('-release', '16')
 }
 
 jar {
@@ -64,22 +78,16 @@ jar {
         attributes 'Main-Class': 'com.barassolutions.Nozc'
     }
 }
-javadoc.options {
-    //addBooleanOption('-enable-preview', true)
-    //addStringOption('-release', '16')
-}
-
 task uberJar(type: Jar) {
     archiveClassifier = 'uber'
     from sourceSets.main.output
-
     dependsOn configurations.runtimeClasspath
     from {
         configurations.runtimeClasspath.findAll {it.name.endsWith('jar')}.collect {zipTree(it)}
     }
 }
 
-dependencies {
+dependencies { // Maven dependencies
     // https://mvnrepository.com/artifact/junit/junit
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
     // https://stefanbirkner.github.io/system-rules/index.html

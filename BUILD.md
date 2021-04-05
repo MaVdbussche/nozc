@@ -1,5 +1,6 @@
 # Requirements
 
+_These are the prerequisites to build this project. If you are just looking for the requirements to **run** it, please consult the main [README](README.md) file._\
 Building this application requires to have to following components installed :
 
 * [Gradle](https://gradle.org/) is the used build system (the Gradle Wrapper shipped with the
@@ -16,8 +17,7 @@ file is situated), run the following commands :
 ./gradlew init
 ./gradlew assembleDist
 ```
->This command will create a distributable, under both `.zip` and `.tar` formats, under `./nozc/build/distributions`,
-> then copies them to the `releases` folder.
+>This command will create a distributable, under both `.zip` and `.tar` formats, under `./nozc/build/distributions`.
 
 >Gradle might signal you that some files are obsolete. If so, navigate to `nozc/src/main/java/com/barassolutions` and delete them.
 > Then, rerun `.\gradlew assembleDist`

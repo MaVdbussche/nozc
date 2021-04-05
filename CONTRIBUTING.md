@@ -1,11 +1,19 @@
-# Contributing
+This repository primarily contains the source code of **Nozc**, a **NewOz** compiler written in Java.\
+However, we will use GitHub issues here to discuss both adaptations to the syntax of **NewOz**, and improvements to the compiler, as they will obviously be tightly connected.
+When creating issues, pleasing add the appropriate tags to ease triaging and to make it easy for others to participate in the discussion.
 
-When contributing to this repository, please first discuss the change you wish to make via an issue.
+As current project maintainer, I will do my best to comment as much as I can on your opened issues.
+Any help is greatly appreciated, and will have a direct impact on the future of **NewOz** in particular, and the Mozart/Oz ecosystem as a whole.\
+Since **Oz** is also used as a teaching tool, it will also have an impact on the material of various MOOCs and university courses.
 
-Please note we have a code of conduct, please follow it in all your interactions with the project,
+Please note we have a [code of conduct](#code-of-conduct), please follow it in all your interactions with the project,
 in the widest sense of the term.
 
+# Contributing to Nozc (the compiler)
+
 ## Pull Request Process
+
+When contributing to this repository, please first discuss the change you wish to make via an issue.
 
 1. Please make sure to only commit relevant files from your fork in the pull request.
 2. Update the README.md or other documentation if necessary
@@ -13,7 +21,15 @@ in the widest sense of the term.
    Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
 4. Prefer a sequence of multiple small commits focusing on one change, with descriptive commit messages.
 
-## Code of Conduct
+# Contributing to NewOz (the language)
+
+You can find at the root of the repository, an [examples](examples) folder with small, commented programs giving you an idea of what the current version of the syntax looks like.\
+These are meant to serve as a base for the discussion that will happen in the GitHub issues.
+You are kindly invited to submit any changes you think might be relevant !
+The process of creating a syntax is long and happens iteratively, and getting feedback from many programmers from various backgrounds is very important to us. 
+As stated above, I will do my best to answer promptly to you opened issues.
+
+# Code of Conduct
 
 ### Our Pledge
 

@@ -4,7 +4,7 @@
 Building this application requires to have to following components installed :
 
 * [Gradle](https://gradle.org/) is the used build system (the Gradle Wrapper shipped with the
-  project will select and download an appropriate version for you);
+  project will select and download an appropriate version for you).
 * [Java 16+](README.md#requirements) for the compilation itself.
 * Other requirements are shipped with the code in the `bin` folder, or automatically downloaded
   by *Gradle*.

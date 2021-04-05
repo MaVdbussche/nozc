@@ -100,6 +100,7 @@ public class FunctionDef extends Declaration {
     output.newLine();
     output.indentLeft();
     output.token(TokenOz.END);
+    output.newLine();
   }
 
   @Override

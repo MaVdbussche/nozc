@@ -2,5 +2,8 @@ declare
 {
 var i=5, a
 val k=1
-browse(i)
+def test(_) {
+  2
+}
+browse("Hello !")
 }

@@ -61,9 +61,6 @@ public class InStatement extends Statement {
   public void codegen(Emitter output) {
     declarations.forEach(e -> {
       e.codegen(output);
-      if(declarations.indexOf(e)!=declarations.size()-1) {
-        output.newLine();
-      }
     });
     if (declarations.size() > 0 && statements.size() > 0) {
       output.indentLeft();

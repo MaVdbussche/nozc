@@ -1,9 +1,7 @@
 declare
 fun{Acc L N}
 case L of
-   L1|nil andthen true then A=0
-in
-N + L1
+   L1|nil andthen (true orelse (false andthen true)) then N + L1
 [] L1|L2 then {Acc L2 N + L1}
 else 0
 end

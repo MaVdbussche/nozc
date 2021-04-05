@@ -1,14 +1,3 @@
-// Copyright 2011 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
-
-// This is the input file to JavaCC for generating a scanner and
-// a parser for newOz. From the specification in this file, JavaCC,
-// among other files, generates a JavaCCParser.java file
-// under this directory. This file is the parser. The code
-// between  PARSER_BEGIN( JavaCCParser ) and
-// PARSER_END( JavaCCParser ) is copied verbatim to this file. JavaCC
-// also generates a JavaCCParserTokenManager.java file which is the
-// scanner.
-
 PARSER_BEGIN( JavaCCParser )
 
 package com.barassolutions;
@@ -256,14 +245,14 @@ TOKEN : {
 | <ELLIPSIS: "...">
 }
 
-// Identifiers & litterals
+// Identifiers & literals
 TOKEN : {
   < VARIABLESTRICT: ((<UPPERCASE>(<ALPHANUM>)*) | "`"(<ESC> | <PSEUDO_CHAR> | ~["`","\\","\n","\r"])"`") >
 | < VARIABLE: <LOWERCASE>(<ALPHANUM>)* >
 | < ATOM: (<ATOMLISP> | "´" (<ESC>| <PSEUDO_CHAR> | ~["\\","\n","\r"]) "´") >
 | < ATOMLISP: <APOSTROPHE> (<LOWERCASE>|<UPPERCASE>) (<ALPHANUM>)* >
 //| < LABEL: (<VARIABLE>|<ATOM>|<BOOLEAN>|<UNIT>) >
-| < STRING: "\"" (<ESC>| <PSEUDO_CHAR> | ~["\"","\\","\n","\r"]) "\"" >
+| < STRING: "\"" (<ESC> | <PSEUDO_CHAR> | ~["\"","\\","\n","\r"])* "\"" >
 | < CHARACTER: (<DEGREE>(<CHARCHAR> | <PSEUDO_CHAR>) | "'"<ALPHANUM>"'" )> //| <CHARINT> ) >
 | < INT: (<DECINT> | <HEXINT> | <OCTINT> | <BININT>) >
 | < FLOAT: (<DIGIT>)+ <DOT> (<DIGIT>)* (("e"|"E")("~")?(<DIGIT>)+)? >
@@ -283,7 +272,7 @@ TOKEN : {
 | < #HEXDIGIT: (<DIGIT> | ["A"-"F"] | ["a"-"f"]) >
 | < #BINDIGIT: ["0"-"1"] >
 
-| < #ESCAPE_CHAR: ("a"|"b"|"f"|"n"|"r"|"t"|<BACKSLASH>|<APOSTROPHE>|<QUOTE>|<DEGREE>) > //TODO <LACCENT> here iff it is present in <VARIABLESTRICT definition
+| < #ESCAPE_CHAR: ("a"|"b"|"f"|"n"|"r"|"t"|<BACKSLASH>|<APOSTROPHE>|<QUOTE>|<DEGREE>) >
 | < #ESC: <BACKSLASH> <ESCAPE_CHAR> >
 | < #CHARCHAR: ~["\\"] >
 // In the classes of words <variable>, <atom>, <string>, and <character> we use pseudo-characters,
@@ -429,17 +418,18 @@ private Expression expression(): {
  * @return an AST for a parExpression.
  */
 private Expression parExpression(): {
+    int line = 0;
     Expression expr = null;
     {Logger.debug("Entering parExpression()");}
 }
 {
     try {
-        <LPAREN> expr = expression() <RPAREN>
+        <LPAREN> { line =token.beginLine; } expr = expression() <RPAREN>
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
     }
-    { return expr; }
+    { return new ParExpression(line, expr); }
 }
 
 /**
@@ -574,18 +564,18 @@ private Statement nestConStatement(): {
             Logger.debug("Found a CallProcedure to "+name+" at line "+line); }
           <LPAREN>
           [ LOOKAHEAD( expression() )
-          expression2 = expression() { args.add(expression2); }
-          (
-            LOOKAHEAD( <COMMA> expression() )
-            <COMMA> expression2 = expression() { args.add(expression2); }
-          )*
+            expression2 = expression() { args.add(expression2); }
+            (
+              LOOKAHEAD( <COMMA> expression() )
+              <COMMA> expression2 = expression() { args.add(expression2); }
+            )*
           ]
           <RPAREN>
           { out = new CallProcedure(line, name, args); }
         | LOOKAHEAD( <LCURLY> )
           statement2 = inStatement()
           { out = statement2; }
-        | LOOKAHEAD( <IF> parExpression() inStatement() )
+        | LOOKAHEAD( <IF> )
           <IF> { line = token.beginLine; }
           expression = parExpression()
           statement2 = inStatement()
@@ -600,19 +590,19 @@ private Statement nestConStatement(): {
             { consq.add(statement2); }
           ]
           { out = new ConditionalStatement(line, conds, consq); }
-        | LOOKAHEAD( <MATCH> expression() <LCURLY> )
+        | LOOKAHEAD( <MATCH> )
           <MATCH> { line = token.beginLine; }
           expression = expression() <LCURLY>
           (
-            LOOKAHEAD( <CASE> caseStatementClause() )
+            LOOKAHEAD( <CASE> )
             <CASE> aClause = caseStatementClause(firstClausePassed) { firstClausePassed = true; clauses.add(aClause); }
           )+
           [
-            LOOKAHEAD( <ELSE> inStatement() )
+            LOOKAHEAD( <ELSE> )
             <ELSE> statement2 = inStatement() ]
           { out = new CaseStructStatement(line, expression, clauses, statement2); }
           <RCURLY>
-        | LOOKAHEAD( <FOR> <LPAREN> )
+        | LOOKAHEAD( <FOR> )
           <FOR> { line = token.beginLine; }
           <LPAREN>
           (
@@ -622,7 +612,7 @@ private Statement nestConStatement(): {
           )+
           <RPAREN> statement2 = inStatement()
           { out = new LoopStructure(line, loopDecs, statement2); }
-        | LOOKAHEAD( <TRY> inStatement() )
+        | LOOKAHEAD( <TRY> )
           <TRY> { line = token.beginLine; }
           statement = inStatement()
           [
@@ -639,11 +629,11 @@ private Statement nestConStatement(): {
             <FINALLY> statement2 = inStatement()
           ]
           { out = new TryStructure(line, statement, clauses, statement2); }
-        | LOOKAHEAD( <RAISE> inExpression() )
+        | LOOKAHEAD( <RAISE> )
           <RAISE> { line = token.beginLine; }
           expression = inExpression()
           { out = new RaiseStructure(line, expression); }
-        | LOOKAHEAD( <THREAD> inStatement() )
+        | LOOKAHEAD( <THREAD> )
           <THREAD> { line = token.beginLine; }
           statement2 = inStatement()
           { out = new ThreadStructure(line, statement2); }
@@ -727,16 +717,16 @@ private Expression nestConExpression(): {
             <MATCH> { line = token.beginLine; }
           expression = expression() <LCURLY>
           (
-            LOOKAHEAD( <CASE> caseExpressionClause() )
+            LOOKAHEAD( <CASE> )
             <CASE> aClause = caseExpressionClause(firstClausePassed) { firstClausePassed = true; clauses.add(aClause); }
           )+
           [
-            LOOKAHEAD( <ELSE> inExpression() )
+            LOOKAHEAD( <ELSE> )
             <ELSE> expression2 = inExpression()
           ]
           { out = new CaseStructExpression(line, expression, clauses, expression2); }
           <RCURLY>
-        | LOOKAHEAD( <TRY> inExpression() )
+        | LOOKAHEAD( <TRY> )
           <TRY> { line = token.beginLine; }
           expression = inExpression()
           [
@@ -753,11 +743,11 @@ private Expression nestConExpression(): {
             <FINALLY> statement = inStatement()
           ]
           { out = new TryExpression(line, (InExpression) expression, clauses, statement); }
-        | LOOKAHEAD( <RAISE> inExpression() )
+        | LOOKAHEAD( <RAISE> )
           <RAISE> { line = token.beginLine; }
           expression = inExpression()
           { out = new RaiseExpression(line, expression); }
-        | LOOKAHEAD( <THREAD> inExpression() )
+        | LOOKAHEAD( <THREAD> )
           <THREAD> { line = token.beginLine; }
           expression = inExpression()
           { out = new ThreadExpression(line, (InExpression) expression); }
@@ -1702,7 +1692,7 @@ private Expression term(): {
               map.put(aFeature, val);
             }}
           ( LOOKAHEAD( <COMMA> )
-            <COMMA>
+            <COMMA> {aFeature = null;}
             [ LOOKAHEAD( feature() <COLON> )
               aFeature = feature() <COLON>
               { map.put(aFeature, null); }
@@ -1756,7 +1746,8 @@ private Expression term(): {
  * Parse a pattern (Used in functions/procedures/methods signatures and match blocks).
  *
  * <pre>
- *   pattern ::= variable | int | float | character | string | UNIT | TRUE | FALSE | UNDERSCORE | NIL
+ *   pattern ::= variable | UNDERSCORE | NIL
+ *            | int | float | character | string | UNIT | TRUE | FALSE
  *            | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN
  *            | LPAREN pattern {HASHTAG pattern}+ RPAREN
  *            | LPAREN pattern {COLCOL pattern}+ RPAREN
@@ -1781,17 +1772,27 @@ private Pattern pattern(): {
 }
 {
     try {
-        <UNIT> { out = new Literal(token.beginLine, Type.UNIT, true); }
-        | <TRUE> { out = new Literal(token.beginLine, Type.BOOLEAN, true, true); }
-        | <FALSE> { out = new Literal(token.beginLine, Type.BOOLEAN, false, true); }
-        | <UNDERSCORE> { out = new Literal(token.beginLine, Type.UNDERSCORE, true); }
-        | <NIL> { out = new Literal(token.beginLine, Type.NIL, true); }
-        | <INT> { out = new Literal(token.beginLine, Type.INT, token.image, true); }
-        | <FLOAT> { out = new Literal(token.beginLine, Type.FLOAT, token.image, true); }
-        | <CHARACTER> { out = new Literal(token.beginLine, Type.CHAR, token.image, true); }
-        | <STRING> { out = new Literal(token.beginLine, Type.STRING, token.image, true); }
-        | <VARIABLE> { out = new Variable(token.beginLine, token.image, true, true, false); }
-        | <ATOMLISP> { line = token.beginLine; value = token.image; } //This is a record pattern
+          <UNIT> { out = new Literal(token.beginLine, Type.UNIT, true); }
+        |
+          <TRUE> { out = new Literal(token.beginLine, Type.BOOLEAN, true, true); }
+        |
+          <FALSE> { out = new Literal(token.beginLine, Type.BOOLEAN, false, true); }
+        |
+          <UNDERSCORE> { out = new Literal(token.beginLine, Type.UNDERSCORE, true); }
+        |
+          <NIL> { out = new Literal(token.beginLine, Type.NIL, true); }
+        |
+          <INT> { out = new Literal(token.beginLine, Type.INT, token.image, true); }
+        |
+          <FLOAT> { out = new Literal(token.beginLine, Type.FLOAT, token.image, true); }
+        |
+          <CHARACTER> { out = new Literal(token.beginLine, Type.CHAR, token.image, true); }
+        |
+          <STRING> { out = new Literal(token.beginLine, Type.STRING, token.image, true); }
+        |
+          <VARIABLE> { out = new Variable(token.beginLine, token.image, true, true, false); }
+        |
+          <ATOMLISP> { line = token.beginLine; value = token.image; } //This is a record pattern
           <LPAREN>
           [
           [ LOOKAHEAD( feature() )

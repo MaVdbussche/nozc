@@ -1,7 +1,7 @@
 declare {
   def acc(l, n) {
     match l {
-      case (l1::nil) && true => {val a=0 n+l1}
+      case (l1::nil) && (true || (false && true)) => {n+l1}
       case (l1::l2) => {acc(l2, n+l1)}
       else {0}
     }

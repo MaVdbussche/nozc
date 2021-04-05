@@ -3,7 +3,7 @@ However, we will use GitHub issues here to discuss both adaptations to the synta
 When creating issues, pleasing add the appropriate tags to ease triaging and to make it easy for others to participate in the discussion.
 
 As current project maintainer, I will do my best to comment as much as I can on your opened issues.
-Any help is greatly appreciated, and will have a direct impact on the future of **NewOz** in particular, and the Mozart/Oz ecosystem as a whole.\
+Any help is greatly appreciated, and will have a direct impact on the future of **NewOz** in particular, and the **Mozart**/**Oz** ecosystem as a whole.\
 Since **Oz** is also used as a teaching tool, it will also have an impact on the material of various MOOCs and university courses.
 
 Please note we have a [code of conduct](#code-of-conduct), please follow it in all your interactions with the project,
@@ -16,8 +16,8 @@ in the widest sense of the term.
 When contributing to this repository, please first discuss the change you wish to make via an issue.
 
 1. Please make sure to only commit relevant files from your fork in the pull request.
-2. Update the README.md or other documentation if necessary
-3. Increase the version numbers in any examples files and the README.md to the new version that this
+2. Update the [README](README.md) or other documentation if necessary
+3. Increase the version numbers in any examples files, and the [README](README.md) to the new version that this
    Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
 4. Prefer a sequence of multiple small commits focusing on one change, with descriptive commit messages.
 

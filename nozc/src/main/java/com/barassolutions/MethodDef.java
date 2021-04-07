@@ -37,6 +37,9 @@ public class MethodDef extends Declaration implements ClassElement {
 
     //This is only correct because of the statements above. Be careful when editing this constructor !
     isAFunction = (expression != null);
+    if (isAFunction) {
+      this.returnType = Type.ANY;
+    }
 
     if (name != null) {
       this.aliasName = name.name();
@@ -84,7 +87,7 @@ public class MethodDef extends Declaration implements ClassElement {
       statement = (InStatement) statement
           .analyze(methContext);
     } else if (expression != null && isAFunction) {
-      returnType = Type.ANY; //Temporary assigning a type to allow analysis of potential recursive calls
+      //Temporary assigning a type to allow analysis of potential recursive calls
       methContext.setReturnType(returnType);
       Logger.debug("Temporarily assigned a type to MethodDef");
 

@@ -67,6 +67,10 @@ public class InterStatement extends AST {
     return isInError;
   }
 
+  public void putInErrorState() {
+    isInError = true;
+  }
+
   /**
    * Report a semantic error.
    *
@@ -95,7 +99,7 @@ public class InterStatement extends AST {
                   null,
                   /*We don't care if lazy or not*/
                   false),
-              new MethodContext(null));
+              new MethodContext(null, Type.ANY));
         }
         case PROCEDURE -> {
           globalContext.addProcedureBuiltIn(new ProcedureDef(-1, b.nozString(),
@@ -109,7 +113,7 @@ public class InterStatement extends AST {
           //TODO necessary ?
         }
         case CLASS -> {
-          globalContext.addClassBuiltIn(new ClassDef(-1, b.ozString(),
+          globalContext.addClassBuiltIn(new ClassDef(-1, b.nozString(),
                   /*Class descriptors*/
                   b.descrs(),
                   /*Class methods*/
@@ -118,9 +122,6 @@ public class InterStatement extends AST {
         }
       }
     }
-    //TODO also add system calls etc, things directly available without imports
-
-    //Launch recursive preAnalyze
   }
 
   @Override

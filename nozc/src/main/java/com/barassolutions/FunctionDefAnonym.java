@@ -25,6 +25,7 @@ public class FunctionDefAnonym extends DeclarationAnonym {
     this.expression = expression;
     this.lazy = lazy;
     this.name = name;
+    this.returnType = Type.ANY;
   }
 
   public Type returnType() {
@@ -54,7 +55,7 @@ public class FunctionDefAnonym extends DeclarationAnonym {
   @Override
   public Expression analyze(Context context) {
     MethodContext methContext = new MethodContext(context);
-    returnType = Type.ANY; //Temporary assigning a type to allow analysis of potential recursive calls
+    //Temporary assigning a type to allow analysis of potential recursive calls
     methContext.setReturnType(returnType);
     Logger.debug("Temporarily assigned a type to FunctionDefAnonym");
 

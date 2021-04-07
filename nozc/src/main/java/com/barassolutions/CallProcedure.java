@@ -1,5 +1,7 @@
 package com.barassolutions;
 
+import com.barassolutions.util.BuiltInType;
+import com.barassolutions.util.BuiltIns;
 import com.barassolutions.util.Logger;
 import com.barassolutions.util.Utils;
 import java.util.ArrayList;
@@ -77,7 +79,8 @@ public class CallProcedure extends Statement {
   public void codegen(Emitter output) {
     Logger.debug("Generating code for a procedure call <name:" + name + ">");
     output.token(TokenOz.LCURLY);
-    output.literal(Utils.ozFriendlyName(name));
+    BuiltIns builtIn = Utils.findBuiltIn(name, BuiltInType.PROCEDURE);
+    output.literal(builtIn!=null ? builtIn.ozString() : Utils.ozFriendlyName(name));
     args.forEach(a -> {
       output.space();
       if (a instanceof Variable v) {

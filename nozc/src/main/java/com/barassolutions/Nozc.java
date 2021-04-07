@@ -260,7 +260,7 @@ public class Nozc implements Callable<Integer> {
               inputFilesNames[i]);
     }
 
-    // Part of this codehas been found on https://stackabuse.com/executing-shell-commands-with-java/
+    // Part of this code has been found on https://stackabuse.com/executing-shell-commands-with-java/
     if (false) {
     //if (!dontRunOzc) {
       Logger.info("We will now run the Mozart Oz compiler.");

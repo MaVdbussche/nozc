@@ -67,8 +67,9 @@ public class Context {
           + " nbArgs:" + f.nbArgs() + ">");
       this.definedFunctions.put(f, c);
     } else {
-      Logger.error("There is already a Procedure matching <name:" + f.name() + " returnType:" + f
+      Logger.error("There is already a Function matching <name:" + f.name() + " returnType:" + f
           .returnType() + " nbArgs:" + f.nbArgs() + ">. Ignoring this one.");
+      AST.interStatement.putInErrorState();
     }
   }
 
@@ -107,12 +108,13 @@ public class Context {
       }
     }
     if (!existsConflictingProcedure) {
-      Logger.debug("Adding Built-in Function <name:" + f.name() + " nbArgs:" + f.nbArgs() + ">");
+      Logger.debug("Adding Built-in Procedure <name:" + f.name() + " nbArgs:" + f.nbArgs() + ">");
       this.definedProcedures.put(f, c);
     } else {
       Logger.error(
           "There is already a Procedure matching <name:" + f.name() + " nbArgs:" + f.nbArgs()
               + ">. Ignoring this one.");
+      AST.interStatement.putInErrorState();
     }
   }
 
@@ -156,6 +158,7 @@ public class Context {
     } else {
       Logger
           .error("There is already a Functor matching <name:" + f.name() + ">. Ignoring this one.");
+      AST.interStatement.putInErrorState();
     }
   }
 
@@ -198,6 +201,7 @@ public class Context {
       this.definedClasses.put(f, c);
     } else {
       Logger.error("There is already a Class matching <name:" + f.name() + ">. Ignoring this one.");
+      AST.interStatement.putInErrorState();
     }
   }
 
@@ -419,22 +423,14 @@ class MethodContext extends Context {
     super(parent);
   }
 
+  public MethodContext(Context parent, Type type) {
+    super(parent);
+    this.returnType = type;
+  }
+
   public void addArgument(Pattern p) {
     this.addVariable(p);
   }
-/*
-  /**
-   * The following methods are used to add a method name to its own context, to allow for recursion
-   *
-  public void addFunction(FunctionDef f) {
-    super.addFunction(f, null);
-  }
-  public void addProcedure(ProcedureDef f) {
-    super.addProcedure(f, null);
-  }
-  public void addMethod(MethodDef f) {
-    super.ad
-  }*/
 
   public void setReturnType(Type type) {
     this.returnType = type;

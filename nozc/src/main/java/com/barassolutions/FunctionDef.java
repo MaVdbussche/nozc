@@ -32,6 +32,7 @@ public class FunctionDef extends Declaration {
     this.args = args;
     this.expression = expression;
     this.lazy = lazy;
+    this.returnType = Type.ANY;
   }
 
   public FunctionDef(FunctionDefAnonym f) {
@@ -57,7 +58,7 @@ public class FunctionDef extends Declaration {
   @Override
   public AST analyze(Context context) {
     MethodContext methContext = new MethodContext(context);
-    returnType = Type.ANY; //Temporary assigning a type to allow analysis of potential recursive calls
+    //Temporary assigning a type to allow analysis of potential recursive calls
     methContext.setReturnType(returnType);
     Logger.debug("Temporarily assigned a type to FunctionDef");
 

@@ -139,7 +139,7 @@ class OperationLogicalNot extends UnaryExpression {
   @Override
   public void codegen(Emitter output) {
     output.token(TokenOz.LCURLY);
-    output.literal(BuiltIns.NOT.ozString());
+    output.literal(BuiltIns.not.ozString());
     output.space();
     arg.codegen(output);
     output.token(TokenOz.RCURLY);

@@ -29,12 +29,12 @@ The [**Oz** programming language](http://mozart2.org) is a multi-paradigm langua
 It allows users to dynamically create any number of sequential threads.
 The threads are dataflow threads in the sense that a thread executing an operation will suspend until all needed operands have a well-defined value.
 
-The [**Mozart** programming system](https://github.com/mozart/mozart2), which is the official implementation of **Oz**, has been **developed in the 1990s** by researchers from DFKI (the German Research Center for Artificial Intelligence), SICS (the Swedish Institute of Computer Science), the University of the Saarland, UCLouvain (the Université catholique de Louvain), and others.
+The [**Mozart** programming system](https://github.com/mozart/mozart2), which is the official implementation of **Oz**, has been **developed in the 1990s** by researchers from DFKI (the German Research Center for Artificial Intelligence), SICS (the Swedish Institute of Computer Science), the University of the Saarland, UCLouvain (the Université Catholique de Louvain), and others.
 
 Over the years, the **Oz** programming language has been used with success in various MOOCs and university courses.
 It's **multi-paradigm philosophy** proved to be an invaluable strength in teaching students the basics of programming paradigms, through its *one-fits-all* approach.
 
-However, it has become obvious over the years that the syntax of the language has become a drawback.
+However, it has become obvious over time that the syntax of the language constitutes a drawback.
 In particular, **Oz** has not been updated like other languages have, which is hindering its ability to keep a growing community of developers around it.
 
 The **objective behind NewOz**, launched by Prof. Peter Van Roy at [UCLouvain](https://uclouvain.be/fr/index.html) is ambitious : bringing the syntax of Oz to par with modern programming languages, while **keeping alive the philosophy** that makes its strength :

@@ -110,7 +110,7 @@ public class LoopDeclaration extends AST {
       endValue.type().mustMatchExpected(line(), initialValue.type());
     } else {
       generator = generator.analyze(context);
-      generator.type().mustMatchExpected(line(), Type.LIST);
+      generator.type().mustMatchExpected(line(), Type.LIST); //TODO problem : we never create expressions of type LIST
     }
 
     return this;

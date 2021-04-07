@@ -87,7 +87,7 @@ public class Variable extends Pattern implements Lhs {
               + "> to a Variable of type VAL. You might want to use VAR instead.");
     } else if (!isAssigned) {
       interStatement.reportSemanticError(line(),
-          "Trying to compute using a not-yet assigned variable as an operand.");
+          "Trying to compute using a not-yet assigned variable as an operand."); //TODO do this check for all computations
     } else {
       if (type.equals(Type.INT)) {
         newValue.type.mustMatchExpected(line(), Type.INT);

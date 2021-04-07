@@ -19,6 +19,7 @@ public class Record extends Pattern {
     this.patterns = map;
     this.hasMoreFeatures = hasMore;
     this.usedAsPattern = isAPattern;
+    this.type = Type.RECORD;
   }
 
   public Record(int line, String name, Map<Feature, Expression> map, boolean hasMore) {
@@ -27,6 +28,7 @@ public class Record extends Pattern {
     this.members = map;
     this.hasMoreFeatures = hasMore;
     this.usedAsPattern = false;
+    this.type = Type.RECORD;
   }
 
   public String name() {

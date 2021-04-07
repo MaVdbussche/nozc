@@ -9,6 +9,8 @@
 nozc/build/
 build/
 
-
 # Latex report
 report/
+
+# Javadoc generated manually when writing documentation
+docs/Javadoc

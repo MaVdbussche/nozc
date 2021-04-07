@@ -10,11 +10,12 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 //TODO all implicit functions/procs in Oz (Browse etc.)
+// TODO http://mozart2.org/mozart-v1/doc-1.4.0/base/node7.html has been partially skipped, to discuss
 
 /**
  * An enum containing all the functions, procedures, classes and functors known by the compiler.
  * They can be considered as built into the language itself, meaning they are available to be
- * referenced from any every scope in your NewOz program.
+ * referenced from any scope in your NewOz program.
  */
 public enum BuiltIns {
 
@@ -74,6 +75,31 @@ public enum BuiltIns {
       Arrays.asList(
           new Variable(-1, "f1", true, false),
           new Variable(-1, "f2", true, false)),
+      null, null),
+  /**
+   * <code>and(b1, b2)</code>
+   * <p>
+   * Returns the conjunction of truth value <code>b1</code> and <code>b2</code>. Note that
+   * <code>and()</code> is different from the operation available via the keyword <code>&amp;&amp;</code> in
+   * that it always evaluates its second argument. For instance, <code>false &amp;&amp; p</code> reduces
+   * without reducing application of <code>p</code>, whereas reduction of <code>and(false, p)</code>
+   * always applies <code>p</code>.
+   */
+  and("And", "and", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "b1", true, false),
+          new Variable(-1, "b2", true, false)),
+      null, null),
+  /**
+   * <code>and(b1, b2, ?b3)</code>
+   * <p>
+   * Procedure version of <code>and(b1, b2)</code>.
+   */
+  andP("And", "and", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "b1", true, false),
+          new Variable(-1, "b2", true, false),
+          new Variable(-1, "b3", true, false)),
       null, null),
   /**
    * <code>asin(f1)</code>
@@ -202,6 +228,29 @@ public enum BuiltIns {
           new Variable(-1, "f2", true, false)),
       null, null),
   /**
+   * <code>condSelect(rc, li, x)</code>
+   * <p>
+   * Returns the field of record <code>rc</code> at feature <code>li</code>, if <code>rc</code> has feature <code>li</code>. Otherwise, return <code>x</code>.
+   */
+  condSelect("CondSelect", "condSelect", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "rc", true, false),
+          new Variable(-1, "li", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>condSelect(rc, li, x, ?y)</code>
+   * <p>
+   * Procedure version of <code>condSelect(rc, li, x)</code>.
+   */
+  condSelectP("HasFeature", "hasFeature", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "rc", true, false),
+          new Variable(-1, "li", true, false),
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "y", true, false)),
+      null, null),
+  /**
    * <code>cos(f1)</code>
    * <p>
    * Returns the cosine of <code>f1</code>.
@@ -319,6 +368,27 @@ public enum BuiltIns {
           new Variable(-1, "f2", true, false)),
       null, null),
   /**
+   * <code>hasFeature(rc, li)</code>
+   * <p>
+   * Tests whether the record <code>rc</code> has feature <code>li</code>.
+   */
+  hasFeature("HasFeature", "hasFeature", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "rc", true, false),
+          new Variable(-1, "li", true, false)),
+      null, null),
+  /**
+   * <code>hasFeature(rc, li, ?b)</code>
+   * <p>
+   * Procedure version of <code>hasFeature(rc, li)</code>.
+   */
+  hasFeatureP("HasFeature", "hasFeature", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "rc", true, false),
+          new Variable(-1, "li", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
    * <code>intToFloat(i)</code>
    * <p>
    * Returns the float closest to the integer <code>i</code>.
@@ -353,6 +423,24 @@ public enum BuiltIns {
       Arrays.asList(
           new Variable(-1, "i", true, false),
           new Variable(-1, "s", true, false)),
+      null, null),
+  /**
+   * <code>isBool(x)</code>
+   * <p>
+   * Tests whether <code>x</code> is a boolean.
+   */
+  isBool("IsBool", "isBool", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>isBool(x, ?b)</code>
+   * <p>
+   * Procedure version of <code>isBool(x)</code>.
+   */
+  isBoolP("IsBool", "isBool", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
       null, null),
   /**
    * <code>isDet(x)</code>
@@ -557,6 +645,24 @@ public enum BuiltIns {
           new Variable(-1, "b", true, false)),
       null, null),
   /**
+   * <code>isRecord(x)</code>
+   * <p>
+   * Tests whether <code>x</code> is a record.
+   */
+  isRecord("IsRecord", "isRecord", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>isRecord(x, ?b)</code>
+   * <p>
+   * Procedure version of <code>isRecord(x)</code>.
+   */
+  isRecordP("IsRecord", "isRecord", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
    * <code>log(f1)</code>
    * <p>
    * Returns the logarithm to the base <i>e</i> of <code>f1</code>.
@@ -624,10 +730,47 @@ public enum BuiltIns {
       Collections.singletonList(new Variable(-1, "InitValue", true, false)),
       null, null),
   /**
-   * @hidden
+   * <code>not(b1)</code>
+   * <p>
+   * Returns the negation of truth value <code>b1</code>.
    */
-  NOT("Not", "not", BuiltInType.FUNCTION,
-      Collections.singletonList(new Variable(-1, "Target", true, false)),
+  not("Not", "not", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "b1", true, false)),
+      null, null),
+  /**
+   * <code>not(b1, ?b2)</code>
+   * <p>
+   * Procedure version of <code>not(b1)</code>.
+   */
+  notP("Not", "not", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "b1", true, false),
+          new Variable(-1, "b2", true, false)),
+      null, null),
+  /**
+   * <code>or(b1, b2)</code>
+   * <p>
+   * Returns the disjunction of truth value <code>b1</code> and <code>b2</code>. Note that
+   * <code>or()</code> is different from the operation available via the keyword <code>||</code> in
+   * that it always evaluates its second argument. For instance, <code>true || p</code> reduces
+   * without reducing application of <code>p</code>, whereas reduction of <code>or(true, p)</code>
+   * always applies <code>p</code>.
+   */
+  or("Or", "or", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "b1", true, false),
+          new Variable(-1, "b2", true, false)),
+      null, null),
+  /**
+   * <code>or(b1, b2, ?b3)</code>
+   * <p>
+   * Procedure version of <code>or(b1, b2)</code>.
+   */
+  orP("Or", "or", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "b1", true, false),
+          new Variable(-1, "b2", true, false),
+          new Variable(-1, "b3", true, false)),
       null, null),
   /**
    * <code>pow(fi1, fi2)</code>

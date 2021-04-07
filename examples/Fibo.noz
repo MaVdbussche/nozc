@@ -1,20 +1,13 @@
-declare {
-  val fibo, out
-  fibo = def $ (n) {
-            if(n<2) {return 1} else {return fibo(n-1) + fibo(n-2)}
+declare { // If your program makes declarations, you need to write it in a declare block.
+  val fibo, out //Declare final values with val. You don't have to assign them immediately.
+  fibo = def $ (n) { //You can declare functions "anonymously" using "$". You can now call it using fibo().
+            if(n<2) {
+              1 // No return keyword, simply write the returned expression.
+            } else {
+              (fibo(n-1) + fibo(n-2))
+            }
          }
   out = fibo(30)
+  out = 30 //This line is invalid, as "out" was declared as a "val".
   browse(out)
 }
-
-///////////////////////////////////////////////
-Translates to
-///////////////////////////////////////////////
-declare local
-   Fibo = fun{$ N}
-            if(N<2) then 1 else {Fibo N-1} + {Fibo N-2} end
-          end
-   Out = {Fibo 30}
-in
-  {Browse Out}
-end

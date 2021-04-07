@@ -84,7 +84,11 @@ public class CallProcedure extends Statement {
     args.forEach(a -> {
       output.space();
       if (a instanceof Variable v) {
-        v.codegen(output);
+        if (args.indexOf(a)==args.size()-1 && builtIn!=null && builtIn.name().charAt(builtIn.name().length()-1)=='P') {
+          (new Variable(v, false)).codegen(output); //Ugly hack to avoid readmode on the last argument for the procedures that "overload" built-in functions (see BuiltIns enums definitions)
+        } else {
+          v.codegen(output);
+        }
       } else {
         a.codegen(output);
       } //Can't remember the purpose of this. But at this point I'm too afraid to ask

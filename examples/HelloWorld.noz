@@ -1,0 +1,2 @@
+//Use browse to display integers, floats, strings, lists, etc.
+browse("Hello !")

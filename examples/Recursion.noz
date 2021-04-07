@@ -1,14 +1,22 @@
+// A small program summing elements of a list using tail-recursion.
 declare {
-  def acc(l, n) {
-    match l {
-      case (l1::nil) && true => {val a=0 n+l1}
-      case (l1::l2) => {acc(l2, n+l1)}
-      else {0}
+  def acc(l, n) { //Use "def" to declare functions, "defproc" to declare procedures
+    match l { //Match structure will compare to expression "l"
+      case (l1::nil) && true => { // You can place boolean evaluations after the pattern being matched. These won't be evaluated if the pattern doesn't match.
+        n+l1
+      }
+      case (l1::l2) => {
+        val a=0 //You can of course declare variables in all inner scopes. However, all declarations in a scope must be placed before the first statement of the scope.
+        acc(l2, n+l1)
+      }
+      else { //Use "else" for the default case.
+        0
+      }
     }
   }
   def sumList(l) {
     acc(l, 0)
   }
-  var list = [1,2,3]
+  var list = (1::2::5::4::7::nil)
   browse(sumList(list))
 }

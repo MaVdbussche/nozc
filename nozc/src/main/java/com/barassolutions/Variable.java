@@ -34,6 +34,10 @@ public class Variable extends Pattern implements Lhs {
     }
   }
 
+  Variable(Variable v, boolean readMode) {
+    this(v.line(), v.name, v.constant, v.usedAsPattern, readMode);
+  }
+
   /**
    * To use in places where we rather want to give faithful representation to the user. In other
    * words, places where we don't want things like first letter capitalization.
@@ -161,7 +165,7 @@ public class Variable extends Pattern implements Lhs {
     Logger.debug(
         "Generating code for a Variable <name:" + name + " constant:" + constant + " readMode:"
             + readMode + ">");
-    if (!constant) {
+    if (!constant && readMode) {
       output.token(TokenOz.COMMERCAT);
     }
     output.literal(Utils.ozFriendlyName(name));

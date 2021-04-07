@@ -1,9 +1,1 @@
-declare
-{
-var i=5, a
-val k=1
-def test(_) {
-  2
-}
 browse("Hello !")
-}

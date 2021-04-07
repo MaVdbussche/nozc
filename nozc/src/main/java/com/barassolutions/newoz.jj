@@ -1065,10 +1065,10 @@ private Expression nestDecAnonym(): {
           <DEF> { line = token.beginLine; }
           aMethodHead = methHead()
           [<ASSIGN> <VARIABLE> { name = new Variable(line, token.image, true, false); }]
-          ( LOOKAHEAD( inExpression() )
-            expression = inExpression()
-          |
-            LOOKAHEAD( inStatement() )
+          ( //LOOKAHEAD( inExpression() )
+            //expression = inExpression()
+          //| //TODO find a way to re-add this later-on
+            //LOOKAHEAD( inStatement() )
             statement = inStatement()
           )
           { out = new MethodDef(line, aMethodHead, name, expression, statement); }
@@ -2041,7 +2041,7 @@ private ClassDescriptor classDescriptor(): {
  * Parse a method head. This can be seen as its signature
  *
  * <pre>
- *   methHead ::= (variableStrict | variable ) //variableStrict => private, variable => public
+ *   methHead ::= (variableStrict | variable) //variableStrict => private, variable => public
  *                  LPAREN [methArg {COMMA methArg} [COMMA ELLIPSIS]] RPAREN
  * </pre>
  *
@@ -2095,6 +2095,7 @@ private MethodArg methArg(): {
     Feature feature = null;
     String name = null;
     Expression defaultValue = null;
+    {Logger.debug("Entering methArg()");}
 }
 {
     try {
@@ -2103,7 +2104,7 @@ private MethodArg methArg(): {
         <COLON>
         ]
         (
-          <VARIABLE> { name = token.image; }
+          <VARIABLE> { name = token.image; Logger.debug("Found methArg called "+name); }
           | <UNDERSCORE> { name = token.image; }
         )
         [

@@ -86,6 +86,7 @@ public class CallProcedure extends Statement {
       if (a instanceof Variable v) {
         if (args.indexOf(a)==args.size()-1 && builtIn!=null && builtIn.name().charAt(builtIn.name().length()-1)=='P') {
           (new Variable(v, false)).codegen(output); //Ugly hack to avoid readmode on the last argument for the procedures that "overload" built-in functions (see BuiltIns enums definitions)
+          //TODO make sure this last argument exists in the aprent context, instead of adding it as pattern to the context in analyze() !
         } else {
           v.codegen(output);
         }
@@ -94,6 +95,7 @@ public class CallProcedure extends Statement {
       } //Can't remember the purpose of this. But at this point I'm too afraid to ask
     });
     output.token(TokenOz.RCURLY);
+    output.newLine();
   }
 
   @Override

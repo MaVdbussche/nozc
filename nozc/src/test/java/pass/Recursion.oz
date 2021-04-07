@@ -5,12 +5,15 @@ case L of
 [] L1|L2 then A=0
 in
 {Acc L2 N + L1}
+
 else 0
 end
 end
 fun{SumList L}
 {Acc L 0}
+
 end
 List={NewCell 1|2|5|4|7|nil}
 in
 {Browse {SumList @List}}
+

@@ -66,6 +66,7 @@ public class MethodDef extends Declaration implements ClassElement {
 
   @Override
   public AST analyze(Context context) {
+    Logger.debug("Launching methDef analysis for " + name());
     MethodContext methContext = new MethodContext(context);
     ClassContext classContext = context.asClassContext();
     if (classContext == null) {
@@ -75,8 +76,7 @@ public class MethodDef extends Declaration implements ClassElement {
 
     head.args().forEach(a -> {
       a = a.analyze(context);
-      methContext.addArgument(a);
-      a.patterns().forEach(methContext::addVariable);
+      a.patterns().forEach(methContext::addVariable); //TODO Do this for other Def classes ?! Also, make this infinitely recursive for records in records as pattern etc.
     });
 
     if (classContext != null) {
@@ -84,8 +84,8 @@ public class MethodDef extends Declaration implements ClassElement {
     }
 
     if (statement != null && !isAFunction) {
-      statement = (InStatement) statement
-          .analyze(methContext);
+      Logger.debug("Analyzing statement in method context");
+      statement = (InStatement) statement.analyze(methContext);
     } else if (expression != null && isAFunction) {
       //Temporary assigning a type to allow analysis of potential recursive calls
       methContext.setReturnType(returnType);
@@ -129,9 +129,9 @@ public class MethodDef extends Declaration implements ClassElement {
     } else if (expression != null) {
       expression.codegen(output);
     }
-    output.newLine();
     output.indentLeft();
     output.token(TokenOz.END);
+    output.newLine();
   }
 
   @Override

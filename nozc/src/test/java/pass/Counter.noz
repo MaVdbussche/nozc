@@ -1,0 +1,17 @@
+declare {
+  class Counter
+  {
+    attr value = 0
+    def display() {
+      browse(value)
+    }
+    def inc(i) {
+      value = (value+i)
+    }
+    def init(i) {
+      value = i
+    }
+  }
+  val c = new(Counter)
+  c.display()
+}

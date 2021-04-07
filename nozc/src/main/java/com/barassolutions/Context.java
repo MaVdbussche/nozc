@@ -28,11 +28,18 @@ public class Context {
           + " readMode:" + v.readMode() + " usedAsPattern:" + v.usedAsPattern() + ">");
     } else if (p instanceof Record r) {
       notExistsHere = this.ensureNotExistsHere(r.line(), r.name());
+    } else if (p instanceof MethodArg m) {
+      notExistsHere = this.ensureNotExistsHere(m.line(), m.name());
+      Logger.debug("Adding method argument in context <name:" + m.name()+">");
     } else {
       notExistsHere = true;
     }
     if (notExistsHere) {
-      this.definedVars.add(p);
+      if (p instanceof MethodArg m) {
+        this.definedVars.add(new Variable(m.line(), m.name(), true, false));
+      } else {
+        this.definedVars.add(p);
+      }
       return true;
     } else {
       return false;
@@ -383,6 +390,8 @@ public class Context {
         return v.name().equals(name);
       } else if (e instanceof Record r) {
         return r.name().equals(name);
+      } else if (e instanceof MethodArg m) {
+        return m.name().equals(name);
       } else {
         return false; //Not applicable for name search
       }

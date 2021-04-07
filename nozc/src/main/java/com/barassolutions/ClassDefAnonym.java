@@ -71,7 +71,7 @@ public class ClassDefAnonym extends DeclarationAnonym {
     output.token(TokenOz.CLASS);
     output.space();
     output.token(TokenOz.DOLLAR);
-    output.space();
+    output.newLine();
     //The following piece of codes relies on the fact that the list is sorted according to
     // the ClassDescriptor.SubType enum.
     // It is far from elegant, but it should work.
@@ -87,6 +87,7 @@ public class ClassDefAnonym extends DeclarationAnonym {
         output.token(TokenOz.ATTR);
         output.space();
         output.literal(descriptor.attribute().name());
+        output.newLine();
       } else if (descriptor.type().equals(SubType.PROPERTY)) {
         //TODO not supported in the first release
       } else if (descriptor.type().equals(SubType.FEATURE)) {

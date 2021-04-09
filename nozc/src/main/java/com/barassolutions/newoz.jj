@@ -307,7 +307,7 @@ TOKEN:
  */
 InterStatement interStatement(): {
     int line = 0;
-    InStatement statement = null;
+    InStatement s = null;
     Statement aStatement = null;
     ArrayList<Statement> statements = new ArrayList<Statement>();
     InterStatement out = null;
@@ -316,9 +316,9 @@ InterStatement interStatement(): {
     try {
         //LOOKAHEAD( <DECLARE> inStatement() )
         <DECLARE> { line = token.beginLine; Logger.debug("Found an interStatement"); }
-        statement = inStatement()
+        s = inStatement()
         <EOF>
-        { out = new InterStatement(line, statement); } //Declare block
+        { out = new InterStatement(line, new InStatement(s.line(), s.decls(), s.statements(), true)); } //Declare block
       |
         //LOOKAHEAD( nestConStatement() )
         ( aStatement = nestConStatement()
@@ -465,7 +465,7 @@ private InStatement inStatement(): {
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
     }
-    { return new InStatement(line, decls, statements);}//, expression); }
+    { return new InStatement(line, decls, statements, false);}//, expression); }
 }
 
 /**
@@ -1942,24 +1942,25 @@ private LoopDeclaration loopDeclaration(): {
 {
     try {
         LOOKAHEAD(<VARIABLE> <IN> expression() <DOTDOT> )
-        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, false); }
+        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, true, false); }
           <IN> init = expression()
           <DOTDOT> end = expression()
+          { out = new LoopDeclaration(line, var, init, null, null, end); }
           [
             <SEMI> step = expression()
+            { out = new LoopDeclaration(line, var, init, null, step, end); }
           ]
-          {out = new LoopDeclaration(line, var, init, null, step, end); }
       | LOOKAHEAD( <VARIABLE> <IN> expression() <SEMI> )
-        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, false); }
+        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, true, false); }
           <IN> init = expression()
           <SEMI> step = expression()
+          { out = new LoopDeclaration(line, var, init, null, step, null); }
           [
             <SEMI> end  = expression()
-            { cond=step; step=end; }
+            { out = new LoopDeclaration(line, var, init, step, end, null); } // See http://mozart2.org/mozart-v1/doc-1.4.0/loop/node1.html#chapter.official
           ]
-          { out = new LoopDeclaration(line, var, init, cond, step, null); }
       | LOOKAHEAD( <VARIABLE> <IN> expression() )
-        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, false); }
+        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, true, false); }
           <IN> generator = expression()
           { out = new LoopDeclaration(line, var, generator); }
     }

@@ -1,1 +1,1 @@
-{Browse "Hello !"}
+{Browse 'Hello !'}

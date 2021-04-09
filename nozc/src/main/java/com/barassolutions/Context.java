@@ -20,6 +20,10 @@ public class Context {
     this.parent = parent;
   }
 
+  public Context parent() {
+    return this.parent;
+  }
+
   public boolean addVariable(Pattern p) {
     boolean notExistsHere;
     if (p instanceof Variable v) {

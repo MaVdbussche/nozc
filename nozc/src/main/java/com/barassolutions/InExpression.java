@@ -81,22 +81,31 @@ public class InExpression extends Expression {
    */
   @Override
   public void codegen(Emitter output) {
-    declarations.forEach(e -> {
-      e.codegen(output);
-      if (declarations.indexOf(e) != declarations.size() - 1) {
-        output.newLine();
-      }
-    });
     if (declarations.size() > 0) {
+      output.token(TokenOz.LOCAL);
+      output.newLine();
+      output.indentRight();
+      declarations.forEach(e -> {
+        e.codegen(output);
+        //if (declarations.indexOf(e) != declarations.size() - 1) {
+        //output.newLine();
+        //}
+      });
       output.indentLeft();
       output.token(TokenOz.IN);
       output.newLine();
       output.indentRight();
     }
-    statements.forEach(s -> s.codegen(output));
+    if (statements.size() > 0) {
+      statements.forEach(s -> s.codegen(output));
+    }
 
     if (expression != null) {
       expression.codegen(output);
+    }
+    output.indentLeft();
+    if (declarations.size() > 0) {
+      output.token(TokenOz.END);
     }
   }
 

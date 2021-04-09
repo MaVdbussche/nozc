@@ -104,9 +104,28 @@ public class NozcJavaCCTestCase {
   /**
    * Run the nozc compiler against a pass-test file.
    */
-  @Test
+  //@Test
   public void testPassCounter() {
     String testedFile = "Counter.noz";
+
+    File passTest = new File("src/test/java/pass/"+testedFile);
+    File genClassDir = new File("src/test/java/pass");
+    System.out.print("\n\n");
+    System.out.println("================================================");
+    System.out.println("Starting testPass on " + passTest.toString() + " to test and compile.");
+
+    args = new String[]{"-v", "DEBUG", "-d", genClassDir.getAbsolutePath(), passTest.toString()};
+
+    exit.expectSystemExitWithStatus(0);
+    Nozc.main(args);
+  }
+
+  /**
+   * Run the nozc compiler against a pass-test file.
+   */
+  @Test
+  public void testPassTest() {
+    String testedFile = "Test.noz";
 
     File passTest = new File("src/test/java/pass/"+testedFile);
     File genClassDir = new File("src/test/java/pass");

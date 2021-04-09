@@ -93,21 +93,21 @@ public class LoopDeclaration extends AST {
     iterator = (Variable) iterator.analyze(loopContext);
 
     if (!generatorMode) {
-      initialValue = initialValue.analyze(loopContext.parent());
+      initialValue = initialValue.analyze(loopContext);
       initialValue.type().mustMatchExpected(line(), Type.INT, Type.FLOAT);
 
       if (continuationCondition != null) {
-        continuationCondition = continuationCondition.analyze(loopContext.parent());
+        continuationCondition = continuationCondition.analyze(loopContext);
         continuationCondition.type().mustMatchExpected(line(), Type.BOOLEAN);
       }
 
       if (stepValue != null) {
-        stepValue = stepValue.analyze(loopContext.parent());
+        stepValue = stepValue.analyze(loopContext);
         stepValue.type().mustMatchExpected(line(), initialValue.type());
       }
 
       if (endValue != null) { //Form E1..E2[;E3]
-        endValue = endValue.analyze(loopContext.parent());
+        endValue = endValue.analyze(loopContext);
         initialValue.type().mustMatchExpected(line(), Type.INT);
         if(stepValue!=null) {
           stepValue.type().mustMatchExpected(line(), Type.INT);
@@ -115,7 +115,7 @@ public class LoopDeclaration extends AST {
         endValue.type().mustMatchExpected(line(), Type.INT);
       }
     } else {
-      generator = generator.analyze(loopContext.parent());
+      generator = generator.analyze(loopContext);
       generator.type().mustMatchExpected(line(),
           Type.LIST); //TODO problem : we never create expressions of type LIST
     }

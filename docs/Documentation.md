@@ -119,25 +119,46 @@ Additionally, these arguments can be prefixed as in `lowI`, which indicates that
 The rest of this document will provide code examples to describe common operations you can do in **NewOz**. We indicate **invalid** code pieces with an explanation.
 # Declaring data
 ## Variables
-| Code snippet | Explanation for valid code | Explanation for erroneous code |
+| Code snippet | Explanation for **valid** code | Explanation for **erroneous** code |
 |--------------|-------------|-------------|
 | `val a, b, c` | You can declare multiples variables on the same line | |
-| `val d=5 var e`<br>*is equivalent to :*<br>`val d=5`<br>`var e` | `d` is a *value* (final), `e` is a *variable*| |
-| `val d, var e` | | Commas can only be used to declare variables of the same *nature* |
+| `val d=5 var e`<br>*is equivalent to :*<br>`val d=5`<br>`var e` | `d` is a *value* (final), `e` is a *variable* | |
+| `val d, var e` | | Commas can only be used to declare variables of the same *nature* on the same line |
 | `val d`<br>`d = 5`<br>*is equivalent to :*<br>`val d = 5` | You can split declaration and initialization | |
 | `val d=5`<br>`d = 6` | | Not valid since `d` is a *val* (final) |
-| `val l = [1,2,3]`<br>*is equivalent to :*<br>`val l = 1::2::3::nil` | Note that placing the closing `nil` is necessary for the 2nd syntax| |
+| `val l = [1,2,3]`<br>*is equivalent to :*<br>`val l = (1::2::3::nil)` | Note that placing the closing `nil` is necessary in the 1st syntax| |
 | `val t = 1#2#'c'` | Tuple declaration | |
+| `val a = 'name(1:'a' 2'b' 3:'c')`| Record declaration. The `'` is mandatory | |
+| `val a = _`<br>*is equivalent to :*<br>`val a` | Variables can be declared or explicitly set to "unassigned" (see *free* status above) |
+## Operators
+| Code snippet | Explanation for **valid** code | Explanation for **erroneous** code |
+|--------------|-------------|-------------|
+| `r = a + b`<br>`r = a - -b`<br>`r = a*b`<br>`r = a/b`<br>`r = a%b` | Addition<br>Subtraction<br>Multiplication<br>Division : valid for 2 ints *or* 2 floats<br>Modulo | |
+| `r = a && b`<br><code>r = a &#124;&#124; b</code><br>`r = a==b`<br>`r = !b` | Logical operations on booleans | |
+| `r = "Hello "+"world"` | String concatenation | |
+| `r = a < b`<br>`r = a >= b`<br>`r = a <= b`<br>`r = a > b` | Logical operations on booleans | |
+| `r = l.1`<br>`r = l.2` | Select the head (first element) of a list<br>Select the tail of a list (which is a list, see above) | |
+| `r = l.3` | | There is no 3rd element in a **NewOz** list. Use the library or create a recursive method to access further elements | 
 ## Functions & Procedures
-| Code snippet | Explanation for valid code | Explanation for erroneous code |
+| Code snippet | Explanation for **valid** code | Explanation for **erroneous** code |
 |--------------|-------------|-------------|
-| `fun sum(a, b) { (a+b) }` | Function declaration with 2 parameters. Body is between `{}`. Returned expression is between `()`. | |
-| `proc sum(a, b, c) { c=a+b}` | Procedure declaration. Procedures cannot return an expression.<br>*Note : in this example, c has to be a *var* or an unassigned *val* defined before !*| |
-| `fun lazy ints(n) {`<br>`(n::ints(n+1))`<br>`}` | Functions can be declared "lazy" (=*demand-driven*). Evaluation is done only when the result is needed. | |
-| `val s = fun $ (a, b) {`<br>`(a+b)`<br>`}`<br>*later, call :*<br>`x = s(3, 4)` | You can declare functions "anonymously". Functions and procedures are values (*higher-order programming*) | |
+| `fun sum(a, b) { (a+b) }` | Function declaration with 2 parameters. Body is between `{}`. Returned expression is between `()` | |
+| `fun sum(a, b) { }`<br>`fun sum(a, b) {`<br>`procedureCall(a)`<br>`}` | | Functions must return an expression as the last element of their body |
+| `proc sum(a, b, c) { c=a+b}`<br>`proc nothing(a) {}` | Procedure declaration. Procedures cannot return an expression<br>*Note : in this example, c has to be a *var* or an unassigned *val* defined before !*<br>Procedures can be empty (no side-effect) | |
+| `proc sum(a, b) { c }` | | Procedures can't return expressions. |
+| `fun lazy ints(n) {`<br>`(n::ints(n+1))`<br>`}` | Functions can be declared "lazy" (=*demand-driven*). Evaluation is done only when the result is needed | |
+| `val s = fun $ (a, b) {`<br>`(a+b)`<br>`}`<br>*later, call :*<br>`x = s(3, 4)` | You can declare functions "anonymously". Functions, procedures, and more are values (*higher-order programming*) | |
 ## Basic structures
-| Code snippet | Explanation for valid code | Explanation for erroneous code |
+| Code snippet | Explanation for **valid** code | Explanation for **erroneous** code |
 |--------------|-------------|-------------|
-| `if (a<b) {`<br>`(b-a)`<br>`} else if (a>b) {`<br>`(a-b)`<br>`} else {`<br>`0 }` | Conditional structures. All returned expression must be of the same type. | |
+| `if (a<b) {`<br>`(b-a)`<br>`} else if (a>b) {`<br>`(a-b)`<br>`} else {`<br>`0 }` | Conditional structures. All returned expression must be of the same type | |
 | `match myList {`<br>`case (e::nil) => { browse(e) }`<br>`case (e::l2) && e==1 => { browse("One") }`<br>`else { browse("Error") }`<br>`}` | Switch statement | |
-| `for ` |
+| For loops : 4 possible notations :<br>1: `for x in 0;x<10;x+1 { ... }`<br>*is equivalent to :*<br>2: `for x in 0 .. 9;1 { ... }`<br>*is equivalent to :*<br>3 :`for x in 0 .. 9 { ... }`<br>4: `for x in 0;x+1 { ... }`| 1 : C-like notation : <*intitial value*> ; <*boolean condition*> ; <*next value*><br>2 : <*lower bound*> .. <*upper bound*> ; <*increment value*><br>Bounds are inclusive. All three values are evaluated once, before starting the loop. Step can be negative. Only integers are allowed<br>3 : <*lower bound*> .. <*upper bound*><br>Same as above, with step defaulting to 1<br>4 : <*initial value*> ; <*increment value*><br>Equivalent to `for x in 0;true;x+1 { ... }`| |
+| `raise {e}` | `e` is an exception, which in practice can be any expression | |
+| `try { ... }`<br>`catch x {`<br>`case 1 && b==true => {...}`<br>`case 2 => {...}`<br>`else {}`<br>`} finally { ... }` | You can catch raised exceptions and do pattern-matching against them. In this example we assume numbers, are raiased, but as said above, any expression is a valid exception. | |
+| `thread { ... } ` | Create a new thread and run the code block in it | |
+| `lock l { ... }` | `l` is a reentrant lock (see the library for how to create them). The code block will be executed by the thread when the lock is available | |
+| `skip` | The empty statement | |
+## Classes and objects
+Including class definitions, private methods, and calls fom outside. + this and super()
+## Functors

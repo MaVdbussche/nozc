@@ -195,14 +195,14 @@ TOKEN : {
 //| <PIPE: "|"> //TODO DELETED
 | <LOR: "||">
 | <LNOT: "!">
-| <LNOTNOT: "!!">
+//| <LNOTNOT: "!!">
 | <MINUS: "-">
 | <PLUS: "+">
 | <STAR: "*">
 //| <STARSTAR: "**">
 | <SLASH: "/">
-| <INC: "++">
-| <DEC: "--">
+//| <INC: "++">
+//| <DEC: "--">
 | <BACKSLASH: "\\">
 | <MODULO: "%">
 | <HASHTAG: "#">

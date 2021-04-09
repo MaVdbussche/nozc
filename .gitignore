@@ -14,3 +14,6 @@ report/
 
 # Javadoc generated manually when writing documentation
 docs/Javadoc
+
+nozc/src/test/java/pass/Test.noz
+nozc/src/test/java/pass/Test.oz

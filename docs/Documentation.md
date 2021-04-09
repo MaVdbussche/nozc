@@ -74,10 +74,10 @@ A variable `x` is always in one of the following statuses :
 - **Kinded** : `x` is neither free, nor determined, nor future.
 
 # **NewOz**'s Standard Library
-//TODO generate it using https://delight-im.github.io/Javadoc-to-Markdown/, from the Javadoc of BuiltIns class
+//TODO generate it using https://delight-im.github.io/Javadoc-to-Markdown/, from the Javadoc of BuiltIns class\
 Every function or procedure built into the language is described on [this page](./Library.md), with a signature as follows :
 ```
-map(+xs, +p, ?ys)
+name(+xs, +p, ?ys)
 ```
 This signature specifies the number of arguments, their type, and their mode.
 - **Types** : the type of an argument is indicated by its name, using the abbreviations in the following table :
@@ -113,3 +113,31 @@ Additionally, these arguments can be prefixed as in `lowI`, which indicates that
 > **NewOz** mimics this behavior in its library as well.
 > For example, `isList(+x)` has an equivalent `isList(+x, ?b)`, in which the result of the operation is stored in `b` instead of being returned.\
 > **Be careful though :** when calling one of those "Procedure versions" of functions, the last parameter (`b` here) has to denote an **unassigned / free value (as in *val*)**. Passing an assigned *val*, or a *var* will result in an error at runtime !
+
+\
+\
+The rest of this document will provide code examples to describe common operations you can do in **NewOz**. We indicate **invalid** code pieces with an explanation.
+# Declaring data
+## Variables
+| Code snippet | Explanation for valid code | Explanation for erroneous code |
+|--------------|-------------|-------------|
+| `val a, b, c` | You can declare multiples variables on the same line | |
+| `val d=5 var e`<br>*is equivalent to :*<br>`val d=5`<br>`var e` | `d` is a *value* (final), `e` is a *variable*| |
+| `val d, var e` | | Commas can only be used to declare variables of the same *nature* |
+| `val d`<br>`d = 5`<br>*is equivalent to :*<br>`val d = 5` | You can split declaration and initialization | |
+| `val d=5`<br>`d = 6` | | Not valid since `d` is a *val* (final) |
+| `val l = [1,2,3]`<br>*is equivalent to :*<br>`val l = 1::2::3::nil` | Note that placing the closing `nil` is necessary for the 2nd syntax| |
+| `val t = 1#2#'c'` | Tuple declaration | |
+## Functions & Procedures
+| Code snippet | Explanation for valid code | Explanation for erroneous code |
+|--------------|-------------|-------------|
+| `fun sum(a, b) { (a+b) }` | Function declaration with 2 parameters. Body is between `{}`. Returned expression is between `()`. | |
+| `proc sum(a, b, c) { c=a+b}` | Procedure declaration. Procedures cannot return an expression.<br>*Note : in this example, c has to be a *var* or an unassigned *val* defined before !*| |
+| `fun lazy ints(n) {`<br>`(n::ints(n+1))`<br>`}` | Functions can be declared "lazy" (=*demand-driven*). Evaluation is done only when the result is needed. | |
+| `val s = fun $ (a, b) {`<br>`(a+b)`<br>`}`<br>*later, call :*<br>`x = s(3, 4)` | You can declare functions "anonymously". Functions and procedures are values (*higher-order programming*) | |
+## Basic structures
+| Code snippet | Explanation for valid code | Explanation for erroneous code |
+|--------------|-------------|-------------|
+| `if (a<b) {`<br>`(b-a)`<br>`} else if (a>b) {`<br>`(a-b)`<br>`} else {`<br>`0 }` | Conditional structures. All returned expression must be of the same type. | |
+| `match myList {`<br>`case (e::nil) => { browse(e) }`<br>`case (e::l2) && e==1 => { browse("One") }`<br>`else { browse("Error") }`<br>`}` | Switch statement | |
+| `for ` |

@@ -12,4 +12,5 @@ D := 1.2
 if ((({IsFloat @D} andthen {IsFloat @E}) orelse ({IsInt @D} andthen {IsInt @E}))) then
 Maximum := {Max @D @E}
 {Max @D @E Maximum}
+
 end

@@ -1,5 +1,7 @@
 package com.barassolutions;
 
+import com.barassolutions.util.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -53,9 +55,8 @@ public class LoopDeclaration extends AST {
    */
   public LoopDeclaration(int line, Variable var, Expression init, @Nullable Expression cond,
       @Nullable Expression step,
-      Expression end) {
+      @Nullable Expression end) {
     super(line);
-    assert (cond != null || step != null);
     this.iterator = var;
     this.initialValue = init;
     this.continuationCondition = cond;
@@ -82,35 +83,41 @@ public class LoopDeclaration extends AST {
    * Analyzing the loop declaration part means analyzing its components and evaluating the
    * expression types.
    *
-   * @param context context in which names are resolved.
+   * @param loopContext context in which names are resolved.
    * @return the analyzed (and possibly rewritten) AST subtree.
    */
   @Override
-  public AST analyze(Context context) {
-    Context loopContext = new Context(context);
+  public AST analyze(Context loopContext) {
     loopContext.addVariable(iterator);
 
     iterator = (Variable) iterator.analyze(loopContext);
 
     if (!generatorMode) {
-      initialValue = initialValue.analyze(context);
+      initialValue = initialValue.analyze(loopContext.parent());
       initialValue.type().mustMatchExpected(line(), Type.INT, Type.FLOAT);
 
       if (continuationCondition != null) {
-        continuationCondition = continuationCondition.analyze(context);
-        continuationCondition.type().mustMatchExpected(line(), initialValue.type());
+        continuationCondition = continuationCondition.analyze(loopContext.parent());
+        continuationCondition.type().mustMatchExpected(line(), Type.BOOLEAN);
       }
 
       if (stepValue != null) {
-        stepValue = stepValue.analyze(context);
+        stepValue = stepValue.analyze(loopContext.parent());
         stepValue.type().mustMatchExpected(line(), initialValue.type());
       }
 
-      endValue = endValue.analyze(context);
-      endValue.type().mustMatchExpected(line(), initialValue.type());
+      if (endValue != null) { //Form E1..E2[;E3]
+        endValue = endValue.analyze(loopContext.parent());
+        initialValue.type().mustMatchExpected(line(), Type.INT);
+        if(stepValue!=null) {
+          stepValue.type().mustMatchExpected(line(), Type.INT);
+        }
+        endValue.type().mustMatchExpected(line(), Type.INT);
+      }
     } else {
-      generator = generator.analyze(context);
-      generator.type().mustMatchExpected(line(), Type.LIST); //TODO problem : we never create expressions of type LIST
+      generator = generator.analyze(loopContext.parent());
+      generator.type().mustMatchExpected(line(),
+          Type.LIST); //TODO problem : we never create expressions of type LIST
     }
 
     return this;
@@ -139,24 +146,24 @@ public class LoopDeclaration extends AST {
         } else {
           output.token(TokenOz.TRUE);
         }
+
+        assert stepValue != null;
         output.token(TokenOz.SEMI);
-        if(stepValue!=null) {
-          stepValue.codegen(output);
-        }
+        stepValue.codegen(output);
+
         output.token(TokenOz.RPAREN);
       } else { //Form E1..E2[;E3]
         initialValue.codegen(output);
         output.token(TokenOz.DOTDOT);
         endValue.codegen(output);
         output.token(TokenOz.SEMI);
-        if(stepValue!=null) {
+        if (stepValue != null) {
           stepValue.codegen(output);
         } else {
           output.literal("1");
         }
       }
     }
-    output.space();
   }
 
   /**

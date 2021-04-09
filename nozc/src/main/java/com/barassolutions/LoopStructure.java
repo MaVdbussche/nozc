@@ -48,9 +48,10 @@ public class LoopStructure extends Statement {
    */
   @Override
   public AST analyze(Context context) {
-    loopDecs.forEach(l -> l = (LoopDeclaration) l.analyze(context));
+    Context loopContext = new Context(context);
+    loopDecs.forEach(l -> l = (LoopDeclaration) l.analyze(loopContext));
 
-    statement = (InStatement) statement.analyze(context);
+    statement = (InStatement) statement.analyze(loopContext);
     return this;
   }
 
@@ -68,6 +69,7 @@ public class LoopStructure extends Statement {
       output.space();
     });
     output.token(TokenOz.DO);
+    output.newLine();
     statement.codegen(output);
     output.token(TokenOz.END);
     output.newLine();

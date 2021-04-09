@@ -15,5 +15,6 @@ report/
 # Javadoc generated manually when writing documentation
 docs/Javadoc
 
+# Super-secret personal testing file...
 nozc/src/test/java/pass/Test.noz
 nozc/src/test/java/pass/Test.oz

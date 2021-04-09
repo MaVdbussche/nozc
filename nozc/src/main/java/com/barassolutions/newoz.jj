@@ -307,7 +307,7 @@ TOKEN:
  */
 InterStatement interStatement(): {
     int line = 0;
-    InStatement statement = null;
+    InStatement s = null;
     Statement aStatement = null;
     ArrayList<Statement> statements = new ArrayList<Statement>();
     InterStatement out = null;
@@ -316,9 +316,9 @@ InterStatement interStatement(): {
     try {
         //LOOKAHEAD( <DECLARE> inStatement() )
         <DECLARE> { line = token.beginLine; Logger.debug("Found an interStatement"); }
-        statement = inStatement()
+        s = inStatement()
         <EOF>
-        { out = new InterStatement(line, statement); } //Declare block
+        { out = new InterStatement(line, new InStatement(s.line(), s.decls(), s.statements(), true)); } //Declare block
       |
         //LOOKAHEAD( nestConStatement() )
         ( aStatement = nestConStatement()
@@ -465,7 +465,7 @@ private InStatement inStatement(): {
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
     }
-    { return new InStatement(line, decls, statements);}//, expression); }
+    { return new InStatement(line, decls, statements, false);}//, expression); }
 }
 
 /**
@@ -1065,10 +1065,10 @@ private Expression nestDecAnonym(): {
           <DEF> { line = token.beginLine; }
           aMethodHead = methHead()
           [<ASSIGN> <VARIABLE> { name = new Variable(line, token.image, true, false); }]
-          ( LOOKAHEAD( inExpression() )
-            expression = inExpression()
-          |
-            LOOKAHEAD( inStatement() )
+          ( //LOOKAHEAD( inExpression() )
+            //expression = inExpression()
+          //| //TODO find a way to re-add this later-on
+            //LOOKAHEAD( inStatement() )
             statement = inStatement()
           )
           { out = new MethodDef(line, aMethodHead, name, expression, statement); }
@@ -1942,24 +1942,25 @@ private LoopDeclaration loopDeclaration(): {
 {
     try {
         LOOKAHEAD(<VARIABLE> <IN> expression() <DOTDOT> )
-        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, false); }
+        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, true, false); }
           <IN> init = expression()
           <DOTDOT> end = expression()
+          { out = new LoopDeclaration(line, var, init, null, null, end); }
           [
             <SEMI> step = expression()
+            { out = new LoopDeclaration(line, var, init, null, step, end); }
           ]
-          {out = new LoopDeclaration(line, var, init, null, step, end); }
       | LOOKAHEAD( <VARIABLE> <IN> expression() <SEMI> )
-        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, false); }
+        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, true, false); }
           <IN> init = expression()
           <SEMI> step = expression()
+          { out = new LoopDeclaration(line, var, init, null, step, null); }
           [
             <SEMI> end  = expression()
-            { cond=step; step=end; }
+            { out = new LoopDeclaration(line, var, init, step, end, null); } // See http://mozart2.org/mozart-v1/doc-1.4.0/loop/node1.html#chapter.official
           ]
-          { out = new LoopDeclaration(line, var, init, cond, step, null); }
       | LOOKAHEAD( <VARIABLE> <IN> expression() )
-        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, false); }
+        <VARIABLE> { line = token.beginLine; var = new Variable(line, token.image, true, true, false); }
           <IN> generator = expression()
           { out = new LoopDeclaration(line, var, generator); }
     }
@@ -2041,7 +2042,7 @@ private ClassDescriptor classDescriptor(): {
  * Parse a method head. This can be seen as its signature
  *
  * <pre>
- *   methHead ::= (variableStrict | variable ) //variableStrict => private, variable => public
+ *   methHead ::= (variableStrict | variable) //variableStrict => private, variable => public
  *                  LPAREN [methArg {COMMA methArg} [COMMA ELLIPSIS]] RPAREN
  * </pre>
  *
@@ -2095,6 +2096,7 @@ private MethodArg methArg(): {
     Feature feature = null;
     String name = null;
     Expression defaultValue = null;
+    {Logger.debug("Entering methArg()");}
 }
 {
     try {
@@ -2103,7 +2105,7 @@ private MethodArg methArg(): {
         <COLON>
         ]
         (
-          <VARIABLE> { name = token.image; }
+          <VARIABLE> { name = token.image; Logger.debug("Found methArg called "+name); }
           | <UNDERSCORE> { name = token.image; }
         )
         [

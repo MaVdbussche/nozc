@@ -10,7 +10,10 @@ B := 90
 E := @A
 D := 1.2
 if ((({IsFloat @D} andthen {IsFloat @E}) orelse ({IsInt @D} andthen {IsInt @E}))) then
+local
+M
+in
+{Max @D @E M}
 Maximum := {Max @D @E}
-{Max @D @E Maximum}
-
+end
 end

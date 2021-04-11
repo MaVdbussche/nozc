@@ -50,12 +50,21 @@ public class Variable extends Pattern implements Lhs {
     return constant;
   }
 
+  public boolean isAssigned() {
+    return isAssigned;
+  }
+
   public boolean readMode() {
     return readMode;
   }
 
   public boolean usedAsPattern() {
     return usedAsPattern;
+  }
+
+  @Override
+  public String toString() {
+    return name;
   }
 
   @Override

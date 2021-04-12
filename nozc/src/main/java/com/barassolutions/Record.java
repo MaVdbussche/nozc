@@ -48,7 +48,7 @@ public class Record extends Pattern {
         interStatement.reportSemanticError(line(),
             "Could not find record for: <name:"+name+">");
       } else {
-        members.values().forEach(v -> v = (Expression) v.analyze(context));
+        members.values().forEach(v -> v = v.analyze(context));
       }
     } else {
       patterns.values().forEach(p -> p = (Pattern) p.analyze(context));

@@ -1,9 +1,9 @@
 declare
-A={NewCell 0}
-D={NewCell _}
-Maximum={NewCell _}
 B={NewCell _}
+D={NewCell _}
 E={NewCell _}
+Maximum={NewCell _}
+A={NewCell 0}
 C={Sin @B}
 in
 B := 90

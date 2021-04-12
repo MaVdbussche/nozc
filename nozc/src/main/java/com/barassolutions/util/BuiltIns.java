@@ -11,11 +11,17 @@ import org.jetbrains.annotations.Nullable;
 
 //TODO all implicit functions/procs in Oz (Browse etc.)
 // TODO http://mozart2.org/mozart-v1/doc-1.4.0/base/node7.html has been partially skipped, to discuss
+// TODO http://mozart2.org/mozart-v1/doc-1.4.0/base/node9.html has been skipped, to discuss
+// http://mozart2.org/mozart-v1/doc-1.4.0/base/cell.html#section.proccells.cells was intentionally dropped, as Cells don't exist in NewOz.
+// http://mozart2.org/mozart-v1/doc-1.4.0/base/chunk.html#section.chunks.general was dropped, at least in the first release
+// http://mozart2.org/mozart-v1/doc-1.4.0/base/weakdictionary.html#section.chunks.weakdictionaries was dropped, at least in the first release
+// http://mozart2.org/mozart-v1/doc-1.4.0/base/bitarray.html#section.chunks.bitarrays was dropped, at least in the first release
+// TODO http://mozart2.org/mozart-v1/doc-1.4.0/base/functor.html#section.chunks.functors was dropped for now, because of its complexity
 
 /**
  * An enum containing all the functions, procedures, classes and functors known by the compiler.
  * They can be considered as built into the language itself, meaning they are available to be
- * referenced from any scope in your NewOz program.
+ * referenced from any scope in any NewOz program.
  */
 public enum BuiltIns {
 
@@ -129,7 +135,7 @@ public enum BuiltIns {
           new Variable(-1, "r2", true, false)),
       null, null),
   /**
-   * <code>adjoinlist(+r1, +ts)</code>
+   * <code>adjoinList(+r1, +ts)</code>
    * <p>
    * Returns the result of adjoining to <code>r1</code> all entries of <code>ts</code>, a finite
    * list of pairs whose first components are literals or integers, representing features. Features
@@ -155,24 +161,47 @@ public enum BuiltIns {
           new Variable(-1, "r2", true, false)),
       null, null),
   /**
-   * <code>all(+r, +f)</code>
+   * <code>allList(+xs, +f)</code>
    * <p>
-   * Tests whether the unary boolean function <code>f</code> yields <code>code</code> when applied
+   * Tests whether the unary boolean function <code>f</code> yields <code>true</code> when applied
+   * to all elements of <code>xs</code>. Stops at the first element for which <code>f</code> yields
+   * <code>false</code>.
+   */
+  allList("List.all", "allList", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false)),
+      null, null),
+  /**
+   * <code>allList(+xs, +f, ?b)</code>
+   * <p>
+   * Procedure version of <code>allList(xs, f)</code>.
+   */
+  allListP("List.all", "allList", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
+   * <code>allRecord(+r, +f)</code>
+   * <p>
+   * Tests whether the unary boolean function <code>f</code> yields <code>true</code> when applied
    * to all fields of <code>r</code>. Stops at the first field for which <code>f</code> yields
    * <code>false</code>. The fields are tested in the order given by <code>arity()</code> (which
    * see).
    */
-  all("Record.all", "all", BuiltInType.FUNCTION,
+  allRecord("Record.all", "allRecord", BuiltInType.FUNCTION,
       Arrays.asList(
           new Variable(-1, "r", true, false),
           new Variable(-1, "f", true, false)),
       null, null),
   /**
-   * <code>all(+r, +f, ?b)</code>
+   * <code>allRecord(+r, +f, ?b)</code>
    * <p>
    * Procedure version of <code>all(r, f)</code>.
    */
-  allP("Record.all", "all", BuiltInType.PROCEDURE,
+  allRecordP("Record.all", "allRecord", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "r", true, false),
           new Variable(-1, "f", true, false),
@@ -258,6 +287,18 @@ public enum BuiltIns {
           new Variable(-1, "t3", true, false)),
       null, null),
   /**
+   * <code>apply(+p, +xs)</code>
+   * <p>
+   * Applies the procedure <code>p</code> to the arguments given by the elements of the list
+   * <code>xs</code>, provided that <code>procArity(p) == length(xs)</code>. <code>p</code> has to
+   * be a procedure (i.e., not a function).
+   */
+  apply("Procedure.apply", "apply", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "p", true, false),
+          new Variable(-1, "xs", true, false)),
+      null, null),
+  /**
    * <code>arity(+r)</code>
    * <p>
    * Returns the arity of <code>r</code>. The arity of <code>r</code> is the list of its features,
@@ -277,6 +318,29 @@ public enum BuiltIns {
       Arrays.asList(
           new Variable(-1, "r", true, false),
           new Variable(-1, "lis", true, false)),
+      null, null),
+  /**
+   * <code>arrayToRecord(+l, +a)</code>
+   * <p>
+   * Returns a new record <code>r</code> with label <code>l</code> that contains as features the
+   * integers between <code>low(a)</code> and <code>high(a)</code> and with the corresponding
+   * fields.
+   */
+  arrayToRecord("Array.toRecord", "arrayToRecord", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "l", true, false),
+          new Variable(-1, "a", true, false)),
+      null, null),
+  /**
+   * <code>arrayToRecord(+l, +a, ?r)</code>
+   * <p>
+   * Procedure version of <code>arrayToRecord(l, a)</code>.
+   */
+  arrayToRecordP("Array.toRecord", "arrayToRecord", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "l", true, false),
+          new Variable(-1, "a", true, false),
+          new Variable(-1, "r", true, false)),
       null, null),
   /**
    * <code>asin(+f1)</code>
@@ -386,6 +450,62 @@ public enum BuiltIns {
       Collections.singletonList(new Variable(-1, "ToPrint", true, false)),
       null, null),
   /**
+   * <code>byNeed(+fp)</code>
+   * <p>
+   * Concurrently evaluates <code>fp(x)</code> as soon as <code>x</code>, the returned value,
+   * becomes needed. It can be defined as follows :
+   * <pre><code>
+   * defproc byNeed(p, x) {
+   *  thread {waitNeeded(x) p(x)}
+   * }
+   * </code></pre>
+   */
+  byNeed("ByNeed", "byNeed", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "fp", true, false)),
+      null, null),
+  /**
+   * <code>byNeed(+fp, ?x)</code>
+   * <p>
+   * Procedure version of <code>byNeed(fp)</code>
+   */
+  byNeedP("ByNeed", "byNeed", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "fp", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>byNeedFuture(p)</code>
+   * <p>
+   * Creates a by-need computation that evaluates <code>fp</code>, and then returns a future
+   * <code>x</code> of its result. If the call to <code>fp</code> raises an expression
+   * <code>e</code>, then <code>x</code> is bound to a failed value (see <code>failed()</code>)
+   * that encapsulates <code>e</code>. It can be defined as follows :
+   * <pre><code>
+   *  defproc byNeedFuture(fp) {
+   *    future(
+   *      byNeed(
+   *        fun $() {try {fp()} catch {case e => failed(e)}}
+   *      )
+   *    )
+   *  }
+   * </code></pre>
+   */
+  byNeedFuture("ByNeedFuture", "byNeedFuture", BuiltInType.FUNCTION,
+      Collections.singletonList(
+          new Variable(-1, "p", true, false)),
+      null, null),
+  /**
+   * <code>byNeedFuture(fp, ?x)</code>
+   * <p>
+   * Procedure version of <code>byNeedFuture(fp)</code>
+   */
+  byNeedFutureP("ByNeedFuture", "byNeedFuture", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "fp", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
    * <code>ceil(+f1)</code>
    * <p>
    * Returns the ceiling of <code>f1</code> (rounding towards positive infinity).
@@ -405,29 +525,110 @@ public enum BuiltIns {
           new Variable(-1, "f2", true, false)),
       null, null),
   /**
-   * <code>clone(+r1)</code>
+   * <code>cloneArray(+a)</code>
+   * <p>
+   * Returns a new array with the same bounds and contents as <code>a</code>.
+   */
+  cloneArray("Array.clone", "cloneArray", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "a", true, false)),
+      null, null),
+  /**
+   * <code>cloneArray(+a1, ?a2)</code>
+   * <p>
+   * Procedure version of <code>cloneArray(a1)</code>.
+   */
+  cloneArrayP("Array.clone", "cloneArray", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "a1", true, false),
+          new Variable(-1, "a2", true, false)),
+      null, null),
+  /**
+   * <code>cloneDictionary(+dictionary)</code>
+   * <p>
+   * Returns a new dictionary containing the currently valid keys and corresponding items of
+   * <code>dictionary</code>.
+   */
+  cloneDictionary("Dictionary.clone", "cloneDictionary", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "dictionary", true, false)),
+      null, null),
+  /**
+   * <code>cloneDictionary(+dictionary1, ?dictionary2)</code>
+   * <p>
+   * Procedure version of <code>cloneDictionary(dictionary1)</code>.
+   */
+  cloneDictionaryP("Dictionary.clone", "cloneDictionary", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary1", true, false),
+          new Variable(-1, "dictionary2", true, false)),
+      null, null),
+  /**
+   * <code>cloneRecord(+r1)</code>
    * <p>
    * Returns a new record with the same label (name) and features as <code>r1</code> and fresh
    * variables at every field.
    */
-  clone("Record.clone", "clone", BuiltInType.FUNCTION,
+  cloneRecord("Record.clone", "cloneRecord", BuiltInType.FUNCTION,
       Collections.singletonList(new Variable(-1, "r1", true, false)),
       null, null),
   /**
-   * <code>clone(+r1, ?r2)</code>
+   * <code>cloneRecord(+r1, ?r2)</code>
    * <p>
-   * Procedure version of <code>clone(r1)</code>.
+   * Procedure version of <code>cloneRecord(r1)</code>.
    */
-  cloneP("Record.clone", "clone", BuiltInType.PROCEDURE,
+  cloneRecordP("Record.clone", "cloneRecord", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "r2", true, false)),
       null, null),
   /**
+   * <code>condExchange(+dictionary, +li, defVal, oldVal, newVal)</code>
+   * <p>
+   * If <code>li</code>is a valid key of <code>dictionary</code>, then returns the current value of
+   * <code>dictionary</code> under key <code>li</code> as item <code>oldVal</code>. Otherwise,
+   * returns <code>defVal</code> as item <code>oldVal</code>. Sets the value of
+   * <code>dictionary</code> under key <code>li</code> to be <code>newVal</code>.
+   */
+  condExchange("Dictionary.condExchange", "condExchange", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "li", true, false),
+          new Variable(-1, "defVal", true, false),
+          new Variable(-1, "oldVal", true, false),
+          new Variable(-1, "newVal", true, false)),
+      null, null),
+  /**
+   * <code>condGet(+dictionary, +li, defVal)</code>
+   * <p>
+   * Returns the item <code>x</code> of <code>dictionary</code> under key <code>li</code>, if
+   * <code>li</code>is a valid key of <code>dictionary</code>. Otherwise, returns
+   * <code>defVal</code>.
+   */
+  condGet("Dictionary.condGet", "condGet", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "li", true, false),
+          new Variable(-1, "defVal", true, false)),
+      null, null),
+  /**
+   * <code>condGet(+dictionary, +li, defVal, ?x)</code>
+   * <p>
+   * Procedure version of <code>condSelect(dictionary, li, defVal)</code>.
+   */
+  condGetP("Dictionary.condGet", "condGet", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "li", true, false),
+          new Variable(-1, "defVal", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
    * <code>condSelect(+rc, +li, x)</code>
    * <p>
-   * Returns the field of record <code>rc</code> at feature <code>li</code>, if <code>rc</code> has
-   * feature <code>li</code>. Otherwise, return <code>x</code>.
+   * Returns the field of <code>rc</code> at feature <code>li</code>, if <code>rc</code> has
+   * feature
+   * <code>li</code>. Otherwise, return <code>x</code>.
+   * <p>
+   * This operation if defined on records, tuples, arrays, and dictionaries.
    */
   condSelect("CondSelect", "condSelect", BuiltInType.FUNCTION,
       Arrays.asList(
@@ -440,7 +641,7 @@ public enum BuiltIns {
    * <p>
    * Procedure version of <code>condSelect(rc, li, x)</code>.
    */
-  condSelectP("HasFeature", "hasFeature", BuiltInType.PROCEDURE,
+  condSelectP("CondSelect", "condSelect", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "rc", true, false),
           new Variable(-1, "li", true, false),
@@ -486,9 +687,32 @@ public enum BuiltIns {
           new Variable(-1, "f2", true, false)),
       null, null),
   /**
+   * <code>dictionaryToRecord(+l, +dictionary)</code>
+   * <p>
+   * Returns a new record <code>r</code> with label <code>l</code> whose features and their fields
+   * correspond to the keys and their entries in <code>dictionary</code>.
+   */
+  dictionaryToRecord("Dictionary.toRecord", "dictionaryToRecord", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "l", true, false),
+          new Variable(-1, "dictionary", true, false)),
+      null, null),
+  /**
+   * <code>dictionaryToRecord(+l, +dictionary, ?r)</code>
+   * <p>
+   * Procedure version of <code>dictionaryToRecord(l, dictionary)</code>.
+   */
+  dictionaryToRecordP("Dictionary.toRecord", "dictionaryToRecord", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "l", true, false),
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "r", true, false)),
+      null, null),
+  /**
    * <code>drop(+xs, +i)</code>
    * <p>
-   * Returns the list <code>xs</code> with the first <code>i</code> elements removed, os <code>nil</code> if it is shorter.
+   * Returns the list <code>xs</code> with the first <code>i</code> elements removed, os
+   * <code>nil</code> if it is shorter.
    */
   drop("List.drop", "drop", BuiltInType.FUNCTION,
       Arrays.asList(
@@ -507,25 +731,94 @@ public enum BuiltIns {
           new Variable(-1, "ys", true, false)),
       null, null),
   /**
-   * <code>dropWhile(+r1, +f)</code>
+   * <code>dropWhileList(+xs, +f)</code>
    * <p>
-   * See takeDropWhile()
+   * See takeDropWhileList()
    */
-  dropWhile("Record.dropWhile", "dropWhile", BuiltInType.FUNCTION,
+  dropWhileList("List.dropWhile", "dropWhileList", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false)),
+      null, null),
+  /**
+   * <code>dropWhileList(+xs, +f, ?ys)</code>
+   * <p>
+   * See takeDropWhileList()
+   */
+  dropWhileListP("List.dropWhile", "dropWhileList", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "ys", true, false)),
+      null, null),
+  /**
+   * <code>dropWhileRecord(+r1, +f)</code>
+   * <p>
+   * See takeDropWhileRecord()
+   */
+  dropWhileRecord("Record.dropWhile", "dropWhileRecord", BuiltInType.FUNCTION,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "f", true, false)),
       null, null),
   /**
-   * <code>dropWhile(+r1, +f, ?r2)</code>
+   * <code>dropWhileRecord(+r1, +f, ?r2)</code>
    * <p>
-   * See takeDropWhile()
+   * See takeDropWhileRecord()
    */
-  dropWhileP("Record.dropWhile", "dropWhile", BuiltInType.PROCEDURE,
+  dropWhileRecordP("Record.dropWhile", "dropWhileRecord", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "f", true, false),
           new Variable(-1, "r2", true, false)),
+      null, null),
+  /**
+   * <code>entries(+dictionary)</code>
+   * <p>
+   * Returns the list of current entries of <code>dictionary</code>. An entry is a pair
+   * <code>(li#x)</code>, where <code>li</code> is a valid key of <code>dictionary</code> and
+   * <code>x</code> the corresponding item.
+   */
+  entries("Dictionary.entries", "entries", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "dictionary", true, false)),
+      null, null),
+  /**
+   * <code>entries(+dictionary, ?ts)</code>
+   * <p>
+   * Procedure version of <code>entries(dictionary)</code>.
+   */
+  entriesP("Dictionary.entries", "entries", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "ts", true, false)),
+      null, null),
+  /**
+   * <code>exchangeArray(+array, +i, oldVal, newVal)</code>
+   * <p>
+   * Returns the current value of <code>array</code> under key <code>i</code> as item
+   * <code>oldVal</code> and updates the value of <code>array</code> under key <code>i</code> to be
+   * <code>newVal</code>.
+   */
+  exchangeArray("Array.exchange", "exchangeArray", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "array", true, false),
+          new Variable(-1, "i", true, false),
+          new Variable(-1, "oldVal", true, false),
+          new Variable(-1, "newVal", true, false)),
+      null, null),
+  /**
+   * <code>exchangeDictionary(+dictionary, +li, oldVal, newVal)</code>
+   * <p>
+   * Returns the current value of <code>dictionary</code> under key <code>li</code> as item
+   * <code>oldVal</code> and updates the value of <code>dictionary</code> under key <code>li</code>
+   * to be <code>newVal</code>.
+   */
+  exchangeDictionary("Dictionary.exchange", "exchangeDictionary", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "li", true, false),
+          new Variable(-1, "oldVal", true, false),
+          new Variable(-1, "newVal", true, false)),
       null, null),
   /**
    * <code>exp(+f1)</code>
@@ -547,23 +840,71 @@ public enum BuiltIns {
           new Variable(-1, "f2", true, false)),
       null, null),
   /**
-   * <code>filter(+r, +f)</code>
+   * <code>failed(e)</code>
+   * <p>
+   * Creates a failed value <code>x</code> encapsulating exception <code>e</code>.
+   * Whenever a statement is needs <code>x</code>, in particular, whenever a thread synchronises on <code>x</code>,
+   * exception term <code>e</code> is raised.
+   * This is convenient in concurrent designs;
+   * if a concurrent generator encounters a problem while computing a value,
+   * it may catch the corresponding exception, package it as a failed value and return the latter instead.
+   * Thus eac consumer will be able to synchronously handle the exception when it attempts to use
+   * the "failed" value.
+   */
+  failed("Value.failed", "failed", BuiltInType.FUNCTION,
+      Collections.singletonList(
+          new Variable(-1, "e", true, false)),
+      null, null),
+  /**
+   * <code>failed(e, ?x)</code>
+   * <p>
+   * Procedure version of <code>failed(e)</code>
+   */
+  failedP("Value.failed", "failed", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "e", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>filterList(+xs, +f)</code>
+   * <p>
+   * Returns the list which contains all the elements of <code>xs</code>, for which the unary
+   * boolean function <code>f</code> yields <code>true</code>. The ordering is preserved.
+   */
+  filterList("List.filter", "filterList", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false)),
+      null, null),
+  /**
+   * <code>filterList(+xs, +f, ?ys)</code>
+   * <p>
+   * Procedure version of <code>filterList(xs, f)</code>.
+   */
+  filterListP("List.filter", "filterList", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "ys", true, false)),
+      null, null),
+  /**
+   * <code>filterRecord(+r, +f)</code>
    * <p>
    * Returns the record which contains all the features and fields of the record <code>r</code>, for
    * which the unary boolean function <code>f</code> applied to the fields yields
    * <code>true</code>.
    */
-  filter("Record.filter", "filter", BuiltInType.FUNCTION,
+  filterRecord("Record.filter", "filterRecord", BuiltInType.FUNCTION,
       Arrays.asList(
           new Variable(-1, "r", true, false),
           new Variable(-1, "f", true, false)),
       null, null),
   /**
-   * <code>filter(+r1, +f, ?r2)</code>
+   * <code>filterRecord(+r1, +f, ?r2)</code>
    * <p>
-   * Procedure version of <code>filter(r1, f)</code>.
+   * Procedure version of <code>filterRecord(r1, f)</code>.
    */
-  filterP("Record.filter", "filter", BuiltInType.PROCEDURE,
+  filterRecordP("Record.filter", "filterRecord", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "f", true, false),
@@ -650,85 +991,312 @@ public enum BuiltIns {
           new Variable(-1, "f2", true, false)),
       null, null),
   /**
-   * <code>foldL(+r, +f, x)</code>
+   * <code>foldListL(+xs, +f, x)</code>
+   * <p>
+   * Used for folding the elements of <code>xs</code> by applying the binary function
+   * <code>f</code>.
+   * <p>
+   * Applying the left folding function <code>foldListL([X1,... Xn], f, x)</code> reduces to
+   * <code>f(...f(f(x, X1), X2), Xn)</code>. The first actual argument of <code>f</code> is the
+   * accumulator in which the result of the previous application, or the start value <code>z</code>,
+   * is passed. The second actual argument is an element of <code>xs</code>.
+   * <p>
+   * Besides the left folding function there exists a right folding variant. The application
+   * <code>foldListR([X1,... Xn], f, x)</code> reduces to <code>f(X1, f(X2, ...f(Xn, x)))</code>.
+   * The first actual argument of <code>f</code> is an element of <code>xs</code>; the second actual
+   * argument is the accumulator in which the result of the previous application or the start value
+   * <code>x</code> is passed.
+   * <p>
+   * For example,
+   * <code>foldListL([1,2,3], fun $(xr, x){(x::xr)}, nil)</code> yields the output
+   * <code>(3::2::1::nil)</code>, whereas <code>foldListR([b,c,d], fun $(x, xr){(x#r)}, a)</code>
+   * yields the output <code>(b#(c#(d#a)))</code>.
+   */
+  foldListL("List.foldL", "foldListL", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "X", true, false)),
+      null, null),
+  /**
+   * <code>foldListL(+xs, +f, x, ?y)</code>
+   * <p>
+   * Procedure version of <code>foldListL(xs, f, x)</code>.
+   */
+  foldListLP("List.foldL", "foldListL", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "y", true, false)),
+      null, null),
+  /**
+   * <code>foldListR(+xs, +f, x)</code>
+   * <p>
+   * See foldListL().
+   */
+  foldListR("List.foldR", "foldListR", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "X", true, false)),
+      null, null),
+  /**
+   * <code>foldListR(+xs, +f, x, ?y)</code>
+   * <p>
+   * Procedure version of <code>foldListR(xs, f, x)</code>.
+   */
+  foldListRP("List.foldR", "foldListR", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "y", true, false)),
+      null, null),
+  /**
+   * <code>foldRecordL(+r, +f, x)</code>
    * <p>
    * Used for folding the fields of <code>r</code> by applying the binary function
    * <code>f</code>.
    * <p>
    * Supposing that <code>r</code> has the arity [F1, ... Fn], applying the left folding function
-   * <code>foldL(r, f, x)</code> reduces to <code>f(...f(f(x, r.F1), r.F2), r.Fn)</code>. The first
-   * actual argument of <code>f</code> is the accumulator in which the result of the previous
+   * <code>foldRecordL(r, f, x)</code> reduces to <code>f(...f(f(x, r.F1), r.F2), r.Fn)</code>. The
+   * first actual argument of <code>f</code> is the accumulator in which the result of the previous
    * application, or the start value of <code>x</code>, is passed. The second actual argument is the
    * field of <code>r</code>.
    * <p>
    * Besides the left folding function there exists a right folding variant. The application
-   * <code>foldR(r, f, x)</code> reduces to
+   * <code>foldRecordR(r, f, x)</code> reduces to
    * <code>f(r.F1, f(r.F2, ...f(r.Fn, x)))</code>. The first actual argument of <code>f</code> is a
    * field of <code>r</code>; the second actual argument is the accumulator in which the result of
    * the previous application or the start value <code>x</code> is passed.
    * <p>
    * For example,
-   * <code>foldL('a(3, a:7, b:4), fun $(xr, x){(x::xr)}, nil)</code> yields the output <code>[4, 7,
-   * 3]</code>, whereas <code>foldR('a(3, a:7, b:4), fun $(x, xr){(x::xr)}, nil)</code> yields the
-   * output <code>[3, 7, 4]</code>.
+   * <code>foldRecordL('a(3, a:7, b:4), fun $(xr, x){(x::xr)}, nil)</code> yields the output
+   * <code>[4, 7,
+   * 3]</code>, whereas <code>foldRecordR('a(3, a:7, b:4), fun $(x, xr){(x::xr)}, nil)</code> yields
+   * the output <code>[3, 7, 4]</code>.
    */
-  foldL("Record.foldL", "foldL", BuiltInType.FUNCTION,
+  foldRecordL("Record.foldL", "foldRecordL", BuiltInType.FUNCTION,
       Arrays.asList(
-          new Variable(-1, "r1", true, false),
+          new Variable(-1, "r", true, false),
           new Variable(-1, "f", true, false),
           new Variable(-1, "X", true, false)),
       null, null),
   /**
-   * <code>foldL(+r, +f, x, ?y)</code>
+   * <code>foldRecordL(+r, +f, x, ?y)</code>
    * <p>
-   * Procedure version of <code>foldL(r, f, x)</code>.
+   * Procedure version of <code>foldRecordL(r, f, x)</code>.
    */
-  foldLP("Record.foldL", "foldL", BuiltInType.PROCEDURE,
+  foldRecordLP("Record.foldL", "foldRecordL", BuiltInType.PROCEDURE,
       Arrays.asList(
-          new Variable(-1, "r1", true, false),
+          new Variable(-1, "r", true, false),
           new Variable(-1, "f", true, false),
           new Variable(-1, "x", true, false),
           new Variable(-1, "y", true, false)),
       null, null),
   /**
-   * <code>foldR(+r, +f, x)</code>
+   * <code>foldRecordR(+r, +f, x)</code>
    * <p>
-   * See foldL().
+   * See foldRecordL().
    */
-  foldR("Record.foldR", "foldR", BuiltInType.FUNCTION,
+  foldRecordR("Record.foldR", "foldRecordR", BuiltInType.FUNCTION,
       Arrays.asList(
-          new Variable(-1, "r1", true, false),
+          new Variable(-1, "r", true, false),
           new Variable(-1, "f", true, false),
           new Variable(-1, "X", true, false)),
       null, null),
   /**
-   * <code>foldR(+r, +f, x, ?y)</code>
+   * <code>foldRecordR(+r, +f, x, ?y)</code>
    * <p>
-   * Procedure version of <code>foldR(r, f, x)</code>.
+   * Procedure version of <code>foldRecordR(r, f, x)</code>.
    */
-  foldRP("Record.foldR", "foldR", BuiltInType.PROCEDURE,
+  foldRecordRP("Record.foldR", "foldRecordR", BuiltInType.PROCEDURE,
       Arrays.asList(
-          new Variable(-1, "r1", true, false),
+          new Variable(-1, "r", true, false),
           new Variable(-1, "f", true, false),
           new Variable(-1, "x", true, false),
           new Variable(-1, "y", true, false)),
       null, null),
   /**
-   * <code>forAll(+r, +p)</code>
+   * <code>foldTailL(+xs, +f, x)</code>
+   * <p>
+   * Used for folding all non-<code>nil</code> tails of <code>xs</code> by applying the binary
+   * function
+   * <code>f</code>, i.e. application of the left folding function <code>foldTailL([X1,... Xn], f,
+   * z)</code> reduces to <code>f(...f(f(z, [X1,...XN]), [X2,...Xn]), ...Xn])</code>.
+   * <p>
+   * The right folding function is analogous.
+   */
+  foldTailL("List.foldLTail", "foldTailL", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "X", true, false)),
+      null, null),
+  /**
+   * <code>foldTailL(+xs, +f, x, ?y)</code>
+   * <p>
+   * Procedure version of <code>foldTailL(xs, f, x)</code>.
+   */
+  foldTailLP("List.foldLTail", "foldTailL", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "y", true, false)),
+      null, null),
+  /**
+   * <code>foldTailR(+xs, +f, x)</code>
+   * <p>
+   * See foldTailL().
+   */
+  foldTailR("List.foldRTail", "foldTailR", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "X", true, false)),
+      null, null),
+  /**
+   * <code>foldTailR(+xs, +f, x, ?y)</code>
+   * <p>
+   * Procedure version of <code>foldTailR(xs, f, x)</code>.
+   */
+  foldTailRP("List.foldRTail", "foldTailR", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "y", true, false)),
+      null, null),
+  /**
+   * <code>forAllList(+xs, +p)</code>
+   * <p>
+   * Applies the unary procedure <code>p</code> to each element of <code>xs</code>, i.e., the
+   * application <code>forAllList([X1,...Xn], p)</code> reduces to the sequence of statements
+   * <code>p(X1) ... p(Xn)</code>.
+   */
+  forAllList("List.forAll", "forAllList", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "p", true, false)),
+      null, null),
+  /**
+   * <code>forAllRecord(+r, +p)</code>
    * <p>
    * Applies the unary procedure <code>p</code> to each field of <code>r</code>. Suppose that the
    * arity of <code>r</code> is [F1, ... Fn]. The application <code>forAll(r, p)</code> reduces to
    * the sequence of statements <code>p(r.F1) ... p(r.Fn)</code>.
    */
-  forAll("Record.forAll", "forAll", BuiltInType.FUNCTION,
+  forAllRecord("Record.forAll", "forAllRecord", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "r", true, false),
           new Variable(-1, "p", true, false)),
       null, null),
   /**
+   * <code>forAllTail(+xs, +p)</code>
+   * <p>
+   * Applies the unary procedure <code>p</code> to each non-<code>nil</code> tail of
+   * <code>xs</code>, i.e., the application <code>forAllTail([X1,...Xn], p)</code> reduces to the
+   * sequence of statements <code>p([X1,...Xn]) p([X2,...Xn])... p([Xn])</code>.
+   */
+  forAllTail("List.forAllTail", "forAllTail", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "p", true, false)),
+      null, null),
+  /**
+   * <code>future(x)</code>
+   * <p>
+   * Returns a future <code>y</code> for <code>x</code>, i.e. a read-only placeholder for
+   * <code>x</code>. If <code>y</code> becomes needed, <code>x</code> is made needed too.
+   */
+  future("Value.'!!'", "future", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>future(x, ?y)</code>
+   * <p>
+   * Procedure version of <code>future(x)</code>.
+   */
+  futureP("Value.'!!'", "future", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "y", true, false)),
+      null, null),
+  /**
+   * <code>getArray(+array, +i)</code>
+   * <p>
+   * Returns the item of <code>array</code> under key <code>i</code>.
+   */
+  getArray("Get", "getArray", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "array", true, false),
+          new Variable(-1, "i", true, false)),
+      null, null),
+  /**
+   * <code>getArray(+array, +i, ?x)</code>
+   * <p>
+   * Procedure version of <code>getArray(array, i)</code>.
+   */
+  getArrayP("Get", "getArray", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "array", true, false),
+          new Variable(-1, "i", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>getAttr(+k, +li)</code>
+   * <p>
+   * Returns the initial value <code>x</code> for attribute <code>li</code> as defined by class
+   * <code>k</code>.
+   * <p>
+   * For example, the call <code>getAttr(class $ attr a=4 {...}, a)</code> returns <code>4</code>.
+   */
+  getAttr("Class.getAttr", "getAttr", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "k", true, false),
+          new Variable(-1, "li", true, false)),
+      null, null),
+  /**
+   * <code>getAttr(+k, +li, ?x)</code>
+   * <p>
+   * Procedure version of <code>getAttr(k, li)</code>.
+   */
+  getAttrP("Class.getAttr", "getAttr", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "k", true, false),
+          new Variable(-1, "li", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>getDictionary(+dictionary, +i)</code>
+   * <p>
+   * Returns the item of <code>dictionary</code> under key <code>i</code>.
+   */
+  getDictionary("Dictionary.get", "getDictionary", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "i", true, false)),
+      null, null),
+  /**
+   * <code>getDictionary(+dictionary, +i, ?x)</code>
+   * <p>
+   * Procedure version of <code>getDictionary(dictionary, i)</code>.
+   */
+  getDictionaryP("Dictionary.get", "getDictionary", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "i", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
    * <code>hasFeature(+rc, +li)</code>
    * <p>
-   * Tests whether the record <code>rc</code> has feature <code>li</code>.
+   * Tests whether <code>rc</code> has feature <code>li</code>.
+   * <p>
+   * This operation if defined on records, tuples, arrays, and dictionaries.
    */
   hasFeature("HasFeature", "hasFeature", BuiltInType.FUNCTION,
       Arrays.asList(
@@ -745,6 +1313,25 @@ public enum BuiltIns {
           new Variable(-1, "rc", true, false),
           new Variable(-1, "li", true, false),
           new Variable(-1, "b", true, false)),
+      null, null),
+  /**
+   * <code>high(+array)</code>
+   * <p>
+   * Returns the upper bound of the key range of <code>array</code>.
+   */
+  high("Array.high", "high", BuiltInType.FUNCTION,
+      Collections.singletonList(
+          new Variable(-1, "array", true, false)),
+      null, null),
+  /**
+   * <code>high(+array, ?highI)</code>
+   * <p>
+   * Procedure version of <code>high(array)</code>.
+   */
+  highP("Array.high", "high", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "array", true, false),
+          new Variable(-1, "highI", true, false)),
       null, null),
   /**
    * <code>intToFloat(+i)</code>
@@ -783,6 +1370,24 @@ public enum BuiltIns {
           new Variable(-1, "s", true, false)),
       null, null),
   /**
+   * <code>isArray(+x)</code>
+   * <p>
+   * Tests whether <code>x</code> is an array.
+   */
+  isArray("IsArray", "isArray", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>isArray(+x, ?b)</code>
+   * <p>
+   * Procedure version of <code>isArray(x)</code>.
+   */
+  isArrayP("IsArray", "isArray", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
    * <code>isBool(+x)</code>
    * <p>
    * Tests whether <code>x</code> is a boolean.
@@ -796,6 +1401,42 @@ public enum BuiltIns {
    * Procedure version of <code>isBool(x)</code>.
    */
   isBoolP("IsBool", "isBool", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
+   * <code>isClass(+x)</code>
+   * <p>
+   * Tests whether <code>x</code> is a class.
+   */
+  isClass("IsClass", "isClass", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>isClass(+x, ?b)</code>
+   * <p>
+   * Procedure version of <code>isClass(x)</code>.
+   */
+  isClassP("isClass", "isClass", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
+   * <code>isDictionary(x)</code>
+   * <p>
+   * Tests whether <code>x</code> is a dictionary.
+   */
+  isDictionary("IsDictionary", "isDictionary", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>isDictionary(x, ?b)</code>
+   * <p>
+   * Procedure version of <code>isDictionary(x)</code>.
+   */
+  isDictionaryP("IsDictionary", "isDictionary", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "x", true, false),
           new Variable(-1, "b", true, false)),
@@ -816,6 +1457,24 @@ public enum BuiltIns {
   isDetP("IsDet", "isDet", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
+   * <code>isEmpty(+dictionary)</code>
+   * <p>
+   * Tests whether <code>dictionary</code> contains an entry.
+   */
+  isEmpty("Dictionary.isEmpty", "isEmpty", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "i", true, false)),
+      null, null),
+  /**
+   * <code>isEmpty(+dictionary, ?b)</code>
+   * <p>
+   * Procedure version of <code>isEmpty(dictionary)</code>.
+   */
+  isEmptyP("Dictionary.isEmpty", "isEmpty", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
           new Variable(-1, "b", true, false)),
       null, null),
   /**
@@ -890,6 +1549,24 @@ public enum BuiltIns {
           new Variable(-1, "x", true, false),
           new Variable(-1, "b", true, false)
       ), null, null),
+  /**
+   * <code>isFunctor(+x)</code>
+   * <p>
+   * Tests whether <code>x</code> is a functor.
+   */
+  isFunctor("Functor.is", "isFunctor", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>isFunctor(+x, ?b)</code>
+   * <p>
+   * Procedure version of <code>isFunctor(x)</code>.
+   */
+  isFunctorP("Functor.is", "isFunctor", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
   /**
    * <code>isFuture(x)</code>
    * <p>
@@ -966,6 +1643,24 @@ public enum BuiltIns {
           new Variable(-1, "b", true, false)),
       null, null),
   /**
+   * <code>isLock(+x)</code>
+   * <p>
+   * Tests whether <code>x</code> is a lock.
+   */
+  isLock("IsLock", "isLock", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>isLock(+x, ?b)</code>
+   * <p>
+   * Procedure version of <code>isLock(x)</code>.
+   */
+  isLockP("IsLock", "isLock", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
    * <code>isNat(+i)</code>
    * <p>
    * Tests whether <code>i</code> is a natural number, i.e., an integer greater than or equal to
@@ -985,6 +1680,24 @@ public enum BuiltIns {
           new Variable(-1, "b", true, false)),
       null, null),
   /**
+   * <code>isNeeded(+x)</code>
+   * <p>
+   * Tests whether <code>x</code> is needed.
+   */
+  isNeeded("IsNeeded", "isNeeded", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>isNeeded(+x, ?b)</code>
+   * <p>
+   * Procedure version of <code>isNeeded(x)</code>.
+   */
+  isNeededP("IsNeeded", "isNeeded", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
    * <code>isNumber(+x)</code>
    * <p>
    * Tests whether <code>x</code> is a number.
@@ -998,6 +1711,24 @@ public enum BuiltIns {
    * Procedure version of <code>isNumber(x)</code>.
    */
   isNumberP("IsNumber", "isNumber", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
+   * <code>isObject(+x)</code>
+   * <p>
+   * Tests whether <code>x</code> is an object (an instance of a class).
+   */
+  isObject("IsObject", "isObject", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>isObject(+x, ?b)</code>
+   * <p>
+   * Procedure version of <code>isObject(x)</code>.
+   */
+  isObjectP("IsObject", "isObject", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "x", true, false),
           new Variable(-1, "b", true, false)),
@@ -1021,6 +1752,66 @@ public enum BuiltIns {
           new Variable(-1, "b", true, false)),
       null, null),
   /**
+   * <code>isPort(+x)</code>
+   * <p>
+   * Tests whether <code>x</code> is a port.
+   */
+  isPort("IsPort", "isPort", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>isPort(+x, ?b)</code>
+   * <p>
+   * Procedure version of <code>isPort(x)</code>.
+   */
+  isPortP("IsPort", "isPort", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
+   * <code>isPrefix(+xs, +ys)</code>
+   * <p>
+   * Tests whether <code>xs</code> is a prefix of <code>ys</code>. Given that <code>xs</code> has
+   * length <i>i</i>, it is a prefix of <code>ys</code> if <code>ys</code> has at least length
+   * <i>i</i> and the first elements of <code>ys</code> are equal to the corresponding elements of
+   * <code>xs</code>.
+   */
+  isPrefix("List.isPrefix", "isPrefix", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "ys", true, false)),
+      null, null),
+  /**
+   * <code>isPrefix(+xs, +ys, ?b)</code>
+   * <p>
+   * Procedure version of <code>isPrefix(xs, ys)</code>.
+   */
+  isPrefixP("List.isPrefix", "isPrefix", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "ys", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
+   * <code>isProcedure(+x)</code>
+   * <p>
+   * Returns <code>true</code> if <code>x</code> is a procedure or a function, and false otherwise.
+   */
+  isProcedure("IsProcedure", "isProcedure", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>isProcedure(+x, ?b)</code>
+   * <p>
+   * Procedure version of <code>isProcedure(x)</code>.
+   */
+  isProcedureP("IsProcedure", "isProcedure", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
    * <code>isRecord(+x)</code>
    * <p>
    * Tests whether <code>x</code> is a record.
@@ -1037,6 +1828,24 @@ public enum BuiltIns {
       Arrays.asList(
           new Variable(-1, "x", true, false),
           new Variable(-1, "b", true, false)),
+      null, null),
+  /**
+   * <code>keys(+dictionary)</code>
+   * <p>
+   * Returns a list of all currently valid keys of <code>dictionary</code>.
+   */
+  keys("Dictionary.keys", "keys", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "dictionary", true, false)),
+      null, null),
+  /**
+   * <code>keys(+dictionary, ?lis)</code>
+   * <p>
+   * Procedure version of <code>keys(dictionary)</code>.
+   */
+  keysP("Dictionary.keys", "keys", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "lis", true, false)),
       null, null),
   /**
    * <code>isTuple(+x)</code>
@@ -1057,6 +1866,24 @@ public enum BuiltIns {
           new Variable(-1, "b", true, false)),
       null, null),
   /**
+   * <code>items(+dictionary)</code>
+   * <p>
+   * Returns the list of all items cuurently in <code>dictionary</code>.
+   */
+  items("Dictionary.items", "items", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "dictionary", true, false)),
+      null, null),
+  /**
+   * <code>items(+dictionary, ?xs)</code>
+   * <p>
+   * Procedure version of <code>items(dictionary)</code>.
+   */
+  itemsP("Dictionary.items", "items", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "xs", true, false)),
+      null, null),
+  /**
    * <code>label(+r)</code>
    * <p>
    * Returns the label (name) of <code>r</code> (without the leading apostrophe).
@@ -1075,6 +1902,24 @@ public enum BuiltIns {
           new Variable(-1, "l", true, false)),
       null, null),
   /**
+   * <code>last(+xs)</code>
+   * <p>
+   * Returns the last element of <code>xs</code>. Raises an exception if <code>xs</code> is (nil).
+   */
+  last("List.last", "last", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "xs", true, false)),
+      null, null),
+  /**
+   * <code>last(+xs, ?y)</code>
+   * <p>
+   * Procedure version of <code>last(xs)</code>.
+   */
+  lastP("List.last", "last", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "y", true, false)),
+      null, null),
+  /**
    * <code>length(+xs)</code>
    * <p>
    * Returns the length of <code>xs</code>.
@@ -1088,7 +1933,7 @@ public enum BuiltIns {
    * <p>
    * Procedure version of <code>width(r)</code>.
    */
-  lenghtP("Length", "length", BuiltInType.PROCEDURE,
+  lengthP("Length", "length", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "xs", true, false),
           new Variable(-1, "i", true, false)),
@@ -1113,6 +1958,25 @@ public enum BuiltIns {
           new Variable(-1, "f2", true, false)),
       null, null),
   /**
+   * <code>low(+array)</code>
+   * <p>
+   * Returns the lower bound of the key range of <code>array</code>.
+   */
+  low("Array.low", "low", BuiltInType.FUNCTION,
+      Collections.singletonList(
+          new Variable(-1, "array", true, false)),
+      null, null),
+  /**
+   * <code>low(+array, ?lowI)</code>
+   * <p>
+   * Procedure version of <code>low(array)</code>.
+   */
+  lowP("Array.low", "low", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "array", true, false),
+          new Variable(-1, "lowI", true, false)),
+      null, null),
+  /**
    * <code>makeList(+i)</code>
    * <p>
    * Returns a new list of length <code>i</code>. All elements are fresh variables.
@@ -1130,6 +1994,16 @@ public enum BuiltIns {
       Arrays.asList(
           new Variable(-1, "i", true, false),
           new Variable(-1, "xs", true, false)),
+      null, null),
+  /**
+   * <code>makeNeeded(+x)</code>
+   * <p>
+   * Makes <code>x</code> needed. this procedure is useful for triggering by-need computations on
+   * <code>x</code> without having to suspend on <code>x</code>.
+   */
+  makeNeeded("Value.makeNeeded", "makeNeeded", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "x", true, false)),
       null, null),
   /**
    * <code>makeRecord(+l, +lis)</code>
@@ -1186,7 +2060,29 @@ public enum BuiltIns {
           new Variable(-1, "r", true, false)),
       null, null),
   /**
-   * <code>map(+r1, +f)</code>
+   * <code>mapList(+xs, +f)</code>
+   * <p>
+   * Returns a list obtained by applying the unary function <code>f</code> to each element of
+   * <code>xs</code>.
+   */
+  mapList("List.map", "mapList", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false)),
+      null, null),
+  /**
+   * <code>mapList(+xs, +f, ?ys)</code>
+   * <p>
+   * Procedure version of <code>mapList(xs, f)</code>.
+   */
+  mapListP("List.map", "mapList", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "ys", true, false)),
+      null, null),
+  /**
+   * <code>mapRecord(+r1, +f)</code>
    * <p>
    * Returns a record with same label and arity as <code>r1</code>, whose fields are computed by
    * applying the unary function <code>f</code> to all fields of <code>r1</code>.
@@ -1195,17 +2091,17 @@ public enum BuiltIns {
    * <code>map('a(12, b:13, c:1), fun $ (a) {(a*2)})</code> yields the output record <code>'a(24,
    * b:26, c:2)</code>.
    */
-  map("Record.map", "map", BuiltInType.FUNCTION,
+  mapRecord("Record.map", "mapRecord", BuiltInType.FUNCTION,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "f", true, false)),
       null, null),
   /**
-   * <code>map(+r1, +f, ?r2)</code>
+   * <code>mapRecord(+r1, +f, ?r2)</code>
    * <p>
-   * Procedure version of <code>map(r1, f)</code>.
+   * Procedure version of <code>mapRecord(r1, f)</code>.
    */
-  mapP("Record.map", "map", BuiltInType.PROCEDURE,
+  mapRecordP("Record.map", "mapRecord", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "f", true, false),
@@ -1233,24 +2129,45 @@ public enum BuiltIns {
           new Variable(-1, "afi3", true, false)),
       null, null),
   /**
-   * <code>member(x, +ys)</code>
+   * <code>memberDictionary(+dictionary, +li)</code>
+   * <p>
+   * Tests whether <code>li</code> is a valid key of <code>dictionary</code>.
+   */
+  memberDictionary("Dictionary.member", "memberDictionary", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "li", true, false)),
+      null, null),
+  /**
+   * <code>memberDictionary(+dictionary, +li, ?b)</code>
+   * <p>
+   * Procedure version of <code>memberDictionary(dictionary, li)</code>.
+   */
+  memberDictionaryP("Dictionary.member", "memberDictionary", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "li", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
+   * <code>memberList(x, +ys)</code>
    * <p>
    * Tests whether <code>x</code> is equal (in the sense of <code>==</code>) to some element of
    * <code>ys</code>. Note : all other built-in functions that operate on lists take them as their
-   * first argument. <code>member()</code> is the only exception (for historical reasons). TODO
+   * first argument. <code>memberList()</code> is the only exception (for historical reasons). TODO
    * resolve this incoherence ?
    */
-  member("Member", "member", BuiltInType.FUNCTION,
+  memberList("Member", "memberList", BuiltInType.FUNCTION,
       Arrays.asList(
           new Variable(-1, "x", true, false),
           new Variable(-1, "ys", true, false)),
       null, null),
   /**
-   * <code>member(x, +ys, ?b)</code>
+   * <code>memberList(x, +ys, ?b)</code>
    * <p>
-   * Procedure version of <code>member(x, ys)</code>.
+   * Procedure version of <code>memberList(x, ys)</code>.
    */
-  memberP("Member", "member", BuiltInType.PROCEDURE,
+  memberListP("Member", "memberList", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "x", true, false),
           new Variable(-1, "ys", true, false),
@@ -1303,10 +2220,147 @@ public enum BuiltIns {
           new Variable(-1, "afi3", true, false)),
       null, null),
   /**
+   * <code>new(+k, +initCall)</code>
+   * <p>
+   * Creates a new object from class <code>k</code> with initial call to <code>initCall</code>.
+   */
+  newObject("New", "new", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "k", true, false),
+          new Variable(-1, "initCall", true, false)),
+      null, null),
+  /**
+   * <code>newObject(+k, +initCall, ?o)</code>
+   * <p>
+   * Procedure version of <code>newObject(k, initCall)</code>.
+   */
+  newObjectP("New", "new", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "k", true, false),
+          new Variable(-1, "initCall", true, false),
+          new Variable(-1, "o", true, false)),
+      null, null),
+  /**
+   * <code>newArray(+lowI, +highI, initX)</code>
+   * <p>
+   * Returns a new array with key range from <code>lowI</code> to <code>highI</code> including both.
+   * All items are initialized to <code>initX</code>.
+   */
+  newArray("NewArray", "newArray", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "lowI", true, false),
+          new Variable(-1, "highI", true, false),
+          new Variable(-1, "initX", true, false)),
+      null, null),
+  /**
+   * <code>newArrayP(+lowI, +highI, +initX, ?array)</code>
+   * <p>
+   * Procedure version of <code>newArray(lowI, highI, initX)</code>.
+   */
+  newArrayP("NewArray", "newArray", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "lowI", true, false),
+          new Variable(-1, "highI", true, false),
+          new Variable(-1, "initX", true, false),
+          new Variable(-1, "array", true, false)),
+      null, null),
+  /**
    * @hidden
    */
-  NEWCELL("NewCell", "newCell", BuiltInType.FUNCTION,
-      Collections.singletonList(new Variable(-1, "InitValue", true, false)),
+  newCell("NewCell", "<hidden>", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>newClass(+parentKs, +attrR, +featR, +propAs)</code>
+   * <p>
+   * Creates a new class by inheriting from <code>ParentKs</code> with new attributes
+   * <code>attrR</code>. Since features and properties are not yet supported in <b>NewOz</b>,
+   * arguments <code>featR</code> and <code>propAs</code> should always be <code>_</code>. The
+   * fields with integer values in <code>attrR</code> define the free attributes. The fields with
+   * literal features defines attributes with initial values, where the features is the attribute
+   * name and the field its initial value.
+   * <p>
+   * For example, the statement <code>c = newClass([d, e], 'a(a:1, b), _ _)</code> is equivalent to
+   * :
+   * <pre><code>
+   *  class c extends d, e
+   *  attr a=1 attr b
+   *  {
+   *
+   *  }
+   * </code></pre>
+   */
+  newClass("Class.new", "newClass", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "parentKs", true, false),
+          new Variable(-1, "attrR", true, false),
+          new Variable(-1, "featR", true, false),
+          new Variable(-1, "propAs", true, false)),
+      null, null),
+  /**
+   * <code>newClass(+parentKs, +attrR, +featR, +propAs, ?k)</code>
+   * <p>
+   * Procedure version of <code>newClass(parentKs, attrR, featR, propAs)</code>.
+   */
+  newClassP("Class.new", "newClass", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "parentKs", true, false),
+          new Variable(-1, "attrR", true, false),
+          new Variable(-1, "featR", true, false),
+          new Variable(-1, "propAs", true, false),
+          new Variable(-1, "k", true, false)),
+      null, null),
+  /**
+   * <code>newDictionary()</code>
+   * <p>
+   * Returns a new empty dictionary.
+   */
+  newDictionary("NewDictionary", "newDictionary", BuiltInType.FUNCTION,
+      Collections.emptyList(),
+      null, null),
+  /**
+   * <code>newDictionary(?dictionary)</code>
+   * <p>
+   * Procedure version of <code>newDictionary()</code>.
+   */
+  newDictionaryP("NewDictionary", "newDictionary", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "dictionary", true, false)),
+      null, null),
+  /**
+   * <code>newLock()</code>
+   * <p>
+   * Creates and returns a new lock.
+   */
+  newLock("NewLock", "newLock", BuiltInType.FUNCTION,
+      Collections.emptyList(),
+      null, null),
+  /**
+   * <code>newLock(?lock)</code>
+   * <p>
+   * Procedure version of <code>newLock()</code>.
+   */
+  newLockP("NewLock", "newLock", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "lock", true, false)),
+      null, null),
+  /**
+   * <code>newPort(?xs)</code>
+   * <p>
+   * Returns a new port, together with its associated stream <code>xs</code>.
+   */
+  newPort("NewPort", "newPort", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "xs", true, false)),
+      null, null),
+  /**
+   * <code>newPort(?xs, ?port)</code>
+   * <p>
+   * Procedure version of <code>newPort(xs)</code>.
+   */
+  newPortP("NewPort", "newPort", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "port", true, false)),
       null, null),
   /**
    * <code>not(+b1)</code>
@@ -1359,7 +2413,7 @@ public enum BuiltIns {
    */
   numbers("List.number", "numbers", BuiltInType.FUNCTION,
       Arrays.asList(
-          new Variable(-1, "fomI", true, false),
+          new Variable(-1, "fromI", true, false),
           new Variable(-1, "toI", true, false),
           new Variable(-1, "stepI", true, false)),
       null, null),
@@ -1401,14 +2455,29 @@ public enum BuiltIns {
           new Variable(-1, "b3", true, false)),
       null, null),
   /**
-   * <code>partition(+r1, +f, ?r2, ?r3)</code>
+   * <code>partitionList(+xs, +f, ?ys, ?zs)</code>
    * <p>
-   * <code>partition</code> computes a record <code>r2</code> which contains all the features and
-   * fields of the record <code>r1</code> for which the unary boolean function <code>f</code>
+   * <code>partitionList</code> computes a list <code>ys</code> which contains all the elements of
+   * <code>xs</code> for which the unary boolean function <code>f</code> yields <code>true</code>,
+   * and a list <code>zs</code> with the remaining fields of <code>xs</code>. The ordering is
+   * preserved.
+   */
+  partitionList("List.partition", "partitionList", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "ys", true, false),
+          new Variable(-1, "zs", true, false)),
+      null, null),
+  /**
+   * <code>partitionRecord(+r1, +f, ?r2, ?r3)</code>
+   * <p>
+   * <code>partitionRecord</code> computes a record <code>r2</code> which contains all the features
+   * and fields of the record <code>r1</code> for which the unary boolean function <code>f</code>
    * yields
    * <code>true</code>, and a record <code>r3</code> with the remaining fields of <code>r1</code>.
    */
-  partition("Record.partition", "partition", BuiltInType.PROCEDURE,
+  partitionRecord("Record.partition", "partitionRecord", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "f", true, false),
@@ -1435,6 +2504,73 @@ public enum BuiltIns {
           new Variable(-1, "fi1", true, false),
           new Variable(-1, "fi2", true, false),
           new Variable(-1, "fi3", true, false)),
+      null, null),
+  /**
+   * <code>procArity(+fp)</code>
+   * <p>
+   * Returns the procedure arity of <code>fp</code>, i.e., the number of arguments it takes.
+   * <p>
+   * <b>Warning : if <code>fp</code> is a function (as opposed to a procedure), the result returned
+   * by this operation is currently 1 too big. This will be fixed in a future release.</b>
+   */
+  procArity("Procedure.arity", "procArity", BuiltInType.FUNCTION,
+      Collections.singletonList(
+          new Variable(-1, "fp", true, false)),
+      null, null),
+  /**
+   * <code>procArity(+fp, ?i)</code>
+   * <p>
+   * Procedure version of <code>procArity(fp)</code>.
+   * <p>
+   * <b>Warning : if <code>fp</code> is a function, the result returned by this operation is
+   * currently 1 too big. This will be fixed in a future release.</b>
+   */
+  procArityP("Procedure.arity", "procArity", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "fp", true, false),
+          new Variable(-1, "i", true, false)),
+      null, null),
+  /**
+   * <code>putArray(+array, +i, x)</code>
+   * <p>
+   * Sets the item of <code>array</code> under key <code>i</code> to <code>x</code>.
+   */
+  putArray("Put", "putArray", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "array", true, false),
+          new Variable(-1, "i", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>putDictionary(+dictionary, +li, x)</code>
+   * <p>
+   * Sets the item of <code>dictionary</code> under key <code>li</code> to <code>x</code>.
+   */
+  putDictionary("Dictionary.put", "putDictionary", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "i", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>remove(+dictionary, +li)</code>
+   * <p>
+   * Removes the item under key <code>li</code> from <code>dictionary</code> if <code>li</code> is a
+   * valid key. Otherwise, does nothing.
+   */
+  remove("Dictionary.remove", "remove", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "li", true, false)),
+      null, null),
+  /**
+   * <code>removeAll(+dictionary)</code>
+   * <p>
+   * Removes all entries currently in <code>dictionary</code>.
+   */
+  removeAll("Dictionary.removeAll", "removeAll", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "dictionary", true, false)),
       null, null),
   /**
    * <code>reverse(+xs)</code>
@@ -1476,6 +2612,34 @@ public enum BuiltIns {
           new Variable(-1, "f2", true, false)),
       null, null),
   /**
+   * <code>send(+port, x)</code>
+   * <p>
+   * Sends <code>x</code> to the port <code>port</code>: the stream pointed to by <code>port</code>
+   * is unified with <code>(x::_)</code> (in a newly created thread), and the pointer advances to
+   * the stream's new tail.
+   */
+  send("Send", "send", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "port", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>sendReceive(+port, x, y)</code>
+   * <p>
+   * Sends the pair <code>(x#y)</code> to the port <code>port</code>: the stream pointed to by
+   * <code>port</code> is unified with <code>((x#y)::_)</code> (in a newly created thread), and the
+   * pointer advances to the stream's new tail.
+   * <p>
+   * The argument <code>x</code> is commonly used as message to be sent, while <code>y</code> serves
+   * as a reply to that message.
+   */
+  sendReceive("SendRecv", "sendReceive", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "port", true, false),
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "y", true, false)),
+      null, null),
+  /**
    * <code>sin(+f1)</code>
    * <p>
    * Returns the sine of <code>f1</code>.
@@ -1514,24 +2678,47 @@ public enum BuiltIns {
           new Variable(-1, "f2", true, false)),
       null, null),
   /**
-   * <code>some(+r, +f)</code>
+   * <code>someList(+xs, +f)</code>
+   * <p>
+   * Tests whether the unary boolean function <code>f</code> yields <code>true</code> when applied
+   * to some elements of <code>xs</code>. Stops at the first field for which <code>f</code> yields
+   * <code>true</code>.
+   */
+  someList("List.some", "someList", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "r", true, false),
+          new Variable(-1, "f", true, false)),
+      null, null),
+  /**
+   * <code>someList(+xs, +f, ?b)</code>
+   * <p>
+   * Procedure version of <code>someList(xs, f)</code>.
+   */
+  someListP("List.some", "someList", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
+   * <code>someRecord(+r, +f)</code>
    * <p>
    * Tests whether the unary boolean function <code>f</code> yields <code>code</code> when applied
    * to some fields of <code>r</code>. Stops at the first field for which <code>f</code> yields
    * <code>true</code>. The fields are tested in the order given by <code>arity()</code> (which
    * see).
    */
-  some("Record.some", "some", BuiltInType.FUNCTION,
+  someRecord("Record.some", "someRecord", BuiltInType.FUNCTION,
       Arrays.asList(
           new Variable(-1, "r", true, false),
           new Variable(-1, "f", true, false)),
       null, null),
   /**
-   * <code>some(+r, +f, ?b)</code>
+   * <code>someRecord(+r, +f, ?b)</code>
    * <p>
-   * Procedure version of <code>some(r, f)</code>.
+   * Procedure version of <code>someRecord(r, f)</code>.
    */
-  someP("Record.some", "some", BuiltInType.PROCEDURE,
+  someRecordP("Record.some", "someRecord", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "r", true, false),
           new Variable(-1, "f", true, false),
@@ -1544,8 +2731,8 @@ public enum BuiltIns {
    * function <code>f</code>. <code>F</code> must be a binary function returning a boolean value.
    * <code>sort()</code> is implemented using the mergesort algorithm.
    * <p>
-   * For example, <code>sort([2 3 4 1 1], fun$(a, b){(a<b)})</code> returns the list <code>[1 1 2 3
-   * 4]</code>.
+   * For example,<code>sort([2 3 4 1 1], fun$(a, b){ (a&lt;b) })</code> returns the list
+   * <code>[1 1 2 3 4]</code>.
    */
   sort("Sort", "sort", BuiltInType.FUNCTION,
       Arrays.asList(
@@ -1590,7 +2777,8 @@ public enum BuiltIns {
    * If <code>x</code> is free, the atom <code>free</code> is returned. If <code>x</code> is a
    * future, the atom <code>future</code> is returned. If <code>x</code> is a failed value, the
    * atom
-   * <code>failed</code> is returned. If <code>x</code> is kinded, the tuple <code>kinded(y)</code>
+   * <code>failed</code> is returned. If <code>x</code> is kinded, the tuple
+   * <code>'kinded(y)</code>
    * is returned, where <code>y</code> is bound to either the atoms <code>int</code>,
    * <code>fset</code> or <code>record</code>, depending on the type of <code>x</code>. If
    * <code>x</code> is determined, the tuple <code>det(Y)</code> is returned, where <code>y</code>
@@ -1751,7 +2939,8 @@ public enum BuiltIns {
   /**
    * <code>takeDrop(+xs, +i, ?ys, ?zs)</code>
    * <p>
-   * Binds <code>ys</code> to <code>take(xs, i)</code> and <code>zs</code> to <code>drop(xs, i)</code>.
+   * Binds <code>ys</code> to <code>take(xs, i)</code> and <code>zs</code> to <code>drop(xs,
+   * i)</code>.
    */
   takeDrop("List.takeDrop", "takeDrop", BuiltInType.PROCEDURE,
       Arrays.asList(
@@ -1761,14 +2950,51 @@ public enum BuiltIns {
           new Variable(-1, "zs", true, false)),
       null, null),
   /**
-   * <code>takeDropWhile(+r1, +f, ?r2, ?r3)</code>
+   * <code>takeDropWhileList(+xs, +f, ?ys, ?zs)</code>
    * <p>
-   * While <code>filter</code> selects all fields and features of a record which satisfy a certain
-   * condition, <code>takeWhile</code> selects only the starting sequence of features and fields
-   * which fulfill this condition. <code>dropWhile</code> computes a record with the remaining
-   * features and fields. <code>takeWhileDrop</code> computes both records.
+   * While <code>filterList</code> selects all elements of a list which satisfy a certain
+   * condition,
+   * <code>takeWhileList</code> selects only the starting sequence of elements which fulfill this
+   * condition. <code>dropWhileList</code> computes a list with the remaining elements.
+   * <code>takeDropWhileList</code> combines the functionality of both previous methods.
    */
-  takeDropWhile("Record.takeDropWhile", "takeDropWhile", BuiltInType.PROCEDURE,
+  takeDropWhileList("List.takeDropWhile", "takeDropWhileList", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "ys", true, false),
+          new Variable(-1, "zs", true, false)),
+      null, null),
+  /**
+   * <code>takeWhileList(+xs, +f)</code>
+   * <p>
+   * See takeDropWhileList()
+   */
+  takeWhileList("List.takeWhile", "takeWhileList", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false)),
+      null, null),
+  /**
+   * <code>takeWhileList(+xs, +f, ?r2)</code>
+   * <p>
+   * See takeDropWhileList()
+   */
+  takeWhileListP("List.takeWhile", "takeWhileList", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "ys", true, false)),
+      null, null),
+  /**
+   * <code>takeDropWhileRecord(+r1, +f, ?r2, ?r3)</code>
+   * <p>
+   * While <code>filterRecord</code> selects all fields and features of a record which satisfy a
+   * certain condition, <code>takeWhileRecord</code> selects only the starting sequence of features
+   * and fields which fulfill this condition. <code>dropWhileRecord</code> computes a record with
+   * the remaining features and fields. <code>takeDropWhileRecord</code> computes both records.
+   */
+  takeDropWhileRecord("Record.takeDropWhile", "takeDropWhileRecord", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "f", true, false),
@@ -1776,21 +3002,21 @@ public enum BuiltIns {
           new Variable(-1, "r3", true, false)),
       null, null),
   /**
-   * <code>takeWhile(+r1, +f)</code>
+   * <code>takeWhileRecord(+r1, +f)</code>
    * <p>
-   * See takeDropWhile()
+   * See takeDropWhileRecord()
    */
-  takeWhile("Record.takeWhile", "takeWhile", BuiltInType.FUNCTION,
+  takeWhileRecord("Record.takeWhile", "takeWhileRecord", BuiltInType.FUNCTION,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "f", true, false)),
       null, null),
   /**
-   * <code>takeWhile(+r1, +f, ?r2)</code>
+   * <code>takeWhileRecord(+r1, +f, ?r2)</code>
    * <p>
-   * See takeDropWhile()
+   * See takeDropWhileRecord()
    */
-  takeWhileP("Record.takeWhile", "takeWhile", BuiltInType.PROCEDURE,
+  takeWhileRecordP("Record.takeWhile", "takeWhileRecord", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "f", true, false),
@@ -1919,6 +3145,59 @@ public enum BuiltIns {
           new Variable(-1, "ts", true, false)),
       null, null),
   /**
+   * <code>listToRecord(+l, +ts)</code>
+   * <p>
+   * Returns a new record <code>r</code> with label <code>l</code> whose fields are given by the
+   * list of pairs <code>ts</code> : for every element <i>li</i>#<i>xi</i> of <code>xs</code>,
+   * <code>r</code> has a field <i>xi</i> at feature <i>li</i>. The features in the pairs list must
+   * be pairwise distinct, else an error exception is raised.
+   * <p>
+   * For example, <code>listToRecord("f", [(a#1), (b#2), (c#3)])</code> yields <code>'f(a:1, b:2,
+   * c:3)</code> as output.
+   */
+  listToRecord("List.toRecord", "listToRecord", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "l", true, false),
+          new Variable(-1, "ts", true, false)),
+      null, null),
+  /**
+   * <code>listToRecord(+l, +ts, ?r)</code>
+   * <p>
+   * Procedure version of <code>listToRecord(r)</code>.
+   */
+  listToRecordP("List.toRecord", "listToRecord", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "l", true, false),
+          new Variable(-1, "ts", true, false),
+          new Variable(-1, "r", true, false)),
+      null, null),
+  /**
+   * <code>toTuple(+l, +xs)</code>
+   * <p>
+   * Returns a new tuple with label <code>l</code> that contains the elements of <code>xs</code> as
+   * fields, in the given order. As a limitation in this release of <b>NewOz</b>, <code>l</code> has
+   * to a string.
+   * <p>
+   * For example, <code>toTuple("f", (a::b::c::nil))</code> yields <code>'f(a, b, c)</code> as
+   * output.
+   */
+  toTuple("List.toTuple", "toTuple", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "l", true, false),
+          new Variable(-1, "xs", true, false)),
+      null, null),
+  /**
+   * <code>toList(+l, +xs, ?t)</code>
+   * <p>
+   * Procedure version of <code>toTuple(l, xs)</code>.
+   */
+  toTupleP("List.toTuple", "toTuple", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "l", true, false),
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "t", true, false)),
+      null, null),
+  /**
    * <code>toVirtualString(x, +depthI, +widthI)</code>
    * <p>
    * Returns a virtual string describing the value of <code>x</code>. Note that this does not block
@@ -1951,7 +3230,7 @@ public enum BuiltIns {
    * float, record, tuple, atom, name, procedure, cell, byteString, bitString, chunk, array,
    * dictionary, bitArray, 'class', object, 'lock', port, space, or 'thread'. If any other atom is
    * returned, this means that <code>x</code> is of no standard primary type, but an
-   * implementation-dependent extension.
+   * implementation-dependent extension. TODO restrict to types existing in NewOz ?
    */
   type("Value.type", "type", BuiltInType.FUNCTION,
       Collections.singletonList(new Variable(-1, "x", true, false)),
@@ -1967,25 +3246,67 @@ public enum BuiltIns {
           new Variable(-1, "a", true, false)),
       null, null),
   /**
-   * <code>waitOr(+r1)</code>
+   * <code>wait(+x)</code>
+   * <p>
+   * Blocks until <code>x</code> is determined. This statement makes <code>x</code> needed, causing
+   * all by-need computations on <code>x</code> to be triggered. If <code>x</code> is or becomes
+   * bound to a failed value, then its encapsulated exception is raised.
+   */
+  wait("Wait", "wait", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>waitNeeded(+x)</code>
+   * <p>
+   * Blocks until <code>x</code> is needed. This operation is the by-need synchronization.
+   */
+  waitNeeded("WaitNeeded", "waitNeeded", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>waitOr(x, y)</code>
+   * <p>
+   * Blocks until at least one of <code>x</code> or <code>y</code> is determined.
+   */
+  waitOr("WaitOr", "waitOr", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "y", true, false)),
+      null, null),
+  /**
+   * <code>waitQuiet(+x)</code>
+   * <p>
+   * Blocks until <code>x</code> is determined or failed. Contrary to <code>wait()</code>, this
+   * procedure does not make <code>x</code> needed. Also, if <code>x</code> is or becomes bound to a
+   * failed value, no exception is raised.
+   */
+  waitQuiet("Value.waitQuiet", "waitQuiet", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>waitRecord(+r1)</code>
    * <p>
    * Blocks until at least one field of <code>r</code> is determined. Returns the feature of a
    * determined field. Raises an exception if <code>r</code> is not a proper record, that is, if
    * <code>r</code> is a literal.
    * <p>
-   * For example, <code>waitOr('a(_, b:1))</code> returns <code>b</code>, while <code>waitOr('a(2,
-   * b:_))</code> returns <code>1</code>, and <code>waitOr('a(_, b:_))</code> blocks.
+   * For example, <code>waitRecord('a(_, b:1))</code> returns <code>b</code>, while
+   * <code>waitRecord('a(2, b:_))</code> returns <code>1</code>, and <code>waitRecord('a(_,
+   * b:_))</code> blocks.
    */
-  waitOr("Record.waitOr", "waitOr", BuiltInType.FUNCTION,
+  waitRecord("Record.waitOr", "waitRecord", BuiltInType.FUNCTION,
       Collections.singletonList(
           new Variable(-1, "r1", true, false)),
       null, null),
   /**
-   * <code>waitOr(+r1, ?li)</code>
+   * <code>waitRecord(+r1, ?li)</code>
    * <p>
-   * Procedure version of <code>waitOr(r1)</code>.
+   * Procedure version of <code>waitRecord(r1)</code>.
    */
-  waitOrP("Record.waitOr", "waitOr", BuiltInType.PROCEDURE,
+  waitRecordP("Record.waitOr", "waitRecord", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "li", true, false)),
@@ -2009,7 +3330,37 @@ public enum BuiltIns {
           new Variable(-1, "i", true, false)),
       null, null),
   /**
-   * <code>zip(+r1, +r2, +f)</code>
+   * <code>zipLists(+xs, +ys, +f)</code>
+   * <p>
+   * Returns the list of all elements <code>z<i>i</i></code> computed by applying <code>f(x<i>i</i>,
+   * y<i>i</i>)</code>, where <code>x<i>i</i></code> is the <i>i</i>th element of <code>xs</code>
+   * and <code>y<i>i</i></code> is the <i>i</i>th element of <code>ys</code>. The two inputs lists
+   * must be of equal length, else an error exception is raised.
+   * <p>
+   * For example,
+   * <code>zipLists([1,6,3], [4,5,6], def $(x, y) {(x>y)}</code> yields the output list
+   * <code>(false::true::false::nil)</code>.
+   */
+  zipLists("List.zip", "zipLists", BuiltInType.FUNCTION,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "ys", true, false),
+          new Variable(-1, "f", true, false)),
+      null, null),
+  /**
+   * <code>zipLists(+xs, +ys, +f, ?zs)</code>
+   * <p>
+   * Procedure version of <code>zipLists(xs, ys, f)</code>.
+   */
+  zipListsP("List.zip", "zipLists", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "xs", true, false),
+          new Variable(-1, "ys", true, false),
+          new Variable(-1, "f", true, false),
+          new Variable(-1, "zs", true, false)),
+      null, null),
+  /**
+   * <code>zipRecords(+r1, +r2, +f)</code>
    * <p>
    * Given two records <code>r1</code> and <code>r2</code> and a binary function <code>f</code>,
    * returns a record <code>r3</code> with the same label as <code>r1</code>, and whose features are
@@ -2018,22 +3369,21 @@ public enum BuiltIns {
    * applying <code>f(r1.x, r2.x)</code>.
    * <p>
    * For example,
-   * <code>
-   * zip( 'f(jim:1, jack:2, jesse:4), 'g(jim:1, jack:b, joe:c), def $(x, y) {(x#y)}
-   * </code> yields the output record <code>'f(jim:1#a, jack:2#b)</code>.
+   * <code>zip( 'f(jim:1, jack:2, jesse:4), 'g(jim:1, jack:b, joe:c), def $(x, y) {(x#y)}</code>
+   * yields the output record <code>'f(jim:1#a, jack:2#b)</code>.
    */
-  zip("Record.zip", "zip", BuiltInType.FUNCTION,
+  zipRecords("Record.zip", "zipRecords", BuiltInType.FUNCTION,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "r2", true, false),
           new Variable(-1, "f", true, false)),
       null, null),
   /**
-   * <code>zip(+r1, +r2, +f, ?r3)</code>
+   * <code>zipRecords(+r1, +r2, +f, ?r3)</code>
    * <p>
-   * Procedure version of <code>zip(r1, r2, f)</code>.
+   * Procedure version of <code>zipRecords(r1, r2, f)</code>.
    */
-  zipP("Record.zip", "zip", BuiltInType.PROCEDURE,
+  zipRecordsP("Record.zip", "zipRecords", BuiltInType.PROCEDURE,
       Arrays.asList(
           new Variable(-1, "r1", true, false),
           new Variable(-1, "r2", true, false),

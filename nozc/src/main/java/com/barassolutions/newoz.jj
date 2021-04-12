@@ -247,7 +247,7 @@ TOKEN : {
 
 // Identifiers & literals
 TOKEN : {
-  < VARIABLESTRICT: ((<UPPERCASE>(<ALPHANUM>)*) | "`"(<ESC> | <PSEUDO_CHAR> | ~["`","\\","\n","\r"])"`") >
+  < VARIABLESTRICT: ((<UPPERCASE>(<ALPHANUM>)*) | "`"(<ESC> | <PSEUDO_CHAR> | ~["`","\\","\n","\r"])"`") > //TODO resolve inconsistency highlighted by library funtion Class.new. Class names can't always be forced to be capitalized. Option : delate the concept of VariableStrict ? Other option : allow both capitalized or not, (so redefine VARIABLE)
 | < VARIABLE: <LOWERCASE>(<ALPHANUM>)* >
 | < ATOM: (<ATOMLISP> | "´" (<ESC>| <PSEUDO_CHAR> | ~["\\","\n","\r"]) "´") >
 | < ATOMLISP: <APOSTROPHE> (<LOWERCASE>|<UPPERCASE>) (<ALPHANUM>)* >
@@ -852,11 +852,11 @@ private Declaration nestDecVariable(): {
           <LCURLY>
           (
             classElement = classElementDef()
-            { if(classElement instanceof MethodDef){
+            { //if(classElement instanceof MethodDef){
                 methods.add((MethodDef) classElement);
-              } else if(classElement instanceof ClassDescriptor) {
-                descriptors.add((ClassDescriptor) classElement);
-              }
+              //} else if(classElement instanceof ClassDescriptor) {
+              //  descriptors.add((ClassDescriptor) classElement);
+              //}
             }
           )* <RCURLY>
           { out = new ClassDef(line, name, descriptors, methods); }
@@ -1061,7 +1061,7 @@ private Expression nestDecAnonym(): {
 }
 {
     try {
-          LOOKAHEAD( <DEF> methHead() )
+          //LOOKAHEAD( <DEF> methHead() )
           <DEF> { line = token.beginLine; }
           aMethodHead = methHead()
           [<ASSIGN> <VARIABLE> { name = new Variable(line, token.image, true, false); }]
@@ -1072,9 +1072,9 @@ private Expression nestDecAnonym(): {
             statement = inStatement()
           )
           { out = new MethodDef(line, aMethodHead, name, expression, statement); }
-        | LOOKAHEAD( classDescriptor() )
-          descriptor = classDescriptor()
-          { out = descriptor; }
+        //| LOOKAHEAD( classDescriptor() )
+        //  descriptor = classDescriptor()
+        //  { out = descriptor; }
     }
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);

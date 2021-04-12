@@ -58,7 +58,8 @@ starting with a lowercase letter : e.g. `a`, `myVariable95`, `f2ze_5d4f6d`.
   declared by using the `#` operator as follows : `2#4#5#'c'`. Access elements through their
   ordinal, e.g. : `variableStoringMyTuple.3`. "Under the hood", tuples are actually modelled as
   records whose features are ordered integers. This will be apparent in some library functions; in
-  particular, all of those functions operating on records can be applied to tuples.
+  particular, all of those functions operating on records can be applied to tuples.\
+  A two-elements tuple is sometimes called a *pair*.
 - **Lists** : in **NewOz**, lists have a recursive definition. The head of a list is an expression
   of any type; while the tail of a list is an expression evaluated to a list. The last element of a
   list is indicated using the keyword `nil`. List can be defined in two ways : `(1::2::5::'c'::nil)`
@@ -72,8 +73,20 @@ starting with a lowercase letter : e.g. `a`, `myVariable95`, `f2ze_5d4f6d`.
 - **Strings** : strings are sequences of characters enclosed in quotation marks.
   e.g. `"Hello World !"`.
 - **Features** : features are denoted by integers, or literals similar to variable names
-- **Dictionaries** : TODO
-- **Arrays** : TODO
+- **Dictionaries** : dictionaries are data structures consisting of key-item pairs :
+  we say that the item *i* is stored under key *li*.
+  If a dictionary contains an item under some key *li*, we say *li* is a valid key.
+  Whenever a dictionary access is indexed with an ill-typed key, a type error is raised.
+  For a missing but well-typed key, a system exception is raised.
+- **Arrays** : arrays can be seen as a subtype of dictionaries, whose keys are integers.
+  As such, one could make the parallel to the similarities between records and tuples;
+  however, arrays provide no alternative syntax like tuples do.
+  On top of this, arrays do not inherit all library methods from dictionaries.
+- **Ports** : TODO
+- **Locks**: TODO
+- **Classes** : TODO
+- **Objects** : TODO
+- **Functors** : TODO
 
 ### Variable status
 
@@ -102,10 +115,12 @@ This signature specifies the number of arguments, their type, and their mode.
 
 | Abbreviation | Type    |
 |--------------|---------|
+| a            | Array |
 | b            | Boolean |
 | f            | Float   |
 | i            | Integer |
 | k            | Class   |
+| o            | Object |
 | p            | Procedure |
 | r            | Record |
 | s            | String |
@@ -122,16 +137,20 @@ these arguments can be prefixed as in `lowI`, which indicates that the integer r
 bound.
 
 - **Modes** : The arguments can have a mode denoted by the `+` and `?` symbols. Modes indicate the
-  synchronisation behaviour of a procedure. The application of a procedure `P` waits until its
-  inputs marked `+` are determined. If the input arguments are well-typed, `P` will return outputs,
-  marked `?` of the specified types. Ill-typed input arguments will raise a type error exception.
-  Types may be incompletely checked, especially those of output arguments: this happens when a value
-  doesn't need to be completely processed to perform an operation, e. g., in `List.dropWhile`.
-
+  synchronisation behaviour of a procedure.
+  - The application of a procedure `P` waits until its inputs marked `+` are determined.
+  - If the input arguments are well-typed, `P` will return outputs, marked `?` of the specified types.
+    Ill-typed input arguments will raise a type error exception.
+    Types may be incompletely checked, especially those of output arguments:
+    this happens when a value doesn't need to be completely processed to perform an operation, e. g., in `dropWhileList()`.
+    Note that output (`?`) names have to reference an **unassigned / free *val***.
+    Passing an assigned *val*, or a *var* will result in an error which cannot always be caught at compilation time.
+  - Arguments with no modes specified can be any value or variable, free or not.
+    
 > Important note : a nice feature of the **Oz** standard library is that many functions define an equivalent procedure which stores the result in an output variable.
-> **NewOz** mimics this behavior in its library as well. Such "overloading" procedures will appear in **NewOz**'s library documentation as well.
+> **NewOz** mimics this behavior (only in its library); such "overloading" procedures will appear in the library documentation alongside their "function" version.
 > For example, `isList(+x)` has an equivalent `isList(+x, ?b)`, in which the result of the operation is stored in `b` instead of being returned.\
-> **Be careful though :** when calling one of those "Procedure versions" of functions, the last parameter (`b` here) has to denote an **unassigned / free value (as in *val*)**. Passing an assigned *val*, or a *var* will result in an error at runtime !
+> **Remember :** when calling one of those "Procedure versions" of functions, the last parameter (`?b` here) has to denote an **unassigned / free *val*** !
 
 \
 \
@@ -173,7 +192,7 @@ NewOz**. We indicate **invalid** code pieces with an explanation.
 | `fun sum(a, b) { }`<br>`fun sum(a, b) {`<br>`procedureCall(a)`<br>`}` | | Functions must return an expression as the last element of their body |
 | `proc sum(a, b, c) { c=a+b}`<br>`proc nothing(a) {}` | Procedure declaration. Procedures cannot return an expression<br>*Note : in this example, c has to be a *var* or an unassigned *val* defined before !*<br>Procedures can be empty (no side-effect) | |
 | `proc sum(a, b) { c }` | | Procedures can't return expressions. |
-| `fun lazy ints(n) {`<br>`(n::ints(n+1))`<br>`}` | Functions can be declared "lazy" (=*demand-driven*). Evaluation is done only when the result is needed | |
+| `fun lazy ints(n) {`<br>`(n::ints(n+1))`<br>`}` | Functions can be declared "lazy" (=*demand-driven*). Evaluation is done only when the result is needed (by-need computation). | |
 | `val s = fun $ (a, b) {`<br>`(a+b)`<br>`}`<br>*later, call :*<br>`x = s(3, 4)` | You can declare functions "anonymously". Functions, procedures, and more are values (*higher-order programming*) | |
 
 ## Basic structures

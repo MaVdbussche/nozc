@@ -16,3 +16,4 @@ end
 List={NewCell 1|2|5|4|7|nil}
 in
 {Browse {SumList @List}}
+

@@ -29,12 +29,12 @@ public class Context {
     if (p instanceof Variable v) {
       notExistsHere = this.ensureNotExistsHere(v.line(), v.name());
       Logger.debug("Adding Variable in context <name:" + v.name() + " constant:" + v.isConstant()
-          + " readMode:" + v.readMode() + " usedAsPattern:" + v.usedAsPattern() + ">");
+          + " readMode:" + v.readMode() + " usedAsPattern:" + v.usedAsPattern() + " smallLetter:"+ v.forceSmallLetter() + ">");
     } else if (p instanceof Record r) {
       notExistsHere = this.ensureNotExistsHere(r.line(), r.name());
     } else if (p instanceof MethodArg m) {
       notExistsHere = this.ensureNotExistsHere(m.line(), m.name());
-      Logger.debug("Adding method argument in context <name:" + m.name()+">");
+      Logger.debug("Adding method argument in context <name:" + m.name() + ">");
     } else {
       notExistsHere = true;
     }
@@ -74,7 +74,7 @@ public class Context {
       }
     }
     if (!existsConflictingFunction) {
-      Logger.debug("Adding Built-in Function <name:" + f.name() + " returnType:" + f.returnType()
+      Logger.trace("Adding Built-in Function <name:" + f.name() + " returnType:" + f.returnType()
           + " nbArgs:" + f.nbArgs() + ">");
       this.definedFunctions.put(f, c);
     } else {
@@ -90,7 +90,7 @@ public class Context {
       definedVars.remove(var);
       definedFunctions.put(fAnonym, c);
       Logger.debug("Correctly reassigned variable as function : " +
-          (variableFor(fAnonym.name()) == null) + " returnType:"+ fAnonym.returnType());
+          (variableFor(fAnonym.name()) == null) + " returnType:" + fAnonym.returnType());
     } else {
       Logger.error("Could not find variable " + fAnonym.name() + " to reassign.");
     }
@@ -119,7 +119,7 @@ public class Context {
       }
     }
     if (!existsConflictingProcedure) {
-      Logger.debug("Adding Built-in Procedure <name:" + f.name() + " nbArgs:" + f.nbArgs() + ">");
+      Logger.trace("Adding Built-in Procedure <name:" + f.name() + " nbArgs:" + f.nbArgs() + ">");
       this.definedProcedures.put(f, c);
     } else {
       Logger.error(
@@ -164,7 +164,7 @@ public class Context {
       }
     }
     if (!existsConflictingFunctor) {
-      Logger.debug("Adding Built-in Functor <name:" + f.name() + ">");
+      Logger.trace("Adding Built-in Functor <name:" + f.name() + ">");
       this.definedFunctors.put(f, c);
     } else {
       Logger
@@ -208,7 +208,7 @@ public class Context {
       }
     }
     if (!existsConflictingClass) {
-      Logger.debug("Adding Built-in Class <name:" + f.name() + ">");
+      Logger.trace("Adding Built-in Class <name:" + f.name() + ">");
       this.definedClasses.put(f, c);
     } else {
       Logger.error("There is already a Class matching <name:" + f.name() + ">. Ignoring this one.");
@@ -318,6 +318,27 @@ public class Context {
     }
   }
 
+  /**
+   * Look for a class respecting the passed characteristics, in this or any of the parent contexts.
+   *
+   * @param name Name of the class to look for
+   * @return the ClassDef if found, or null if no matching procedure exists
+   */
+  public ClassDef classFor(String name) {
+    AtomicReference<ClassDef> out = new AtomicReference<>();
+    out.set(null);
+    this.definedClasses.keySet().forEach(classDef -> {
+      if (classDef.name().equals(name)) {
+        out.set(classDef);
+      }
+    });
+    if (out.get() == null && parent != null) {//Do we know this class name from parent context ?
+      return parent.classFor(name);
+    } else {
+      return out.get();
+    }
+  }
+
   public ClassContext asClassContext() {
     if (this instanceof ClassContext) {
       return (ClassContext) this;
@@ -346,13 +367,12 @@ public class Context {
     }
   }
 
-  public ClassContext findClassContext(String className) {
-    if (this instanceof ClassContext c && c.name.equals(className)) {
-      return (ClassContext) this;
-    } else if (parent == null) {
-      return null;
+  public ClassContext classContext(ClassDef cd) {
+    ClassContext out = this.definedClasses.get(cd);
+    if (out == null && parent != null) {
+      return parent.classContext(cd);
     } else {
-      return parent.findClassContext();
+      return out;
     }
   }
 
@@ -458,7 +478,7 @@ class ClassContext extends Context {
 
   private final Map<MethodDef, MethodContext> definedMethods = new HashMap<>();
   public String name;
-  public ArrayList<String> superClasses;
+  public ArrayList<ClassDef> superClasses = new ArrayList<>();
 
   public ClassContext(Context parent) {
     super(parent);
@@ -476,8 +496,20 @@ class ClassContext extends Context {
     }
   }
 
-  public boolean addAttribute(Variable attribute, @Nullable Expression defaultValue) {
+  public boolean addAttribute(Variable attribute) {
     return addVariable(attribute);
+  }
+
+  public boolean addSuperClasses(ArrayList<String> superClassesNames) {
+    for (String s : superClassesNames) {
+      ClassDef cd = this.classFor(s);
+      if (cd == null) {
+        return false;
+      } else {
+        this.superClasses.add(cd);
+      }
+    }
+    return true;
   }
 
   /**
@@ -500,6 +532,34 @@ class ClassContext extends Context {
       }
     });
     return out.get();
+  }
+
+  public ClassContext superClassContext() {
+    if (this.superClasses.size()==1) {
+      return classContext(this.superClasses.get(0));
+    } else {
+      return null;
+    }
+  }
+  public ClassContext superClassContext(String superClassName) {
+    if (this.name.equals(superClassName)) {
+      return this;
+    } else if (superClasses == null || superClasses.isEmpty()) {
+      return null;
+    } else {
+      ClassContext out = null;
+      for (ClassDef cd : superClasses) {
+        if (out != null) {
+          return out;
+        }
+        if (cd.name().equals(superClassName)) {
+          out = classContext(cd); // It is one of the superclasses (declared in this context)
+        } else {
+          out = this.parent().classContext(cd); // It may be one of the superclasses (declared in a parent context)
+        }
+      }
+      return out;
+    }
   }
 
   @Override

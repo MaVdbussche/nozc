@@ -7,17 +7,14 @@ import java.util.Collections;
 public class Variable extends Pattern implements Lhs {
 
   private final String name;
-
-  private boolean constant;
-
-  private boolean isAssigned;
-
   private final boolean usedAsPattern;
-
+  private boolean forceSmallLetter;
   /**
    * This means this is an instance of variable access (typically a rhs or a term)
    */
   private final boolean readMode;
+  private boolean constant;
+  private boolean isAssigned;
 
   public Variable(int line, String name, boolean isAPattern, boolean readMode) {
     this(line, name, true, isAPattern, readMode);
@@ -32,10 +29,25 @@ public class Variable extends Pattern implements Lhs {
     if (isAPattern) {
       this.type = Type.ANY;
     }
+    this.forceSmallLetter = false;
+  }
+
+  //Used for attributes in classes
+  public Variable(int line, String name, boolean constant, boolean isAPattern, boolean readMode,
+      boolean forceSmallLetter) {
+    super(line);
+    this.name = name;
+    this.constant = constant;
+    this.usedAsPattern = isAPattern;
+    this.readMode = readMode;
+    if (isAPattern) {
+      this.type = Type.ANY;
+    }
+    this.forceSmallLetter = forceSmallLetter;
   }
 
   Variable(Variable v, boolean readMode) {
-    this(v.line(), v.name, v.constant, v.usedAsPattern, readMode);
+    this(v.line(), v.name, v.constant, v.usedAsPattern, readMode, v.forceSmallLetter);
   }
 
   /**
@@ -60,6 +72,10 @@ public class Variable extends Pattern implements Lhs {
 
   public boolean usedAsPattern() {
     return usedAsPattern;
+  }
+
+  public boolean forceSmallLetter() {
+    return forceSmallLetter;
   }
 
   @Override
@@ -154,8 +170,10 @@ public class Variable extends Pattern implements Lhs {
         Logger.debug(
             "Retrieved Variable in context <name:" + var.name() + " constant:" + var.isConstant()
                 + " readMode:" + var.readMode() + " type:" + var.type() + ">");
+        //Copy general data about the variable found in the context, which are required to have correct code output.
         this.constant = var.constant;
         this.type = var.type();
+        this.forceSmallLetter = var.forceSmallLetter;
       }
     } else {
       //Nothing to do here (it is added to the inner context in analyze() method of all encapsulating AST nodes, like MethodDef or CaseExpressionClause)
@@ -177,7 +195,11 @@ public class Variable extends Pattern implements Lhs {
     if (!constant && readMode) {
       output.token(TokenOz.COMMERCAT);
     }
-    output.literal(Utils.ozFriendlyName(name));
+    if (forceSmallLetter) {
+      output.literal(name);
+    } else {
+      output.literal(Utils.ozFriendlyName(name));
+    }
   }
 
   /**

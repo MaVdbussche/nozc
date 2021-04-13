@@ -15,9 +15,9 @@ public class MethodHead {
 
   private final boolean hasMoreArgs;
 
-  public MethodHead(int line, String name, boolean isPrivate, ArrayList<MethodArg> args, boolean moreArgs) {
+  public MethodHead(int line, String name, ArrayList<MethodArg> args, boolean moreArgs) {
     this.name = name;
-    this.isPrivate = isPrivate;
+    this.isPrivate = Character.isUpperCase(name.charAt(0));
     this.args = args;
     this.hasMoreArgs = moreArgs;
   }

@@ -161,6 +161,25 @@ public enum BuiltIns {
           new Variable(-1, "r2", true, false)),
       null, null),
   /**
+   * <code>alarm(+i)</code>
+   * <p>
+   * Returns <code>unit</code> after <code>i</code> milliseconds.
+   * This is done asynchronously in that it is evaluated in its own thread.
+   */
+  alarm("Alarm", "alarm", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "i", true, false)),
+      null, null),
+  /**
+   * <code>alarm(+i, ?u)</code>
+   * <p>
+   * Procedure version of <code>alarm(i)</code>.
+   */
+  alarmP("Alarm", "alarm", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "i", true, false),
+          new Variable(-1, "u", true, false)),
+      null, null),
+  /**
    * <code>allList(+xs, +f)</code>
    * <p>
    * Tests whether the unary boolean function <code>f</code> yields <code>true</code> when applied
@@ -687,6 +706,15 @@ public enum BuiltIns {
           new Variable(-1, "f2", true, false)),
       null, null),
   /**
+   * <code>delay(+i)</code>
+   * <p>
+   * reduces ro <code>skip</code> after <code>i</code> milliseconds.
+   * Whenever <code>i &lt;= 0</code>, <code>delay(i)</code>reduces immediately.
+   */
+  delay("Delay", "delay", BuiltInType.PROCEDURE,
+      Collections.singletonList(new Variable(-1, "i", true, false)),
+      null, null),
+  /**
    * <code>dictionaryToRecord(+l, +dictionary)</code>
    * <p>
    * Returns a new record <code>r</code> with label <code>l</code> whose features and their fields
@@ -793,6 +821,25 @@ public enum BuiltIns {
           new Variable(-1, "ts", true, false)),
       null, null),
   /**
+   * <code>error(x)</code>
+   * <p>
+   * Returns an error exception record with dispatch field <code>x</code>.
+   */
+  errorException("Exception.error", "errorException", BuiltInType.FUNCTION,
+      Collections.singletonList(
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>errorException(x, ?y)</code>
+   * <p>
+   * Procedure version of <code>errorException(x)</code>.
+   */
+  errorExceptionP("Exception.error", "errorException", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "y", true, false)),
+      null, null),
+  /**
    * <code>exchangeArray(+array, +i, oldVal, newVal)</code>
    * <p>
    * Returns the current value of <code>array</code> under key <code>i</code> as item
@@ -864,6 +911,25 @@ public enum BuiltIns {
       Arrays.asList(
           new Variable(-1, "e", true, false),
           new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>failureException(x)</code>
+   * <p>
+   * Returns a failure exception record with dispatch field <code>x</code>.
+   */
+  failureException("Exception.failure", "failureException", BuiltInType.FUNCTION,
+      Collections.singletonList(
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>failureException(x, ?y)</code>
+   * <p>
+   * Procedure version of <code>failureException(x)</code>.
+   */
+  failureExceptionP("Exception.failure", "failureException", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "y", true, false)),
       null, null),
   /**
    * <code>filterList(+xs, +f)</code>
@@ -1292,6 +1358,43 @@ public enum BuiltIns {
           new Variable(-1, "x", true, false)),
       null, null),
   /**
+   * <code>getPriority(+thread)</code>
+   * <p>
+   * Returns <code>low</code>, <code>medium</code>, or <code>high</code> according to the priority of <code>thread</code>.
+   */
+  getPriority("Thread.getPriority", "getPriority", BuiltInType.FUNCTION,
+      Collections.singletonList(
+          new Variable(-1, "thread", true, false)),
+      null, null),
+  /**
+   * <code>getPriority(+thread, ?x)</code>
+   * <p>
+   * Procedure version of <code>getPriority(thread)</code>.
+   */
+  getPriorityP("Thread.getPriority", "getPriority", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "thread", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>getPriorityThis()</code>
+   * <p>
+   * Returns <code>low</code>, <code>medium</code>, or <code>high</code> according to the priority of the current thread.
+   */
+  getPriorityThis("Thread.getThisPriority", "getPriorityThis", BuiltInType.FUNCTION,
+      Collections.singletonList(
+          new Variable(-1, "thread", true, false)),
+      null, null),
+  /**
+   * <code>getPriorityThis(?x)</code>
+   * <p>
+   * Procedure version of <code>getPriorityThis()</code>.
+   */
+  getPriorityThisP("Thread.getThisPriority", "getPriorityThis", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
    * <code>hasFeature(+rc, +li)</code>
    * <p>
    * Tests whether <code>rc</code> has feature <code>li</code>.
@@ -1332,6 +1435,17 @@ public enum BuiltIns {
       Arrays.asList(
           new Variable(-1, "array", true, false),
           new Variable(-1, "highI", true, false)),
+      null, null),
+  /**
+   * <code>injectException(+thread, +x)</code>
+   * <p>
+   * Raises <code>x</code> as exception on <code>thread</code>.
+   * If <code>thread</code> is terminated, an error exception is raised in the current thread.
+   */
+  injectException("Thread.injectException", "injectException", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "thread", true, false),
+          new Variable(-1, "x", true, false)),
       null, null),
   /**
    * <code>intToFloat(+i)</code>
@@ -1830,22 +1944,40 @@ public enum BuiltIns {
           new Variable(-1, "b", true, false)),
       null, null),
   /**
-   * <code>keys(+dictionary)</code>
+   * <code>isSuspended(+thread)</code>
    * <p>
-   * Returns a list of all currently valid keys of <code>dictionary</code>.
+   * Tests whether <code>thread</code> is currently suspended.
    */
-  keys("Dictionary.keys", "keys", BuiltInType.FUNCTION,
-      Collections.singletonList(new Variable(-1, "dictionary", true, false)),
+  isSuspended("Thread.isSuspended", "isSuspended", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "thread", true, false)),
       null, null),
   /**
-   * <code>keys(+dictionary, ?lis)</code>
+   * <code>isSuspended(+thread, ?b)</code>
    * <p>
-   * Procedure version of <code>keys(dictionary)</code>.
+   * Procedure version of <code>isSuspended(thread)</code>.
    */
-  keysP("Dictionary.keys", "keys", BuiltInType.PROCEDURE,
+  isSuspendedP("Thread.isSuspended", "isSuspended", BuiltInType.PROCEDURE,
       Arrays.asList(
-          new Variable(-1, "dictionary", true, false),
-          new Variable(-1, "lis", true, false)),
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
+      null, null),
+  /**
+   * <code>isThread(+x)</code>
+   * <p>
+   * Tests whether <code>x</code> is a thread.
+   */
+  isThread("IsThread", "isThread", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>isThread(+x, ?b)</code>
+   * <p>
+   * Procedure version of <code>isThread(x)</code>.
+   */
+  isThreadP("IsThread", "isThread", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "b", true, false)),
       null, null),
   /**
    * <code>isTuple(+x)</code>
@@ -1868,7 +2000,7 @@ public enum BuiltIns {
   /**
    * <code>items(+dictionary)</code>
    * <p>
-   * Returns the list of all items cuurently in <code>dictionary</code>.
+   * Returns the list of all items currently in <code>dictionary</code>.
    */
   items("Dictionary.items", "items", BuiltInType.FUNCTION,
       Collections.singletonList(new Variable(-1, "dictionary", true, false)),
@@ -1882,6 +2014,24 @@ public enum BuiltIns {
       Arrays.asList(
           new Variable(-1, "dictionary", true, false),
           new Variable(-1, "xs", true, false)),
+      null, null),
+  /**
+   * <code>keys(+dictionary)</code>
+   * <p>
+   * Returns a list of all currently valid keys of <code>dictionary</code>.
+   */
+  keys("Dictionary.keys", "keys", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "dictionary", true, false)),
+      null, null),
+  /**
+   * <code>keys(+dictionary, ?lis)</code>
+   * <p>
+   * Procedure version of <code>keys(dictionary)</code>.
+   */
+  keysP("Dictionary.keys", "keys", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "dictionary", true, false),
+          new Variable(-1, "lis", true, false)),
       null, null),
   /**
    * <code>label(+r)</code>
@@ -2506,6 +2656,16 @@ public enum BuiltIns {
           new Variable(-1, "fi3", true, false)),
       null, null),
   /**
+   * <code>preempt(+thread)</code>
+   * <p>
+   * Preempts the current thread, i.e., immediately schedules another runnable thread (if there is one).
+   * <code>thread</code> stays runnable.
+   */
+  preempt("Thread.preempt", "preempt", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "thread", true, false)),
+      null, null),
+  /**
    * <code>procArity(+fp)</code>
    * <p>
    * Returns the procedure arity of <code>fp</code>, i.e., the number of arguments it takes.
@@ -2553,6 +2713,23 @@ public enum BuiltIns {
           new Variable(-1, "x", true, false)),
       null, null),
   /**
+   * <code>raiseError(+x)</code>
+   * <p>
+   * Wraps <code>x</code> in an error exception and raises this.
+   * This procedure can be defined as follows, except that it always adds debug information :
+   * <pre>
+   *   <code>
+   *     defproc raiseError(x) {
+   *       raise {errorException(x)}
+   *     }
+   *   </code>
+   * </pre>
+   */
+  raiseError("Exception.raiseError", "raiseError", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
    * <code>remove(+dictionary, +li)</code>
    * <p>
    * Removes the item under key <code>li</code> from <code>dictionary</code> if <code>li</code> is a
@@ -2571,6 +2748,14 @@ public enum BuiltIns {
   removeAll("Dictionary.removeAll", "removeAll", BuiltInType.PROCEDURE,
       Collections.singletonList(
           new Variable(-1, "dictionary", true, false)),
+      null, null),
+  /**
+   * <code>resumeThread(+thread)</code>
+   * <p>
+   * Resumes <code>thread</code>. Resumption undoes suspension.
+   */
+  resumeThread("Thread.resume", "resumeThread", BuiltInType.PROCEDURE,
+      Collections.singletonList(new Variable(-1, "thread", true, false)),
       null, null),
   /**
    * <code>reverse(+xs)</code>
@@ -2638,6 +2823,27 @@ public enum BuiltIns {
           new Variable(-1, "port", true, false),
           new Variable(-1, "x", true, false),
           new Variable(-1, "y", true, false)),
+      null, null),
+  /**
+   * <code>setPriority(+thread, +s)</code>
+   * <p>
+   * Sets priority of thread <code>thread</code> to the priority described in <code>s</code>.
+   * <code>s</code> must be one of the strings <code>"low"</code>, <code>"medium"</code>, or <code>"high"</code>.
+   */
+  setPriority("Thread.setPriority", "setPriority", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "thread", true, false),
+          new Variable(-1, "s", true, false)),
+      null, null),
+  /**
+   * <code>setPriorityThis(+s)</code>
+   * <p>
+   * Sets priority of the current thread to the priority described in <code>s</code>.
+   * <code>s</code> must be one of the strings <code>"low"</code>, <code>"medium"</code>, or <code>"high"</code>.
+   */
+  setPriorityThis("Thread.setThisPriority", "setPriorityThis", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "s", true, false)),
       null, null),
   /**
    * <code>sin(+f1)</code>
@@ -2770,6 +2976,24 @@ public enum BuiltIns {
           new Variable(-1, "f2", true, false)),
       null, null),
   /**
+   * <code>stateThread(+thread)</code>
+   * <p>
+   * Returns <code>runnable</code>, <code>blocked</code>, or <code>terminated</code>, according to the current state of <code>thread</code>.
+   */
+  stateThread("Thread.state", "stateThread", BuiltInType.FUNCTION,
+      Collections.singletonList(new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>state(+thread, ?x)</code>
+   * <p>
+   * Procedure version of <code>stateThread(thread)</code>.
+   */
+  stateThreadP("Thread.state", "state", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "thread", true, false),
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
    * <code>status(x)</code>
    * <p>
    * Returns status and type information on <code>x</code>.
@@ -2796,6 +3020,14 @@ public enum BuiltIns {
       Arrays.asList(
           new Variable(-1, "x", true, false),
           new Variable(-1, "t", true, false)),
+      null, null),
+  /**
+   * <code>suspendThread(+thread)</code>
+   * <p>
+   * Suspends <code>thread</code> such that it cannot be further reduced.
+   */
+  suspendThread("Thread.suspend", "suspendThread", BuiltInType.PROCEDURE,
+      Collections.singletonList(new Variable(-1, "thread", true, false)),
       null, null),
   /**
    * <code>sub(+xs, +ys)</code>
@@ -2889,6 +3121,25 @@ public enum BuiltIns {
           new Variable(-1, "r1", true, false),
           new Variable(-1, "li", true, false),
           new Variable(-1, "r2", true, false)),
+      null, null),
+  /**
+   * <code>systemException(x)</code>
+   * <p>
+   * Returns a system exception record with dispatch field <code>x</code>.
+   */
+  systemException("Exception.system", "systemException", BuiltInType.FUNCTION,
+      Collections.singletonList(
+          new Variable(-1, "x", true, false)),
+      null, null),
+  /**
+   * <code>systemException(x, ?y)</code>
+   * <p>
+   * Procedure version of <code>systemException(x)</code>.
+   */
+  systemExceptionP("Exception.system", "systemException", BuiltInType.PROCEDURE,
+      Arrays.asList(
+          new Variable(-1, "x", true, false),
+          new Variable(-1, "y", true, false)),
       null, null),
   /**
    * <code>tail(+i, y)</code>
@@ -3059,6 +3310,49 @@ public enum BuiltIns {
       Arrays.asList(
           new Variable(-1, "f1", true, false),
           new Variable(-1, "f2", true, false)),
+      null, null),
+  /**
+   * <code>terminate(+thread)</code>
+   * <p>
+   * Raises an exception <code>'kernel(terminate, ...)</code> on <code>thread</code>.
+   */
+  terminate("Thread.terminate", "terminate", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "thread", true, false)),
+      null, null),
+  /**
+   * <code>thisThread()</code>
+   * <p>
+   * Returns the current thread.
+   */
+  thisThread("Thread.this", "thisThread", BuiltInType.FUNCTION,
+      Collections.emptyList(),
+      null, null),
+  /**
+   * <code>thisThread(?thread)</code>
+   * <p>
+   * Procedure version of <code>thisThread(x)</code>.
+   */
+  thisThreadP("Thread.this", "thisThread", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "thread", true, false)),
+      null, null),
+  /**
+   * <code>time()</code>
+   * <p>
+   * Returns the number of seconds elapsed since January 1st of the current year.
+   */
+  time("Time.time", "time", BuiltInType.FUNCTION,
+      Collections.emptyList(),
+      null, null),
+  /**
+   * <code>time(?t)</code>
+   * <p>
+   * Procedure version of <code>time()</code>.
+   */
+  timeP("Time.time", "time", BuiltInType.PROCEDURE,
+      Collections.singletonList(
+          new Variable(-1, "t", true, false)),
       null, null),
   /**
    * <code>toArray(+t)</code>

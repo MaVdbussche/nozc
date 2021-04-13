@@ -130,6 +130,7 @@ public class MethodDef extends Declaration implements ClassElement {
       expression.codegen(output);
     }
     output.indentLeft();
+    output.newLine();
     output.token(TokenOz.END);
     output.newLine();
   }

@@ -102,6 +102,7 @@ public class InExpression extends Expression {
 
     if (expression != null) {
       expression.codegen(output);
+      //output.newLine();
     }
     output.indentLeft();
     if (declarations.size() > 0) {

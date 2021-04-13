@@ -203,37 +203,39 @@ public interface JavaCCParserConstants {
   /** RegularExpression Id. */
   int LOWERCASE = 105;
   /** RegularExpression Id. */
-  int DIGIT = 106;
+  int LETTER = 106;
   /** RegularExpression Id. */
-  int NON_ZERO_DIGIT = 107;
+  int DIGIT = 107;
   /** RegularExpression Id. */
-  int CHARINT = 108;
+  int NON_ZERO_DIGIT = 108;
   /** RegularExpression Id. */
-  int ALPHANUM = 109;
+  int CHARINT = 109;
   /** RegularExpression Id. */
-  int DECINT = 110;
+  int ALPHANUM = 110;
   /** RegularExpression Id. */
-  int HEXINT = 111;
+  int DECINT = 111;
   /** RegularExpression Id. */
-  int OCTINT = 112;
+  int HEXINT = 112;
   /** RegularExpression Id. */
-  int BININT = 113;
+  int OCTINT = 113;
   /** RegularExpression Id. */
-  int OCTDIGIT = 114;
+  int BININT = 114;
   /** RegularExpression Id. */
-  int HEXDIGIT = 115;
+  int OCTDIGIT = 115;
   /** RegularExpression Id. */
-  int BINDIGIT = 116;
+  int HEXDIGIT = 116;
   /** RegularExpression Id. */
-  int ESCAPE_CHAR = 117;
+  int BINDIGIT = 117;
   /** RegularExpression Id. */
-  int ESC = 118;
+  int ESCAPE_CHAR = 118;
   /** RegularExpression Id. */
-  int CHARCHAR = 119;
+  int ESC = 119;
   /** RegularExpression Id. */
-  int PSEUDO_CHAR = 120;
+  int CHARCHAR = 120;
   /** RegularExpression Id. */
-  int ERROR = 121;
+  int PSEUDO_CHAR = 121;
+  /** RegularExpression Id. */
+  int ERROR = 122;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -348,6 +350,7 @@ public interface JavaCCParserConstants {
     "<FLOAT>",
     "<UPPERCASE>",
     "<LOWERCASE>",
+    "<LETTER>",
     "<DIGIT>",
     "<NON_ZERO_DIGIT>",
     "<CHARINT>",

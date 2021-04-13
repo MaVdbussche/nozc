@@ -247,19 +247,21 @@ TOKEN : {
 
 // Identifiers & literals
 TOKEN : {
-  < VARIABLESTRICT: ((<UPPERCASE>(<ALPHANUM>)*) | "`"(<ESC> | <PSEUDO_CHAR> | ~["`","\\","\n","\r"])"`") > //TODO resolve inconsistency highlighted by library funtion Class.new. Class names can't always be forced to be capitalized. Option : delate the concept of VariableStrict ? Other option : allow both capitalized or not, (so redefine VARIABLE)
-| < VARIABLE: <LOWERCASE>(<ALPHANUM>)* >
+  < VARIABLESTRICT: ((<UPPERCASE>(<ALPHANUM>)*) | "`"(<ESC> | <PSEUDO_CHAR> | ~["`","\\","\n","\r"])"`") > //Used only in imports
+|
+< VARIABLE: ((<UPPERCASE>(<ALPHANUM>)*) | (<LOWERCASE> (<ALPHANUM>)*)) >
 | < ATOM: (<ATOMLISP> | "´" (<ESC>| <PSEUDO_CHAR> | ~["\\","\n","\r"]) "´") >
-| < ATOMLISP: <APOSTROPHE> (<LOWERCASE>|<UPPERCASE>) (<ALPHANUM>)* >
+| < ATOMLISP: "'" (<LETTER>)* >
 //| < LABEL: (<VARIABLE>|<ATOM>|<BOOLEAN>|<UNIT>) >
 | < STRING: "\"" (<ESC> | <PSEUDO_CHAR> | ~["\"","\\","\n","\r"])* "\"" >
-| < CHARACTER: (<DEGREE>(<CHARCHAR> | <PSEUDO_CHAR>) | "'"<ALPHANUM>"'" )> //| <CHARINT> ) >
+| < CHARACTER: (<DEGREE>(<CHARCHAR> | <PSEUDO_CHAR>) | "'" (<ESC> | ~["'","\\","\n","\r"]) "'" ) > //| <CHARINT> ) >
 | < INT: (<DECINT> | <HEXINT> | <OCTINT> | <BININT>) >
 | < FLOAT: (<DIGIT>)+ <DOT> (<DIGIT>)* (("e"|"E")("~")?(<DIGIT>)+)? >
 //| < BOOLEAN: (<TRUE> | <FALSE>) >
 
 | < #UPPERCASE: ["A"-"Z"] >
 | < #LOWERCASE: ["a"-"z"] >
+| < #LETTER : ["A"-"Z","a"-"z"] >
 | < #DIGIT: ["0"-"9"] >
 | < #NON_ZERO_DIGIT: ["1"-"9"] >
 | < #CHARINT: (["0"-"9"]|["1"-"9"]["0"-"9"]|"1"["0"-"9"]["0"-"9"]|"2"["0"-"4"]["0"-"9"]|"25"["0"-"5"])> // [0-255]
@@ -272,12 +274,12 @@ TOKEN : {
 | < #HEXDIGIT: (<DIGIT> | ["A"-"F"] | ["a"-"f"]) >
 | < #BINDIGIT: ["0"-"1"] >
 
-| < #ESCAPE_CHAR: ("a"|"b"|"f"|"n"|"r"|"t"|<BACKSLASH>|<APOSTROPHE>|<QUOTE>|<DEGREE>) >
-| < #ESC: <BACKSLASH> <ESCAPE_CHAR> >
+| < #ESCAPE_CHAR: ("a"|"b"|"f"|"n"|"r"|"t"|"\\"|"'"|"\""|<DEGREE>) >
+| < #ESC: "\\" <ESCAPE_CHAR> >
 | < #CHARCHAR: ~["\\"] >
 // In the classes of words <variable>, <atom>, <string>, and <character> we use pseudo-characters,
 // which represent single characters in different notations.
-| < #PSEUDO_CHAR: (<BACKSLASH><OCTDIGIT><OCTDIGIT><OCTDIGIT>) | (<BACKSLASH>("x"|"X")<HEXDIGIT><HEXDIGIT>) >
+| < #PSEUDO_CHAR: ("\\"<OCTDIGIT><OCTDIGIT><OCTDIGIT>) | ("\\"("x"|"X")<HEXDIGIT><HEXDIGIT>) >
 }
 
 // For anything else, we return an ERROR token. Without this
@@ -389,13 +391,13 @@ private Expression expression(): {
           <DOLLAR>
           { line = token.beginLine;
           expression = new AnonymExpression(line); }
-        | LOOKAHEAD( inExpression() )
+        | LOOKAHEAD( <LCURLY> )
           {Logger.debug("Found an inExpression");}
           expression = inExpression()
         | LOOKAHEAD( <IF> | <MATCH> | <TRY> | <RAISE> | <THREAD> )
           {Logger.debug("Found a nestConExpression");}
           expression = nestConExpression()
-        | LOOKAHEAD( term() )
+        | LOOKAHEAD( <ATOMLISP> | <LPAREN> expression() | <LBRACK> expression() | assignmentExpression() )
           {Logger.debug("Found a term");}
           expression = term()
         | LOOKAHEAD( (<DEFPROC>|<DEF>|<FUNCTOR>|<CLASS>) <DOLLAR> )
@@ -541,6 +543,8 @@ private InExpression inExpression(): {
  */
 private Statement nestConStatement(): {
     int line = 0;
+    boolean objectCall = false;
+    String targetName = null;
     Statement out = null;
     String name = null;
     InStatement statement = null;
@@ -559,7 +563,17 @@ private Statement nestConStatement(): {
 }
 {
     try {
-          LOOKAHEAD( <VARIABLE> <LPAREN> )
+          LOOKAHEAD(
+            [(<THIS> <DOT>) | (<SUPER> [<LPAREN><VARIABLE><RPAREN>] <DOT>)]
+            <VARIABLE> <LPAREN>
+          )
+          [ (
+            <THIS> <DOT> {objectCall = true;}
+              |
+            <SUPER>
+            [<LPAREN><VARIABLE>{objectCall=true; targetName=token.image;}<RPAREN>]
+            <DOT>
+          ) ]
           <VARIABLE> { line = token.beginLine; name = token.image;
             Logger.debug("Found a CallProcedure to "+name+" at line "+line); }
           <LPAREN>
@@ -571,7 +585,16 @@ private Statement nestConStatement(): {
             )*
           ]
           <RPAREN>
-          { out = new CallProcedure(line, name, args); }
+          { if(objectCall){
+              if(targetName!=null) {
+                out = new Call(line, name, args, targetName);
+              } else {
+                out = new Call(line, name, args);
+              }
+            } else {
+              out = new CallProcedure(line, name, args);
+            }
+          }
         | LOOKAHEAD( <LCURLY> )
           statement2 = inStatement()
           { out = statement2; }
@@ -843,9 +866,9 @@ private Declaration nestDecVariable(): {
           )*
           statement = inStatement()
           { out = new FunctorDef(line, name, imports, exports, statement); }
-        | LOOKAHEAD( <CLASS> <VARIABLESTRICT> )
+        | LOOKAHEAD( <CLASS> <VARIABLE> )
           <CLASS> { line = token.beginLine; }
-          <VARIABLESTRICT> { name = token.image; }
+          <VARIABLE> { name = token.image; }
           (
             aDescriptor = classDescriptor() { descriptors.add(aDescriptor); }
           )*
@@ -1044,7 +1067,7 @@ private Expression nestDecAnonym(): {
  * a class descriptor (extension, attribute, or property)
  *
  * <pre>
- *   classElementDef ::= DEF methHead [ASSIGN variable] (inExpression|inStatement)
+ *   classElementDef ::= DEFPROC methHead [ASSIGN variable] (inExpression|inStatement) //TODO support returned values
  *                      | classDescriptor
  * </pre>
 
@@ -1062,7 +1085,8 @@ private Expression nestDecAnonym(): {
 {
     try {
           //LOOKAHEAD( <DEF> methHead() )
-          <DEF> { line = token.beginLine; }
+          <DEFPROC> { line = token.beginLine; } //TODO change keyword
+          {Logger.debug("Found a class method declaration");}
           aMethodHead = methHead()
           [<ASSIGN> <VARIABLE> { name = new Variable(line, token.image, true, false); }]
           ( //LOOKAHEAD( inExpression() )
@@ -1604,10 +1628,10 @@ private Expression primary(): {
           ]
           <RPAREN>
           { out = new CallFunction(line, name, args); }
-        | LOOKAHEAD( <THIS> [<DOT> (<VARIABLE>|<VARIABLESTRICT>) <LPAREN>] )
+        | LOOKAHEAD( <THIS> [<DOT> <VARIABLE> <LPAREN>] )
           <THIS> { line = token.beginLine; out = new ThisExpression(line); }
             [
-            <DOT> (<VARIABLE>|<VARIABLESTRICT>) { variable = new Variable(line, token.image, false, false);}
+            <DOT> <VARIABLE> { variable = new Variable(line, token.image, false, false);}
             <LPAREN>
             [
                 arg = expression() { args.add(arg); }
@@ -1620,10 +1644,10 @@ private Expression primary(): {
             ]
         | LOOKAHEAD( <SUPER> )
           <SUPER> { line = token.beginLine; }
-            [ LOOKAHEAD( <LPAREN> <VARIABLESTRICT> <RPAREN> )
-              <LPAREN> <VARIABLESTRICT> { name = token.image; } <RPAREN>
+            [ LOOKAHEAD( <LPAREN> <VARIABLE> <RPAREN> )
+              <LPAREN> <VARIABLE> { name = token.image; } <RPAREN>
             ]
-            <DOT> (<VARIABLE>|<VARIABLESTRICT>) { variable = new Variable(token.beginLine, token.image, false, false);}
+            <DOT> <VARIABLE> { variable = new Variable(token.beginLine, token.image, false, false);}
             <LPAREN>
             [ LOOKAHEAD( expression() )
                 arg = expression() { args.add(arg); }
@@ -1637,7 +1661,7 @@ private Expression primary(): {
           <VARIABLE> { variable = new Variable(token.beginLine, token.image, false, true); out=variable; }
           [
           <DOT> expr = expression()
-          { out = new ExpressionSelectionList(line, variable, expr);
+          { out = new ExpressionSelectionList(line, variable, expr); //TODO make this more generic for all selections
             Logger.debug("Found a list selection arg:"+variable.name()); }
           ]
     }
@@ -2016,14 +2040,14 @@ private ClassDescriptor classDescriptor(): {
 {
     try {
         <EXTENDS> { line = token.beginLine; }
-          <VARIABLESTRICT> { extensions.add(token.image); }
+          <VARIABLE> { extensions.add(token.image); }
           (
             <COMMA>
-            <VARIABLESTRICT> { extensions.add(token.image); }
+            <VARIABLE> { extensions.add(token.image); }
           )*
           { out = new ClassDescriptor(line, SubType.EXTENSION, extensions); }
         | <ATTR> { line = token.beginLine; }
-          <VARIABLE> { var = new Variable(line, token.image, false, true, false); }
+          <VARIABLE> { var = new Variable(line, token.image, false, true, false, true); }
           [
             <ASSIGN> expr = expression()
           ]
@@ -2050,18 +2074,17 @@ private ClassDescriptor classDescriptor(): {
  */
 private MethodHead methHead(): {
     int line = 0;
-    boolean priv = false;
     String name = null;
     MethodArg arg = null;
     ArrayList<MethodArg> args = new ArrayList<MethodArg>();
     boolean moreArgs = false;
+    {Logger.debug("Entering methHead()");}
 }
 {
     try {
-        (
-          <VARIABLESTRICT> { line = token.beginLine; priv = true; name = token.image; }
-          | <VARIABLE> { line = token.beginLine; priv = false; name = token.image; }
-        )
+        (<VARIABLE>)
+        //|<VARIABLESTRICT>)
+        { line = token.beginLine; name = token.image; }
         <LPAREN>
         [
           arg = methArg() { args.add(arg); }
@@ -2078,7 +2101,7 @@ private MethodHead methHead(): {
     catch ( ParseException e ) {
         recoverFromError(new int[]{RCURLY}, e);
     }
-    { return new MethodHead(line, name, priv, args, moreArgs); }
+    { return new MethodHead(line, name, args, moreArgs); }
 }
 
 /**

@@ -32,21 +32,21 @@ programming, meaning that functions and procedures are considered values, which 
 
 In this documentation, we use the word *variable* to refer to *vars* and *vals* indistinctly, unless
 specified otherwise.\
-Valid names for variables are all series of alphanumeric characters, plus the '_' character,
-starting with a lowercase letter : e.g. `a`, `myVariable95`, `f2ze_5d4f6d`.
+Valid names for variables are all series of alphanumeric characters, plus the '_' character :
+e.g. `a`, `MyVariable95`, `f2ze_5d4f6d`.
 
-### NewOz types
+### NewOz types and concepts
 
-- **Characters** : alpha-numeric characters are enclosed between apostrophes : e.g. `'c'`, `'5'`.
+- **Characters** : Alpha-numeric characters are enclosed between apostrophes : e.g. `'c'`, `'5'`.
   They are encoded as integers in the underlying **Oz** language.
-- **Booleans** : either `true` or `false`;
-- **Integers** : integer numbers can be described in 4 numerical bases : binary (e.g. `0b1101`
+- **Booleans** : Either `true` or `false`;
+- **Integers** : Integer numbers can be described in 4 numerical bases : binary (e.g. `0b1101`
   , `0B1001`), octal (e.g. `05620`, `00101`), decimal (e.g. `0`, `3`, `3501`), and hexadecimal (
   e.g. `0x1A`, `0XFF0`).
-- **Floats** : floating-point numbers can be written under one of the following forms : `0.005`
-  , `1.5e44`, `0.03E~5`, where the letter *e*/*E* indicates the exponent to 10. Note that the
-  symbol *~* is used, in this particular context, to describe the negative exponent.
-- **Records** : records are structured compound entities. They are described by a name (called
+- **Floats** : Floating-point numbers can be written under one of the following forms : `0.005`
+  , `1.5e44`, `0.03E~5`, where the letter *e*/*E* indicates the exponent to 10. **Note that the
+  symbol *~* is used, in this particular context, to describe the negative exponent.**
+- **Records** : Records are structured compound entities. They are described by a name (called
   label), and a set of features. Each of those features may store a value, which can of course be a
   record itself, allowing to build complex data structures. Records can be declared as
   follows : `'myRecord(name:"John Doe", age:22, weight:85.3)`. Note the apostrophe, which is a
@@ -54,38 +54,77 @@ starting with a lowercase letter : e.g. `a`, `myVariable95`, `f2ze_5d4f6d`.
   Note that you can omit features in a record description; in that case, the compiler will place
   ordered numbers in their place for you. As such, `'exampleRecord(25, a:'c', 2)` is equivalent
   to `'exampleRecord(1:25, a:'c', 2:2)`.
-- **Tuples** are ordered sets of elements, made accessible through their ordinal. They can be
+- **Tuples** : Ordered sets of elements, made accessible through their ordinal. They can be
   declared by using the `#` operator as follows : `2#4#5#'c'`. Access elements through their
   ordinal, e.g. : `variableStoringMyTuple.3`. "Under the hood", tuples are actually modelled as
-  records whose features are ordered integers. This will be apparent in some library functions; in
-  particular, all of those functions operating on records can be applied to tuples.\
+  records whose features are ordered integers. This will be apparent in some library operations; in
+  particular, all of those operating on records can be applied to tuples.\
   A two-elements tuple is sometimes called a *pair*.
-- **Lists** : in **NewOz**, lists have a recursive definition. The head of a list is an expression
+- **Lists** : In **NewOz**, lists have a recursive definition. The head of a list is an expression
   of any type; while the tail of a list is an expression evaluated to a list. The last element of a
   list is indicated using the keyword `nil`. List can be defined in two ways : `(1::2::5::'c'::nil)`
   is equivalent to `[1, 2, 5, 'c']`. Note that `nil` should be omitted when using the second
   notation. Both notations are totally interchangeable, and will be used indistinctly throughout the
   documentation. Accessing lists has to be done recursively : `listName.1` is the head, `listName.2`
   is the tailing list. Accessing the 4th element of a list could be done by
-  writing `listName.2.2.2.1`, but **
-  NewOz**'
-  basic library also provides helper functions to do this.
-- **Strings** : strings are sequences of characters enclosed in quotation marks.
+  writing `listName.2.2.2.1`, but **NewOz**'s basic library also provides helper functions to do this.
+- **Strings** : Strings are sequences of characters enclosed in quotation marks.
   e.g. `"Hello World !"`.
-- **Features** : features are denoted by integers, or literals similar to variable names
-- **Dictionaries** : dictionaries are data structures consisting of key-item pairs :
+- **Features** : Features are denoted by integers, or literals similar to variable names.
+- **Dictionaries** : Dictionaries are data structures consisting of key-item pairs :
   we say that the item *i* is stored under key *li*.
   If a dictionary contains an item under some key *li*, we say *li* is a valid key.
   Whenever a dictionary access is indexed with an ill-typed key, a type error is raised.
   For a missing but well-typed key, a system exception is raised.
-- **Arrays** : arrays can be seen as a subtype of dictionaries, whose keys are integers.
+- **Arrays** : Arrays can be seen as a subtype of dictionaries, whose keys are integers.
   As such, one could make the parallel to the similarities between records and tuples;
   however, arrays provide no alternative syntax like tuples do.
   On top of this, arrays do not inherit all library methods from dictionaries.
-- **Ports** : TODO
-- **Locks**: TODO
-- **Classes** : TODO
+- **Threads** : Threads may be in one of three states, namely *runnable*, *blocked*, or *terminated*.
+  Orthogonally, a thread may also be *suspended*.
+  Runnable and non-suspended threads are scheduled according to their priorities, which may be `low`,
+  `medium` or `high`. The default priority is `medium`.
+  The priority of a thread may influence its time-share for execution, where threads with `medium`
+  priority obtain at least as long a time-share as threads with `low` priority, and at most as long
+  as threads with `high` priority. Implementations may also choose not to schedule a thread at all
+  if a thread with higher priority is runnable.\
+  A newly created thread inherits the priority from its parent if the latter has either `medium` or `low` priority.
+  Otherwise, the new thread gets default (i.e. `medium`) priority.
+- **Ports** : A port is an asynchronous channel that supports many-to-one communication. A port `p` encapsulates a stream `s`.
+  A stream is a list with unbound tail (that s, its last tail is `_` instead of `nil`).
+  The operation `send(p, m)` adds `m` to the end of `s` (see also its documentation in the library).
+  Successive sends from the same thread appear in the order they were sent.
+  The port keeps track of the end of the stream as its next iteration point.
+  Ports are designed to be the main message passing mechanism between threads.
+- **Locks**: In multi-threaded programs, an appropriate locking mechanism should provide exclusive access rights to all threads.
+  A thread-reentrant lock allows the same thread to reenter the lock, i.e. to enter a dynamically nested critical region guarded by the same lock.
+  Such a lock can be acquired by at most one lock at a time.
+  Concurrent threads that attempt to get the same lock are queued.
+  When the lock is released, it is granted to the thread standing first in line etc.\
+  **NewOz**'s library provides methods to create such locks. There is also a special keyword `lock` (see further below).
+- **Classes** : **NewOz** supports object-oriented programming through library operations or special keywords described further below.\
+  A class in **NewOz** contains methods and attributes, that each instance of the class
+  will possess. Attributes are private states.
+  Inside of method bodies, other methods from this class or from a superclass can be called as follows : `this.method()` or `super(aClassName).method()`.
+  Inheritance is supported. `B` is a superclass of class `A` if (1) `B` appears after the `extends` keyword in the class declaration, or
+  (2) `B` is a superclass of one of the classes which appear after the `extends` keyword.
+  All attributes and non-private methods are made available in the new class.
+  A method in class `A` overrides any method with the same name in any superclass of `A`.\
+  **Oz** enforce classes who inherit from ancestors having methods with the same name, to override those methods in the new class.
+  This is a nice way to circumvent a well-known problem with multiple inheritance. However, this is not yet enforced in **NewOz**.
 - **Objects** : TODO
+- **Exceptions** : Any value may be raised as an exception, although commonly only records are used.
+  Some of these serve special purposes : *error exceptions* are records with label `error`.
+  These are raised when a programming error occurs; it is not recommended catching these.
+  *System exceptions* are records with label `system`.
+  These are raised when an unforeseeable runtime condition occurs; a file operations library might
+  raise system exceptions when a file cannot be opened.
+  It is recommended to always handle such exceptions.
+  *Failure exceptions* are records with label `failure`; these are raised when a tell operation fails.\
+  Both error and system exceptions have a *dispatch field*.
+  This is the element at feature *1* of the exception record.
+  This is usually a record further describing the exact condition that occurred.\
+  See the library for operations on exceptions. There is also a `raise` keyword (see further below).
 - **Functors** : TODO
 
 ### Variable status
@@ -125,6 +164,7 @@ This signature specifies the number of arguments, their type, and their mode.
 | r            | Record |
 | s            | String |
 | t            | Tuple |
+| u            | Unit |
 | x y z        | Value |
 | li           | Feature |
 | xs           | List of elements of type x |
@@ -202,14 +242,56 @@ NewOz**. We indicate **invalid** code pieces with an explanation.
 | `if (a<b) {`<br>`(b-a)`<br>`} else if (a>b) {`<br>`(a-b)`<br>`} else {`<br>`0 }` | Conditional structures. All returned expression must be of the same type | |
 | `match myList {`<br>`case (e::nil) => { browse(e) }`<br>`case (e::l2) && e==1 => { browse("One") }`<br>`else { browse("Error") }`<br>`}` | Switch statement | |
 | For loops : 4 possible notations :<br>1: `for x in 0;x<10;x+1 { ... }`<br>*is equivalent to :*<br>2: `for x in 0 .. 9;1 { ... }`<br>*is equivalent to :*<br>3 :`for x in 0 .. 9 { ... }`<br>4: `for x in 0;x+1 { ... }`| 1 : C-like notation : <*intitial value*> ; <*boolean condition*> ; <*next value*><br>2 : <*lower bound*> .. <*upper bound*>; <*increment value*><br>Bounds are inclusive. All three values are evaluated once, before starting the loop. Step can be negative. Only integers are allowed<br>3 : <*lower bound*> .. <*upper bound*><br>Same as above, with step defaulting to 1<br>4 : <*initial value*> ; <*increment value*><br>Equivalent to `for x in 0;true;x+1 { ... }`| |
-| `raise {e}` | `e` is an exception, which in practice can be any expression | |
-| `try { ... }`<br>`catch x {`<br>`case 1 && b==true => {...}`<br>`case 2 => {...}`<br>`else {}`<br>`} finally { ... }` | You can catch raised exceptions and do pattern-matching against them. In this example we assume numbers, are raised, but as said above, any expression is a valid exception. | |
+| `raise {e}` | Raises `e` as an exception. See above for more details on exceptions. | |
+| `try { ... }`<br>`&nbsp;catch x {`<br>`case 1 && b==true => {...}`<br>`case 2 => {...}`<br>`else {}`<br>`} finally { ... }` | You can catch raised exceptions and do pattern-matching against them. In this example we assume numbers, are raised, but as said above, any expression is a valid exception. | |
 | `thread { ... } ` | Create a new thread and run the code block in it | |
 | `lock l { ... }` | `l` is a reentrant lock (see the library for how to create them). The code block will be executed by the thread when the lock is available | |
 | `skip` | The empty statement | |
 
 ## Classes and objects
 
-Including class definitions, private methods, and calls fom outside. + this and super()
+Here is an example of a class definition in **NewOz** :
+
+    class Point extends AnotherObject
+      attr x=0 attr y=0                 //Attributes can have default values
+    {
+      defproc init(a, b) {
+        x=a y=b
+      }
+      defproc location(l) {             //Only procedures are supported : output has to be given as parameter
+        l = 'l(x:x, y:y)
+      }
+      defproc getX(o) {                 //Getters are required to read the object's state, since attributes are private
+        o = x
+      }
+      defproc MoveVertical(newX) {      //This method is made private by the use of a capital letter
+        x = newX
+      }
+      defproc MoveHorizontal(newY) {
+        y = newY
+      }
+      defproc move(newX, newY) {
+        this.MoveVertical(newX)
+        this.MoveHorizontal(newY)
+        super(AnotherObject).do()       //Doing something in the super class
+        super.do()                      //Also valid here, because we only have one superclass
+      }
+      defproc display() {
+        browse("Point at ("+x+", "+y+")")
+      }
+    }
+
+We can then create an instance of this class and calls its methods :
+
+    {
+      val a = new(Point, init(1,1))     //Creating a new instance. init() will be called after creation
+      var l
+      getX(l)
+      a.MoveVertical(5)                 //Error : MoveVertical is private
+      a.move(5,2)
+      a.display()
+    }
+> Note : calls presented here, being made from outside a method context, are not yet supported in **NewOz**.
 
 ## Functors
+> Will be added in a future release.

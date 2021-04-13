@@ -64,9 +64,11 @@ public class ClassDescriptor extends Declaration implements ClassElement {
     ClassContext classContext = (ClassContext) context;
 
     if (type.equals(SubType.EXTENSION)) {
-      classContext.superClasses.addAll(extendedClassesNames);
+      if(! classContext.addSuperClasses(extendedClassesNames)){
+        interStatement.reportSemanticError(line(), "One of the extended classes was not recognized in this context, nor any parent context.");
+      };
     } else if (type.equals(SubType.ATTRIBUTE)) {
-      classContext.addAttribute(attribute, defaultValue);
+      classContext.addAttribute(attribute);
     } else if (type.equals(SubType.PROPERTY)) {
       interStatement.reportSemanticError(line(), "Class properties are not supported in this release.");
       //TODO add properties & features in future release

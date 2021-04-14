@@ -88,8 +88,8 @@ public enum BuiltIns {
    * Returns the result of adjoining <code>r2</code> to <code>r1</code>. Note that features and
    * label in <code>r2</code> take precedence over <code>r1</code>.
    * <p>
-   * For example, adjoin('a(a, b, c:1), 'b(4, b:3, c:2)) yields the record 'b(4, b, b:3, c:2) as
-   * output..
+   * For example, <code>adjoin('a(a, b, c:1), 'b(4, b:3, c:2))</code> yields the record <code>'b(4, b, b:3, c:2)</code> as
+   * output.
    */
   adjoin("Adjoin", "adjoin", BuiltInType.FUNCTION,
       Arrays.asList(
@@ -113,8 +113,8 @@ public enum BuiltIns {
    * Returns the result of adjoining the field <code>x</code> to <code>r1</code> at feature
    * <code>li</code>.
    * <p>
-   * For example, adjoinAt('a(a, c:1), 2, b) yields the record 'a(a, b, c:1) as output, whereas
-   * adjoinAt('a(a, c:1), c, b) yields 'a(a, c:b) as output.
+   * For example, <code>adjoinAt('a(a, c:1), 2, b)</code> yields the record <code>'a(a, b, c:1)</code> as output, whereas
+   * <code>adjoinAt('a(a, c:1), c, b)</code> yields <code>'a(a, c:b)</code> as output.
    */
   adjoinAt("AdjoinAt", "adjoinAt", BuiltInType.FUNCTION,
       Arrays.asList(
@@ -261,7 +261,7 @@ public enum BuiltIns {
    * <p>
    * For example, <code>appendList((1::2::nil), (3::4::nil))</code> returns the list
    * <code>(1::2::3::4::nil)</code>, whereas <code>appendList((1::2::nil), (3::4))</code> returns
-   * <code>(1::2::(3::4))</code>, which is not a proper list (because (3::4) is not a proper list
+   * <code>(1::2::(3::4))</code>, which is not a proper list (because <code>(3::4)</code> is not a proper list
    * and by the recursive definition of lists).
    */
   appendList("List.append", "appendList", BuiltInType.FUNCTION,
@@ -323,7 +323,7 @@ public enum BuiltIns {
    * Returns the arity of <code>r</code>. The arity of <code>r</code> is the list of its features,
    * beginning with all integer features in ascending order, followed by the literal features.
    * <p>
-   * For example, arity('a(nil, 7, c:1, b:c)) yields [1, 2, b, c] as output.
+   * For example, <code>arity('a(nil, 7, c:1, b:c))</code> yields <code>[1, 2, b, c]</code> as output.
    */
   arity("Arity", "arity", BuiltInType.FUNCTION,
       Collections.singletonList(new Variable(-1, "r", true, false)),
@@ -464,6 +464,7 @@ public enum BuiltIns {
    * <code>browse(X)</code>
    * <p> TODO
    * Displays <code>X</code> in the Mozart Browser
+   * @hidden
    */
   BROWSE("Browse", "browse", BuiltInType.PROCEDURE,
       Collections.singletonList(new Variable(-1, "ToPrint", true, false)),
@@ -1504,7 +1505,7 @@ public enum BuiltIns {
   /**
    * <code>isBool(+x)</code>
    * <p>
-   * Tests whether <code>x</code> is a boolean.
+   * Tests whether <code>x</code> is a boolean value.
    */
   isBool("IsBool", "isBool", BuiltInType.FUNCTION,
       Collections.singletonList(new Variable(-1, "x", true, false)),
@@ -2380,7 +2381,7 @@ public enum BuiltIns {
           new Variable(-1, "initCall", true, false)),
       null, null),
   /**
-   * <code>newObject(+k, +initCall, ?o)</code>
+   * <code>new(+k, +initCall, ?o)</code>
    * <p>
    * Procedure version of <code>newObject(k, initCall)</code>.
    */
@@ -3357,7 +3358,7 @@ public enum BuiltIns {
   /**
    * <code>toArray(+t)</code>
    * <p>
-   * Returns an array with bounds between <code>1</code> and width(t), where the elements of the
+   * Returns an array with bounds between <code>1</code> and <code>width(t)</code>, where the elements of the
    * array are the fields of <code>t</code>.
    */
   toArray("Tuple.toArray", "toArray", BuiltInType.FUNCTION,
@@ -3377,7 +3378,7 @@ public enum BuiltIns {
   /**
    * <code>toDictionary(+r)</code>
    * <p>
-   * Returns a dictionary whose keys and their entries correspond to the features and their fields
+   * Returns a dictionary whose keys, and their entries correspond to the features and their fields
    * of <code>r</code>.
    */
   toDictionary("Record.toDictionary", "toDictionary", BuiltInType.FUNCTION,
@@ -3400,7 +3401,7 @@ public enum BuiltIns {
    * Returns the list of all fields of <code>r</code>, in the order given by <code>arity()</code>
    * (which see).
    * <p>
-   * For example, <code>toList('f(a, a:2, b:3))</code> yields [a, 2, 3] as output.
+   * For example, <code>toList('f(a, a:2, b:3))</code> yields <code>[a, 2, 3]</code> as output.
    */
   toList("Record.toList", "toList", BuiltInType.FUNCTION,
       Collections.singletonList(
@@ -3422,7 +3423,7 @@ public enum BuiltIns {
    * Returns the list of pairs that contains the feature-field pairs of <code>r</code>, in the order
    * given by <code>arity()</code> (which see).
    * <p>
-   * For example, <code>toListInd('f(a, a:2, b:3))</code> yields [1#a, a#2, b#3] as output.
+   * For example, <code>toListInd('f(a, a:2, b:3))</code> yields <code>[1#a, a#2, b#3]</code> as output.
    */
   toListInd("Record.toListInd", "toListInd", BuiltInType.FUNCTION,
       Collections.singletonList(
@@ -3524,7 +3525,7 @@ public enum BuiltIns {
    * float, record, tuple, atom, name, procedure, cell, byteString, bitString, chunk, array,
    * dictionary, bitArray, 'class', object, 'lock', port, space, or 'thread'. If any other atom is
    * returned, this means that <code>x</code> is of no standard primary type, but an
-   * implementation-dependent extension. TODO restrict to types existing in NewOz ?
+   * implementation-dependent extension.
    */
   type("Value.type", "type", BuiltInType.FUNCTION,
       Collections.singletonList(new Variable(-1, "x", true, false)),
@@ -3706,8 +3707,8 @@ public enum BuiltIns {
 
   /**
    * Returns the name of this function, procedure, class or functor in Oz.
-   *
    * @return the name as known by Mozart
+   * @hidden
    */
   public String ozString() {
     return ozImage;
@@ -3715,8 +3716,8 @@ public enum BuiltIns {
 
   /**
    * Returns the name of this function, procedure, class or functor in NewOz.
-   *
    * @return the name as known by Nozc
+   * @hidden
    */
   public String nozString() {
     return nozImage;

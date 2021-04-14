@@ -1,0 +1,32 @@
+{
+    class anotherObject {}
+    class point extends anotherObject
+      attr x=0 attr y=0
+    {
+      defproc init(a, b) {
+        x=a y=b
+      }
+      defproc location(l) {
+        //l = ('l(x:x, y:y))
+      }
+      defproc getX(o) {
+        o = x
+      }
+      defproc moveVertical(newX) {
+        x = newX
+      }
+      defproc moveHorizontal(newY) {
+        y = newY
+      }
+      defproc move(newX, newY) {
+        this.moveVertical(newX)
+        this.moveHorizontal(newY)
+        //super.do(newX, newY)
+        browse((newX#newY))
+        //super(anotherObject).do(newX, newY)
+      }
+      defproc display() {
+        browse("Point at ("+x+", "+y+")")
+      }
+    }
+}

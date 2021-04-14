@@ -99,6 +99,11 @@ public class ClassDefAnonym extends DeclarationAnonym {
         //TODO not supported in the first release
       }
     }
+    this.methods.forEach(m -> {
+      m.codegen(output);
+    });
+    output.token(TokenOz.END);
+    output.newLine();
   }
 
   @Override

@@ -119,6 +119,7 @@ public class Call extends Expression {
     });
     output.token(TokenOz.RPAREN);
     output.token(TokenOz.RCURLY);
+    output.space();
   }
 
   @Override

@@ -76,6 +76,7 @@ public class CallFunction extends
       a.codegen(output);
     });
     output.token(TokenOz.RCURLY);
+    output.space();
   }
 
   @Override

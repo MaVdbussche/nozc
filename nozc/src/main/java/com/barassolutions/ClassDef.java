@@ -106,6 +106,7 @@ public class ClassDef extends Declaration {
       m.codegen(output);
     });
     output.token(TokenOz.END);
+    output.newLine();
   }
 
   @Override

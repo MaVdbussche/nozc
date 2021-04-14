@@ -131,7 +131,7 @@ public class CallProcedure extends Statement {
       }
     });
     output.token(TokenOz.RCURLY);
-    output.newLine();
+    output.space();
   }
 
   @Override

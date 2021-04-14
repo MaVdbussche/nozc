@@ -93,10 +93,13 @@ public class InStatement extends Statement {
     if (statements.size() > 0) {
       statements.forEach(e -> {
         e.codegen(output);
-        output.newLine();
+        if(statements.indexOf(e)!=statements.size()-1) {
+          output.newLine();
+        }
       });
     } else {
       output.token(TokenOz.SKIP);
+      output.newLine();
     }
     output.indentLeft();
     if ((!declareMode) && declarations.size()>0) {

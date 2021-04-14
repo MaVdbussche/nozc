@@ -124,8 +124,8 @@ public class NozcJavaCCTestCase {
    * Run the nozc compiler against a pass-test file.
    */
   @Test
-  public void testPassTest() {
-    String testedFile = "Test.noz";
+  public void testPassClasses() {
+    String testedFile = "Classes.noz";
 
     File passTest = new File("src/test/java/pass/"+testedFile);
     File genClassDir = new File("src/test/java/pass");

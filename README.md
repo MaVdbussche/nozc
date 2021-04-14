@@ -8,6 +8,7 @@
 **Nozc** is a compiler for **NewOz**, written in *Java*. It is able to translate **NewOz** files (denoted by the use of `.noz` extension) to **Oz** files (`.oz`), which can then be fed to the existing **Mozart** compiler (`ozc`).\
 It provides an elegant command-line interface with various options, allowing for example to finely custom the logging verbosity, or to print a visual representation of the program's syntax tree in the terminal.\
 This compiler was developed in the context of my master thesis, which can be found here : [LINK]() (*coming soon*).
+> **NewOz** Is actively looking for contributors. If you are interested, please see below for information on how you can help us !
 
 ## Table of Contents
 
@@ -17,7 +18,6 @@ This compiler was developed in the context of my master thesis, which can be fou
 - [Requirements](#requirements)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [Issues and discussion](#issues-and-discussion)
 - [License](#license)
 
 ## Background
@@ -118,14 +118,7 @@ When placed in the extracted folder, run the following command to see the valid 
 
 ## Contributing
 
-All contributions, to both **NewOz** as a language, and **Nozc** as a compiler, are welcome. See [CONTRIBUTING](CONTRIBUTING.md) for more information.
-
-Note: When editing the Readme, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
-
-## Issues and discussion
-
-You are free to open issues on this repository for any remarks, suggestion, or bug reports.
-I will try to address them as much as possible.
+All contributions of any kind are welcome. See [CONTRIBUTING](CONTRIBUTING.md) for more information.
 
 ## Reference
 

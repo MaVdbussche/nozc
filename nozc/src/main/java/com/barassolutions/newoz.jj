@@ -249,7 +249,7 @@ TOKEN : {
 TOKEN : {
   < VARIABLESTRICT: ((<UPPERCASE>(<ALPHANUM>)*) | "`"(<ESC> | <PSEUDO_CHAR> | ~["`","\\","\n","\r"])"`") > //Used only in imports
 |
-< VARIABLE: ((<UPPERCASE>(<ALPHANUM>)*) | (<LOWERCASE> (<ALPHANUM>)*)) >
+< VARIABLE: <LOWERCASE> (<ALPHANUM>)* >//((<UPPERCASE>(<ALPHANUM>)*) | (<LOWERCASE> (<ALPHANUM>)*)) >TODO allow uppercase ?
 | < ATOM: (<ATOMLISP> | "´" (<ESC>| <PSEUDO_CHAR> | ~["\\","\n","\r"]) "´") >
 | < ATOMLISP: "'" (<LETTER>)* >
 //| < LABEL: (<VARIABLE>|<ATOM>|<BOOLEAN>|<UNIT>) >

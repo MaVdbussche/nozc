@@ -1,7 +1,7 @@
 declare
 fun{Acc L N}
 case L of
-   L1|nil andthen true then N + L1
+   L1|nil andthen L1 == true then N + L1
 [] L1|L2 then local
 A=0
 in

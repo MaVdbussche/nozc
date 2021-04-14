@@ -1,33 +1,26 @@
-This repository primarily contains the source code of **Nozc**, a **NewOz** compiler written in Java.\
+> This repository primarily contains the source code of **Nozc**, a **NewOz** compiler written in Java.\
 However, we will use the GitHub issues tab to discuss both adaptations to the syntax of **NewOz**, and improvements to the compiler, as they will obviously be tightly connected.
 When creating issues, please add the appropriate tags to ease triaging and to make it easier for others to participate in the discussion.
 
 As the current project maintainer, I will do my best to comment as much as I can on your opened issues.
 Any help is greatly appreciated, and will have a direct impact on the future of **NewOz** in particular, and the **Mozart**/**Oz** ecosystem as a whole.\
-Since **Oz** is also used as a teaching tool, it will also have an impact on the material of various MOOCs and university courses.
+Since **Oz** is also used as a teaching tool, it will also improve the material of various MOOCs and university courses.
 
-Please note we have a [code of conduct](#code-of-conduct), please follow it in all your interactions with the project,
+We have a [code of conduct](#code-of-conduct), please follow it in all your interactions with the project,
 in the widest sense of the term.
-
-# Contributing to Nozc (the compiler)
-
-## Pull Request Process
-
-When contributing to this repository, please first discuss the change you wish to make via an issue and a pull request :
-
-1. Please make sure to only commit relevant files from your fork in the pull request.
-2. Update the [README](README.md) or other documentation if necessary
-3. Increase the version number in any example files, and change the [README](README.md) to the new version that this
-   Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
-4. Prefer a sequence of multiple small commits focusing on one change, with descriptive commit messages.
 
 # Contributing to NewOz (the language)
 
-You can find at the root of the repository, an [examples](examples) folder with small, commented programs which will give you an idea of what the current version of the syntax looks like.\
+You can find at the root of the repository, an [examples](examples) folder with small, commented programs which will give you an idea of what the current version of the syntax looks like.
+The [docs](docs) folder also contains a lot of documentation to get started with **NewOz**, and is being improved with each release.\
 These are meant to serve as a base for the discussion in the GitHub issues tab.
-You are kindly invited to submit any changes you think might be relevant.
-The process of creating a syntax is long and happens iteratively, and getting feedback from many programmers from various backgrounds is very important to us. 
-As stated above, I will do my best to answer promptly to your opened issues.
+You are kindly invited to submit any idea you think might be relevant : does a syntax element look weird to you ? How would you change it ? Why would you change it ? What are pros and cons of two versions you can think of ?
+
+
+We want to create a space on the [issues](https://github.com/MaVdbussche/nozc) page for motivated discussion on the current version of the syntax of **NewOz**.
+There are already some open issues there to get the debate started.
+The process of creating a syntax is long and happens iteratively; for this reason, getting feedback from many programmers from various backgrounds is very important to us. 
+As stated above, I will do my best to answer promptly to your opened issues. Come and join !
 
 # Code of Conduct
 

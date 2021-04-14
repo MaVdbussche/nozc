@@ -1,8 +1,8 @@
 //Standard mathematical operations are available as built-in operations :
-declare {
+{
   var a=0, b, d, e, maximum
+  val c = sin(b) //Error : all declarations must come before the statements, in any given block. (b=90 is an assignment statement)
   b = 90
-  val c = sin(b) //Error : all declarations must come before the statements of a scope. (b=90 is an assignment statement)
   e = a d = 1.2
   if ((isFloat(d) && isFloat(e)) || (isInt(d) && isInt(e))) {
     maximum = max(d, e) //Is equivalent to :

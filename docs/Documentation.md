@@ -32,8 +32,8 @@ programming, meaning that functions and procedures are considered values, which 
 
 In this documentation, we use the word *variable* to refer to *vars* and *vals* indistinctly, unless
 specified otherwise.\
-Valid names for variables are all series of alphanumeric characters, plus the '_' character :
-e.g. `a`, `MyVariable95`, `f2ze_5d4f6d`.
+Valid names for variables are all series of alphanumeric characters, plus the '_' character, starting with a lowercase letter :
+e.g. `a`, `myVariable95`, `f2ze_5d4f6d`.
 
 ### NewOz types and concepts
 
@@ -102,7 +102,7 @@ e.g. `a`, `MyVariable95`, `f2ze_5d4f6d`.
   Concurrent threads that attempt to get the same lock are queued.
   When the lock is released, it is granted to the thread standing first in line etc.\
   **NewOz**'s library provides methods to create such locks. There is also a special keyword `lock` (see further below).
-- **Classes** : **NewOz** supports object-oriented programming through library operations or special keywords described further below.\
+- **Classes & Objects** : **NewOz** supports object-oriented programming through library operations or special keywords described further below.\
   A class in **NewOz** contains methods and attributes, that each instance of the class
   will possess. Attributes are private states.
   Inside of method bodies, other methods from this class or from a superclass can be called as follows : `this.method()` or `super(aClassName).method()`.
@@ -112,7 +112,6 @@ e.g. `a`, `MyVariable95`, `f2ze_5d4f6d`.
   A method in class `A` overrides any method with the same name in any superclass of `A`.\
   **Oz** enforce classes who inherit from ancestors having methods with the same name, to override those methods in the new class.
   This is a nice way to circumvent a well-known problem with multiple inheritance. However, this is not yet enforced in **NewOz**.
-- **Objects** : TODO
 - **Exceptions** : Any value may be raised as an exception, although commonly only records are used.
   Some of these serve special purposes : *error exceptions* are records with label `error`.
   These are raised when a programming error occurs; it is not recommended catching these.
@@ -125,7 +124,7 @@ e.g. `a`, `MyVariable95`, `f2ze_5d4f6d`.
   This is the element at feature *1* of the exception record.
   This is usually a record further describing the exact condition that occurred.\
   See the library for operations on exceptions. There is also a `raise` keyword (see further below).
-- **Functors** : TODO
+- **Functors** : Will be added in a future release.
 
 ### Variable status
 
@@ -250,9 +249,12 @@ NewOz**. We indicate **invalid** code pieces with an explanation.
 
 ## Classes and objects
 
+> Note : even though the syntax is presented here, its implementation is still very buggy. Work is being done to fix it in the next release.
+> Still, you can see here what it will look like and already form an opinion.
+
 Here is an example of a class definition in **NewOz** :
 
-    class Point extends AnotherObject
+    class point extends anotherObject
       attr x=0 attr y=0                 //Attributes can have default values
     {
       defproc init(a, b) {
@@ -273,7 +275,7 @@ Here is an example of a class definition in **NewOz** :
       defproc move(newX, newY) {
         this.MoveVertical(newX)
         this.MoveHorizontal(newY)
-        super(AnotherObject).do()       //Doing something in the super class
+        super(anotherObject).do()       //Doing something in the super class
         super.do()                      //Also valid here, because we only have one superclass
       }
       defproc display() {
@@ -281,17 +283,16 @@ Here is an example of a class definition in **NewOz** :
       }
     }
 
-We can then create an instance of this class and calls its methods :
+We can then create an instance of this class and call its methods :
 
     {
-      val a = new(Point, init(1,1))     //Creating a new instance. init() will be called after creation
+      val a = new(point, init(1,1))     //Creating a new instance. init() will be called after creation
       var l
       getX(l)
       a.MoveVertical(5)                 //Error : MoveVertical is private
       a.move(5,2)
       a.display()
     }
-> Note : calls presented here, being made from outside a method context, are not yet supported in **NewOz**.
 
 ## Functors
 > Will be added in a future release.

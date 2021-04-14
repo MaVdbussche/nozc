@@ -9,15 +9,15 @@ Since **Oz** is also used as a teaching tool, it will also improve the material 
 We have a [code of conduct](#code-of-conduct), please follow it in all your interactions with the project,
 in the widest sense of the term.
 
-# Contributing to NewOz (the language)
+# Contributing to NewOz (the language) - go to the Github issues !
 
 You can find at the root of the repository, an [examples](examples) folder with small, commented programs which will give you an idea of what the current version of the syntax looks like.
 The [docs](docs) folder also contains a lot of documentation to get started with **NewOz**, and is being improved with each release.\
-These are meant to serve as a base for the discussion in the GitHub issues tab.
+These are meant to serve as a base for the discussion in the [GitHub issues](https://github.com/MaVdbussche/nozc/issues) tab.
 You are kindly invited to submit any idea you think might be relevant : does a syntax element look weird to you ? How would you change it ? Why would you change it ? What are pros and cons of two versions you can think of ?
 
 
-We want to create a space on the [issues](https://github.com/MaVdbussche/nozc) page for motivated discussion on the current version of the syntax of **NewOz**.
+We want to create a space on the [issues](https://github.com/MaVdbussche/nozc/issues) page for motivated discussion on the current version of the syntax of **NewOz**.
 There are already some open issues there to get the debate started.
 The process of creating a syntax is long and happens iteratively; for this reason, getting feedback from many programmers from various backgrounds is very important to us. 
 As stated above, I will do my best to answer promptly to your opened issues. Come and join !

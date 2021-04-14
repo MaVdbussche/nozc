@@ -125,121 +125,117 @@ public interface JavaCCParserConstants {
   /** RegularExpression Id. */
   int LNOT = 66;
   /** RegularExpression Id. */
-  int LNOTNOT = 67;
+  int MINUS = 67;
   /** RegularExpression Id. */
-  int MINUS = 68;
+  int PLUS = 68;
   /** RegularExpression Id. */
-  int PLUS = 69;
+  int STAR = 69;
   /** RegularExpression Id. */
-  int STAR = 70;
+  int SLASH = 70;
   /** RegularExpression Id. */
-  int SLASH = 71;
+  int BACKSLASH = 71;
   /** RegularExpression Id. */
-  int INC = 72;
+  int MODULO = 72;
   /** RegularExpression Id. */
-  int DEC = 73;
+  int HASHTAG = 73;
   /** RegularExpression Id. */
-  int BACKSLASH = 74;
+  int UNDERSCORE = 74;
   /** RegularExpression Id. */
-  int MODULO = 75;
+  int DOLLAR = 75;
   /** RegularExpression Id. */
-  int HASHTAG = 76;
+  int APOSTROPHE = 76;
   /** RegularExpression Id. */
-  int UNDERSCORE = 77;
+  int QUOTE = 77;
   /** RegularExpression Id. */
-  int DOLLAR = 78;
+  int LACCENT = 78;
   /** RegularExpression Id. */
-  int APOSTROPHE = 79;
+  int RACCENT = 79;
   /** RegularExpression Id. */
-  int QUOTE = 80;
+  int HAT = 80;
   /** RegularExpression Id. */
-  int LACCENT = 81;
+  int BOX = 81;
   /** RegularExpression Id. */
-  int RACCENT = 82;
+  int DEGREE = 82;
   /** RegularExpression Id. */
-  int HAT = 83;
+  int COLCOL = 83;
   /** RegularExpression Id. */
-  int BOX = 84;
+  int COMMA = 84;
   /** RegularExpression Id. */
-  int DEGREE = 85;
+  int LBRACK = 85;
   /** RegularExpression Id. */
-  int COLCOL = 86;
+  int LCURLY = 86;
   /** RegularExpression Id. */
-  int COMMA = 87;
+  int LPAREN = 87;
   /** RegularExpression Id. */
-  int LBRACK = 88;
+  int RBRACK = 88;
   /** RegularExpression Id. */
-  int LCURLY = 89;
+  int RCURLY = 89;
   /** RegularExpression Id. */
-  int LPAREN = 90;
+  int RPAREN = 90;
   /** RegularExpression Id. */
-  int RBRACK = 91;
+  int SEMI = 91;
   /** RegularExpression Id. */
-  int RCURLY = 92;
+  int COLON = 92;
   /** RegularExpression Id. */
-  int RPAREN = 93;
+  int DOT = 93;
   /** RegularExpression Id. */
-  int SEMI = 94;
+  int DOTDOT = 94;
   /** RegularExpression Id. */
-  int COLON = 95;
+  int ELLIPSIS = 95;
   /** RegularExpression Id. */
-  int DOT = 96;
+  int VARIABLESTRICT = 96;
   /** RegularExpression Id. */
-  int DOTDOT = 97;
+  int VARIABLE = 97;
   /** RegularExpression Id. */
-  int ELLIPSIS = 98;
+  int ATOM = 98;
   /** RegularExpression Id. */
-  int VARIABLESTRICT = 99;
+  int ATOMLISP = 99;
   /** RegularExpression Id. */
-  int VARIABLE = 100;
+  int STRING = 100;
   /** RegularExpression Id. */
-  int ATOM = 101;
+  int CHARACTER = 101;
   /** RegularExpression Id. */
-  int ATOMLISP = 102;
+  int INT = 102;
   /** RegularExpression Id. */
-  int STRING = 103;
+  int FLOAT = 103;
   /** RegularExpression Id. */
-  int CHARACTER = 104;
+  int UPPERCASE = 104;
   /** RegularExpression Id. */
-  int INT = 105;
+  int LOWERCASE = 105;
   /** RegularExpression Id. */
-  int FLOAT = 106;
+  int LETTER = 106;
   /** RegularExpression Id. */
-  int UPPERCASE = 107;
+  int DIGIT = 107;
   /** RegularExpression Id. */
-  int LOWERCASE = 108;
+  int NON_ZERO_DIGIT = 108;
   /** RegularExpression Id. */
-  int DIGIT = 109;
+  int CHARINT = 109;
   /** RegularExpression Id. */
-  int NON_ZERO_DIGIT = 110;
+  int ALPHANUM = 110;
   /** RegularExpression Id. */
-  int CHARINT = 111;
+  int DECINT = 111;
   /** RegularExpression Id. */
-  int ALPHANUM = 112;
+  int HEXINT = 112;
   /** RegularExpression Id. */
-  int DECINT = 113;
+  int OCTINT = 113;
   /** RegularExpression Id. */
-  int HEXINT = 114;
+  int BININT = 114;
   /** RegularExpression Id. */
-  int OCTINT = 115;
+  int OCTDIGIT = 115;
   /** RegularExpression Id. */
-  int BININT = 116;
+  int HEXDIGIT = 116;
   /** RegularExpression Id. */
-  int OCTDIGIT = 117;
+  int BINDIGIT = 117;
   /** RegularExpression Id. */
-  int HEXDIGIT = 118;
+  int ESCAPE_CHAR = 118;
   /** RegularExpression Id. */
-  int BINDIGIT = 119;
+  int ESC = 119;
   /** RegularExpression Id. */
-  int ESCAPE_CHAR = 120;
+  int CHARCHAR = 120;
   /** RegularExpression Id. */
-  int ESC = 121;
+  int PSEUDO_CHAR = 121;
   /** RegularExpression Id. */
-  int CHARCHAR = 122;
-  /** RegularExpression Id. */
-  int PSEUDO_CHAR = 123;
-  /** RegularExpression Id. */
-  int ERROR = 124;
+  int ERROR = 122;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -315,13 +311,10 @@ public interface JavaCCParserConstants {
     "\"&&\"",
     "\"||\"",
     "\"!\"",
-    "\"!!\"",
     "\"-\"",
     "\"+\"",
     "\"*\"",
     "\"/\"",
-    "\"++\"",
-    "\"--\"",
     "\"\\\\\"",
     "\"%\"",
     "\"#\"",
@@ -357,6 +350,7 @@ public interface JavaCCParserConstants {
     "<FLOAT>",
     "<UPPERCASE>",
     "<LOWERCASE>",
+    "<LETTER>",
     "<DIGIT>",
     "<NON_ZERO_DIGIT>",
     "<CHARINT>",

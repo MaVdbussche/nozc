@@ -1,4 +1,4 @@
-declare { // If your program makes declarations, you need to write it in a declare block.
+{ // If your program makes declarations, you need to write it in a block.
   val fibo, out //Declare final values with val. You don't have to assign them immediately.
   fibo = def $ (n) { //You can declare functions "anonymously" using "$". You can now call it using fibo().
             if(n<2) {

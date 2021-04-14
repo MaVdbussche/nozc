@@ -22,6 +22,10 @@ public class MethodArg extends Pattern {
     this.defaultValue = defaultValue;
   }
 
+  public String name() {
+    return name;
+  }
+
   @Override
   public Iterable<Pattern> patterns() {
     return Collections.singleton(this);

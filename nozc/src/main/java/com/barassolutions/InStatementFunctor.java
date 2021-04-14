@@ -3,8 +3,10 @@ package com.barassolutions;
 public class InStatementFunctor extends InStatement {
 
   public InStatementFunctor(InStatement statement) {
-    super(statement.line(), statement.declarations, statement.statements);
-    assert statement.declarations.size() > 0;
+    super(statement.line(), statement.declarations, statement.statements, false);
+    if (! (statement.declarations.size() > 0)) {
+      interStatement.reportSemanticError(line(), "You ned at least one declaration in the functor's body");
+    }
   }
 
   /**

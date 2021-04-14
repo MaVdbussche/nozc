@@ -102,6 +102,7 @@ public class CaseStructExpression extends Expression {
       output.newLine();
     }
     output.token(TokenOz.END);
+    output.newLine();
   }
 
   @Override

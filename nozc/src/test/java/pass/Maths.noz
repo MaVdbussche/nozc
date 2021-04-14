@@ -5,7 +5,10 @@ declare {
   b = 90
   e = a d = 1.2
   if ((isFloat(d) && isFloat(e)) || (isInt(d) && isInt(e))) {
-    maximum = max(d, e) //Is equivalent to :
-    max(d, e, maximum) //Most built-in functions have a procedure equivalent, where we pass an existing variable as the last argument to store the result.
+    val m
+    max(d, e, m)
+    //Most built-in functions have a procedure equivalent, where we pass an existing variable as the last argument to store the result.
+    // The 2 previous lines are thus equivalent to :
+    maximum = max(d, e)
   }
 }

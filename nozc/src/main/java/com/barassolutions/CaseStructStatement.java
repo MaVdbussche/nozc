@@ -59,7 +59,8 @@ public class CaseStructStatement extends Statement {
     output.indentRight();
     clauses.forEach(c -> {
       c.codegen(output);
-      if(clauses.indexOf(c)!=clauses.size()-1) {
+      if (clauses.indexOf(c) != clauses.size() - 1
+          || (clauses.indexOf(c) == clauses.size() - 1 && defaultStatement != null)) {
         output.newLine();
       }
     });
@@ -70,6 +71,7 @@ public class CaseStructStatement extends Statement {
       output.newLine();
     }
     output.token(TokenOz.END);
+    output.newLine();
   }
 
   @Override

@@ -137,12 +137,7 @@ public class InterStatement extends AST {
   @Override
   public void codegen(Emitter output) {
     if (statement != null) {
-      output.token(TokenOz.DECLARE);
-      output.newLine();
-      output.indentRight();
       statement.codegen(output);
-      output.newLine();
-      output.indentLeft();
     } else if (statements != null) {
       statements.forEach(s -> s.codegen(output));
     }

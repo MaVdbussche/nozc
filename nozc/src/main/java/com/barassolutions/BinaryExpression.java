@@ -62,9 +62,10 @@ public abstract class BinaryExpression extends Expression {
  */
 class OperationPlus extends BinaryExpression {
 
+  private boolean isConcatenation = false;
+
   public OperationPlus(int line, Expression lhs, Expression rhs) {
     super(line, "+", lhs, rhs);
-
   }
 
   /**
@@ -80,6 +81,7 @@ class OperationPlus extends BinaryExpression {
     lhs = lhs.analyze(context);
     rhs = rhs.analyze(context);
     if (lhs.type() == Type.STRING || rhs.type() == Type.STRING) {
+      isConcatenation = true;
       return (new OperationStringConcatenation(line(), lhs, rhs)).analyze(context);
     } else if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
@@ -97,10 +99,55 @@ class OperationPlus extends BinaryExpression {
 
   @Override
   public void codegen(Emitter output) {
+    if (isConcatenation) {
+      (new OperationStringConcatenation(line(), lhs, rhs)).codegen(output);
+    } else {
+      lhs.codegen(output);
+      output.space();
+      output.token(TokenOz.PLUS);
+      output.space();
+      rhs.codegen(output);
+    }
+  }
+}
+class OperationStringConcatenation extends OperationPlus {
+
+  /**
+   * Construct an AST node for a string concatenation expression given its
+   * line number, and the lhs and rhs operands. An expression of this sort is
+   * created during the analysis of a (overloaded) + operation (and not by the
+   * Parser).
+   *
+   * @param line
+   *            line in which the expression occurs in the source file.
+   * @param lhs
+   *            lhs operand.
+   * @param rhs
+   *            rhs operand.
+   */
+  public OperationStringConcatenation(int line, Expression lhs, Expression rhs) {
+    super(line, lhs, rhs);
+  }
+
+  /**
+   * Analysis is simple here. The operands have already been analyzed (in
+   * <code>OperationPlus</code>) so we simply set the result type.
+   *
+   * @param context
+   *            context in which names are resolved.
+   * @return the analyzed (and possibly rewritten) AST subtree.
+   */
+  @Override
+  public Expression analyze(Context context) {
+    //We checked before that both are strings
+    type = Type.STRING;
+    return this;
+  }
+
+  @Override
+  public void codegen(Emitter output) {
     lhs.codegen(output);
-    output.space();
-    output.token(TokenOz.PLUS);
-    output.space();
+    output.token(TokenOz.HASHTAG);
     rhs.codegen(output);
   }
 }

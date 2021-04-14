@@ -45,6 +45,10 @@ public class ClassDef extends Declaration {
     return out;
   }
 
+  public List<MethodDef> methods() {
+    return methods;
+  }
+
   @Override
   public AST analyze(Context context) {
     ClassContext classContext = new ClassContext(context, className);
@@ -70,7 +74,7 @@ public class ClassDef extends Declaration {
     output.token(TokenOz.CLASS);
     output.space();
     output.literal(Utils.ozFriendlyName(className));
-    output.space();
+    output.newLine();
     //The following piece of codes relies on the fact that the list is sorted according to
     // the ClassDescriptor.SubType enum.
     // It is far from elegant, but it should work.
@@ -86,6 +90,11 @@ public class ClassDef extends Declaration {
         output.token(TokenOz.ATTR);
         output.space();
         output.literal(descriptor.attribute().name());
+        output.space();
+        output.token(TokenOz.COLON);
+        output.space();
+        descriptor.attributeValue().codegen(output);
+        output.newLine();
       } else if (descriptor.type().equals(SubType.PROPERTY)) {
         //TODO not supported in the first release
       } else if (descriptor.type().equals(SubType.FEATURE)) {
@@ -93,6 +102,10 @@ public class ClassDef extends Declaration {
         //TODO not supported in the first release
       }
     }
+    this.methods.forEach(m -> {
+      m.codegen(output);
+    });
+    output.token(TokenOz.END);
   }
 
   @Override

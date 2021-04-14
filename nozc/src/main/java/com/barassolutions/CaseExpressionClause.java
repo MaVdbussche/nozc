@@ -80,7 +80,7 @@ public class CaseExpressionClause extends Expression {
     });
 
     expressions.forEach(e -> {
-      e = e.analyze(context);
+      e = e.analyze(innerContext); //This allows them to know the pattern
       e.type().mustMatchExpected(line(), Type.BOOLEAN);
     });
 

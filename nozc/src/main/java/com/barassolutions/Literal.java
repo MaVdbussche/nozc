@@ -1,6 +1,5 @@
 package com.barassolutions;
 
-import com.barassolutions.util.Logger;
 import org.jetbrains.annotations.NotNull;
 
 public class Literal extends Pattern {

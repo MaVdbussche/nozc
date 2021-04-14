@@ -87,6 +87,10 @@ public class ClassDefAnonym extends DeclarationAnonym {
         output.token(TokenOz.ATTR);
         output.space();
         output.literal(descriptor.attribute().name());
+        output.space();
+        output.token(TokenOz.COLON);
+        output.space();
+        descriptor.attributeValue().codegen(output);
         output.newLine();
       } else if (descriptor.type().equals(SubType.PROPERTY)) {
         //TODO not supported in the first release

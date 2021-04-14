@@ -2,7 +2,7 @@
 declare {
   def acc(l, n) { //Use "def" to declare functions, "defproc" to declare procedures
     match l { //Match structure will compare to expression "l"
-      case (l1::nil) && true => { // You can place boolean evaluations after the pattern being matched. These won't be evaluated if the pattern doesn't match.
+      case (l1::nil) && l1==true => { // You can place boolean evaluations after the pattern being matched. These won't be evaluated if the pattern doesn't match.
         n+l1
       }
       case (l1::l2) => {

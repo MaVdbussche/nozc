@@ -21,7 +21,7 @@ public class ExpressionSelectionMethod extends Expression {
   @Override
   public Expression analyze(Context context) {
     interStatement.reportSemanticError(line(),
-        "Method calls on an instance from outside a class context : this is not supported in this release.");
+        "Method calls on an instance from outside a class context : this is not supported in this release.\nIn a class context, you can use \"this\" and \"super\".");
     //TODO to implement in future release
 
     return this;

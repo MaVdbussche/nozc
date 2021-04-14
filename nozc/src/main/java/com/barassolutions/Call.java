@@ -64,7 +64,11 @@ public class Call extends Expression {
           }
         }
       } else if (target.equals("super")) {
-        classContext = context.findClassContext(superClassName);
+        if(superClassName==null) {
+          classContext = classContext.superClassContext();
+        } else {
+          classContext = classContext.superClassContext(superClassName);
+        }
         if (classContext == null) {
           interStatement.reportSemanticError(line(),
               "Could not find Class \"" + superClassName + "\" in this context.");
@@ -114,6 +118,7 @@ public class Call extends Expression {
       e.codegen(output);
     });
     output.token(TokenOz.RPAREN);
+    output.token(TokenOz.RCURLY);
   }
 
   @Override

@@ -321,7 +321,7 @@ public class Nozc implements Callable<Integer> {
 
   private static String getTimeString(long startTime) {
     long diffNano = System.nanoTime() - startTime;
-    Logger.debug("Printing " + diffNano + " nanoseconds");
+    Logger.trace("Printing " + diffNano + " nanoseconds");
 
     long nbNano = diffNano % 1000;
     long diffMicro = (diffNano - nbNano) / 1000;

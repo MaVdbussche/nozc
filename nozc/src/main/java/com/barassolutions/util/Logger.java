@@ -62,7 +62,6 @@ public class Logger {
     }
   }
 
-  @Deprecated
   public static void trace(String message, Object... args) {
     if (Nozc.loglevel.ordinal() >= LogLevel.TRACE.ordinal()) {
       System.out.printf(LogLevel.TRACE + message, args);
@@ -70,6 +69,7 @@ public class Logger {
     }
   }
 
+  @Deprecated
   public static void log(String message, Object... args) {
     if (Nozc.loglevel.ordinal() >= LogLevel.ALL.ordinal()) {
       System.out.printf(LogLevel.ALL + message, args);

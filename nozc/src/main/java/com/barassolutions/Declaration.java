@@ -68,7 +68,7 @@ public class Declaration extends Statement {
         output.literal(Utils.ozFriendlyName(k.name()));
         output.token(TokenOz.ASSIGN);
         output.token(TokenOz.LCURLY);
-        output.literal(BuiltIns.NEWCELL.ozString());
+        output.literal(BuiltIns.newCell.ozString());
         output.space();
         if (v == null) {
           output.token(TokenOz.UNDERSCORE);

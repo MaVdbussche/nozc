@@ -8,6 +8,7 @@
 **Nozc** is a compiler for **NewOz**, written in *Java*. It is able to translate **NewOz** files (denoted by the use of `.noz` extension) to **Oz** files (`.oz`), which can then be fed to the existing **Mozart** compiler (`ozc`).\
 It provides an elegant command-line interface with various options, allowing for example to finely custom the logging verbosity, or to print a visual representation of the program's syntax tree in the terminal.\
 This compiler was developed in the context of my master thesis, which can be found here : [LINK]() (*coming soon*).
+> **NewOz** Is actively looking for contributors. If you are interested, please see below for information on how you can help us !
 
 ## Table of Contents
 
@@ -17,7 +18,6 @@ This compiler was developed in the context of my master thesis, which can be fou
 - [Requirements](#requirements)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [Issues and discussion](#issues-and-discussion)
 - [License](#license)
 
 ## Background
@@ -29,12 +29,12 @@ The [**Oz** programming language](http://mozart2.org) is a multi-paradigm langua
 It allows users to dynamically create any number of sequential threads.
 The threads are dataflow threads in the sense that a thread executing an operation will suspend until all needed operands have a well-defined value.
 
-The [**Mozart** programming system](https://github.com/mozart/mozart2), which is the official implementation of **Oz**, has been **developed in the 1990s** by researchers from DFKI (the German Research Center for Artificial Intelligence), SICS (the Swedish Institute of Computer Science), the University of the Saarland, UCLouvain (the Université catholique de Louvain), and others.
+The [**Mozart** programming system](https://github.com/mozart/mozart2), which is the official implementation of **Oz**, has been **developed in the 1990s** by researchers from DFKI (the German Research Center for Artificial Intelligence), SICS (the Swedish Institute of Computer Science), the University of the Saarland, UCLouvain (the Université Catholique de Louvain), and others.
 
 Over the years, the **Oz** programming language has been used with success in various MOOCs and university courses.
 It's **multi-paradigm philosophy** proved to be an invaluable strength in teaching students the basics of programming paradigms, through its *one-fits-all* approach.
 
-However, it has become obvious over the years that the syntax of the language has become a drawback.
+However, it has become obvious over time that the syntax of the language constitutes a drawback.
 In particular, **Oz** has not been updated like other languages have, which is hindering its ability to keep a growing community of developers around it.
 
 The **objective behind NewOz**, launched by Prof. Peter Van Roy at [UCLouvain](https://uclouvain.be/fr/index.html) is ambitious : bringing the syntax of Oz to par with modern programming languages, while **keeping alive the philosophy** that makes its strength :
@@ -118,14 +118,7 @@ When placed in the extracted folder, run the following command to see the valid 
 
 ## Contributing
 
-All contributions, to both **NewOz** as a language, and **Nozc** as a compiler, are welcome. See [CONTRIBUTING](CONTRIBUTING.md) for more information.
-
-Note: When editing the Readme, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
-
-## Issues and discussion
-
-You are free to open issues on this repository for any remarks, suggestion, or bug reports.
-I will try to address them as much as possible.
+All contributions of any kind are welcome. See [CONTRIBUTING](CONTRIBUTING.md) for more information.
 
 ## Reference
 

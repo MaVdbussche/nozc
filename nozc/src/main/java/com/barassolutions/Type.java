@@ -4,14 +4,12 @@ import java.util.Arrays;
 
 public enum Type {
   ANY("Any"),
-  ATOM("Atom"),
   BOOLEAN("Boolean"),
   CHAR("Char"),
   FLOAT("Float"),
   INT("Int"),
   LIST("List"),
   NIL("Nil"),
-  OBJECT("Object"),
   RECORD("Record"),
   STRING("String"),
   UNDERSCORE("_"),

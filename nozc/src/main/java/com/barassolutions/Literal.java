@@ -34,8 +34,8 @@ public class Literal extends Pattern {
   public Literal(int line, Type type, @NotNull String image, boolean isAPattern) {
     super(line);
     this.type = type;
-    if (type==Type.STRING) {
-      this.image = image.substring(1, image.length()-1);
+    if (type == Type.STRING) {
+      this.image = image.substring(1, image.length() - 1);
     } else {
       this.image = image;
     }
@@ -59,7 +59,7 @@ public class Literal extends Pattern {
 
   @Override
   public void codegen(Emitter output) {
-    if (this.type==Type.STRING) {
+    if (this.type == Type.STRING) {
       output.token(TokenOz.APOSTROPHE);
       output.literal(image);
       output.token(TokenOz.APOSTROPHE);

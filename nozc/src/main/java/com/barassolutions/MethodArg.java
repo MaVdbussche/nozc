@@ -50,7 +50,7 @@ public class MethodArg extends Pattern {
     }
     output.literal(Utils.ozFriendlyName(name));
 
-    if (defaultValue!=null) {
+    if (defaultValue != null) {
       output.space();
       output.token(TokenOz.LBARROW);
       output.space();
@@ -61,9 +61,9 @@ public class MethodArg extends Pattern {
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<Argument>\n");
     p.indentRight();
-    p.printf("<Feature: \"%s\">\n", feature!=null ? feature.image() : "<none>");
+    p.printf("<Feature: \"%s\">\n", feature != null ? feature.image() : "<none>");
     p.printf("<ArgumentDefinition name: \"%s\">\n", name);
-    if(defaultValue!=null) {
+    if (defaultValue != null) {
       p.printf("<Default value:>\n");
       p.indentRight();
       defaultValue.writeToStdOut(p);

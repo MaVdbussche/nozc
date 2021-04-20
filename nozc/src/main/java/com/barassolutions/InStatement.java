@@ -29,7 +29,8 @@ public class InStatement extends Statement {
    * @param decls      declarations appearing in the block body
    * @param statements list of statements forming the block body.
    */
-  public InStatement(int line, ArrayList<Declaration> decls, ArrayList<Statement> statements, boolean declarePresent) {
+  public InStatement(int line, ArrayList<Declaration> decls, ArrayList<Statement> statements,
+      boolean declarePresent) {
     super(line);
     this.declarations = decls;
     this.statements = statements;
@@ -70,11 +71,10 @@ public class InStatement extends Statement {
    */
   @Override
   public void codegen(Emitter output) {
-    if (declarations.size()>0) {
+    if (declarations.size() > 0) {
       if (declareMode) {
         output.token(TokenOz.DECLARE);
-      }
-      else {
+      } else {
         output.token(TokenOz.LOCAL);
       }
       output.newLine();
@@ -82,7 +82,7 @@ public class InStatement extends Statement {
       declarations.forEach(e -> {
         e.codegen(output);
         //if (declarations.indexOf(e) != declarations.size() - 1) {
-          //output.newLine();
+        //output.newLine();
         //}
       });
       output.indentLeft();
@@ -93,7 +93,7 @@ public class InStatement extends Statement {
     if (statements.size() > 0) {
       statements.forEach(e -> {
         e.codegen(output);
-        if(statements.indexOf(e)!=statements.size()-1) {
+        if (statements.indexOf(e) != statements.size() - 1) {
           output.newLine();
         }
       });
@@ -102,7 +102,7 @@ public class InStatement extends Statement {
       output.newLine();
     }
     output.indentLeft();
-    if ((!declareMode) && declarations.size()>0) {
+    if ((!declareMode) && declarations.size() > 0) {
       output.token(TokenOz.END);
     }
   }

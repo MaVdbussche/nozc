@@ -24,7 +24,7 @@ public class OperationPlusAssignment extends OperationAssignment {
     output.space();
     output.token(TokenOz.COMMERCAT);
     lhs.codegen(output);
-    if(lhs.type().equals(Type.INT) || lhs.type.equals(Type.FLOAT)) {
+    if (lhs.type().equals(Type.INT) || lhs.type.equals(Type.FLOAT)) {
       output.token(TokenOz.PLUS);
     } else if (lhs.type.equals(Type.STRING)) {
       output.token(TokenOz.HASHTAG);

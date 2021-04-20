@@ -63,7 +63,7 @@ public class InExpression extends Expression {
     } else if (statements.get(statements.size() - 1) instanceof CallProcedure cp) {
       if (cp.isActuallyAFunction()) {
         this.type = cp.returnType();
-      } else {//TODO ugly hack to remove once we merge CallFunction and CallProcedure
+      } else { //TODO ugly hack to remove once we merge CallFunction and CallProcedure
         interStatement.reportSemanticError(line(), "Missing expression or return value in block");
       }
     } else {

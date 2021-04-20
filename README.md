@@ -1,18 +1,19 @@
 # NewOz and Nozc
 
-[![Travis (.com)](https://img.shields.io/travis/com/MaVdbussche/nozc?label=Build)](https://www.travis-ci.com/github/MaVdbussche/nozc)
+[![Travis build status](https://img.shields.io/travis/com/MaVdbussche/nozc?label=Build)](https://www.travis-ci.com/github/MaVdbussche/nozc)
 [![GitHub](https://img.shields.io/github/license/MaVdbussche/nozc?label=License)](LICENSE)
-[![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/MaVdbussche/nozc?include_prereleases&label=Release&sort=semver)](releases)
+[![Latest release](https://img.shields.io/github/v/tag/MaVdbussche/nozc?include_prereleases&label=Release&sort=semver)](releases)
 [![GitHub repo size](https://img.shields.io/github/repo-size/MaVdbussche/nozc?label=Size)](https://github.com/MaVdbussche/nozc)
 
 **Nozc** is a compiler for **NewOz**, written in *Java*. It is able to translate **NewOz** files (denoted by the use of `.noz` extension) to **Oz** files (`.oz`), which can then be fed to the existing **Mozart** compiler (`ozc`).\
 It provides an elegant command-line interface with various options, allowing for example to finely custom the logging verbosity, or to print a visual representation of the program's syntax tree in the terminal.\
 This compiler was developed in the context of my master thesis, which can be found here : [LINK]() (*coming soon*).
-> **NewOz** Is actively looking for contributors. If you are interested, please see below for information on how you can help us !
+> **NewOz** Is actively looking for contributors to give us feedback on the syntax ! If you are interested, please see below for information on how you can help us.
 
 ## Table of Contents
 
 - [Background](#background)
+- [Want to help ?](#want-to-help-)
 - [Project structure](#project-structure)
 - [Install](#install)
 - [Requirements](#requirements)
@@ -41,13 +42,16 @@ The **objective behind NewOz**, launched by Prof. Peter Van Roy at [UCLouvain](h
 giving access to a plethora of programming paradigms in a single, unique environment. This process has started in 2020, with the [master thesis](https://dial.uclouvain.be/memoire/ucl/object/thesis:25311) of Jean-Pacifique Mbonyincungu, who created a first design for the **NewOz** syntax, heavily inspired by *Scala*.
 The 2021 [thesis]() (_coming soon_) of Martin Vandenbussche continues this work by making more refinements to the syntax, as well as creating a fully fletched compiler around it.
 
-### Want to help ?
+## Want to help ?
+We are actively looking for people who can help us in the design of this new syntax.
+We believe involving more people with different backgrounds is important to make this syntax the best it can be.
 All your help is welcome and greatly appreciated. Please visit the [CONTRIBUTING](CONTRIBUTING.md) file to get in touch !
 
 ## Project structure
 
     .
     ├── bin                     # Binaries used to compile the program, shipped to ease the installation process
+    ├── docs                    # Documenatation to get started with NewOz. You should probably read this before the examples
     ├── examples                # Examples of NewOz programs, useful to get familiar with the syntax
     ├── gradle                  # A Gradle distribution used to simplify to build process
     ├── nozc

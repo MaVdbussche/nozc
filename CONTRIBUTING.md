@@ -1,5 +1,5 @@
 > This repository primarily contains the source code of **Nozc**, a **NewOz** compiler written in Java.\
-However, we will use the GitHub issues tab to discuss both adaptations to the syntax of **NewOz**, and improvements to the compiler, as they will obviously be tightly connected.
+However, we will mainly use the GitHub issues tab to discuss adaptations to the syntax of **NewOz**.\
 When creating issues, please add the appropriate tags to ease triaging and to make it easier for others to participate in the discussion.
 
 As the current project maintainer, I will do my best to comment as much as I can on your opened issues.

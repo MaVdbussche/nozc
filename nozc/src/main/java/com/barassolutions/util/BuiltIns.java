@@ -113,8 +113,9 @@ public enum BuiltIns {
    * Returns the result of adjoining the field <code>x</code> to <code>r1</code> at feature
    * <code>li</code>.
    * <p>
-   * For example, <code>adjoinAt('a(a, c:1), 2, b)</code> yields the record <code>'a(a, b, c:1)</code> as output, whereas
-   * <code>adjoinAt('a(a, c:1), c, b)</code> yields <code>'a(a, c:b)</code> as output.
+   * For example, <code>adjoinAt('a(a, c:1), 2, b)</code> yields the record
+   * <code>'a(a, b, c:1)</code> as output, whereas <code>adjoinAt('a(a, c:1), c, b)</code> yields
+   * <code>'a(a, c:b)</code> as output.
    */
   adjoinAt("AdjoinAt", "adjoinAt", BuiltInType.FUNCTION,
       Arrays.asList(
@@ -261,8 +262,8 @@ public enum BuiltIns {
    * <p>
    * For example, <code>appendList((1::2::nil), (3::4::nil))</code> returns the list
    * <code>(1::2::3::4::nil)</code>, whereas <code>appendList((1::2::nil), (3::4))</code> returns
-   * <code>(1::2::(3::4))</code>, which is not a proper list (because <code>(3::4)</code> is not a proper list
-   * and by the recursive definition of lists).
+   * <code>(1::2::(3::4))</code>, which is not a proper list (because <code>(3::4)</code> is not
+   * a proper list and by the recursive definition of lists).
    */
   appendList("List.append", "appendList", BuiltInType.FUNCTION,
       Arrays.asList(
@@ -323,7 +324,8 @@ public enum BuiltIns {
    * Returns the arity of <code>r</code>. The arity of <code>r</code> is the list of its features,
    * beginning with all integer features in ascending order, followed by the literal features.
    * <p>
-   * For example, <code>arity('a(nil, 7, c:1, b:c))</code> yields <code>[1, 2, b, c]</code> as output.
+   * For example, <code>arity('a(nil, 7, c:1, b:c))</code> yields <code>[1, 2, b, c]</code> as
+   * output.
    */
   arity("Arity", "arity", BuiltInType.FUNCTION,
       Collections.singletonList(new Variable(-1, "r", true, false)),
@@ -464,6 +466,7 @@ public enum BuiltIns {
    * <code>browse(X)</code>
    * <p> TODO
    * Displays <code>X</code> in the Mozart Browser
+   *
    * @hidden
    */
   BROWSE("Browse", "browse", BuiltInType.PROCEDURE,
@@ -487,7 +490,7 @@ public enum BuiltIns {
   /**
    * <code>byNeed(+fp, ?x)</code>
    * <p>
-   * Procedure version of <code>byNeed(fp)</code>
+   * Procedure version of <code>byNeed(fp)</code>.
    */
   byNeedP("ByNeed", "byNeed", BuiltInType.PROCEDURE,
       Arrays.asList(

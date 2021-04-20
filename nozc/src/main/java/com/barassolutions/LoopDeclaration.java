@@ -109,7 +109,7 @@ public class LoopDeclaration extends AST {
       if (endValue != null) { //Form E1..E2[;E3]
         endValue = endValue.analyze(loopContext);
         initialValue.type().mustMatchExpected(line(), Type.INT);
-        if(stepValue!=null) {
+        if (stepValue != null) {
           stepValue.type().mustMatchExpected(line(), Type.INT);
         }
         endValue.type().mustMatchExpected(line(), Type.INT);

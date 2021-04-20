@@ -32,6 +32,8 @@ public abstract class BooleanBinaryExpression extends BinaryExpression {
       case ">=" -> output.token(TokenOz.GE);
       case "<" -> output.token(TokenOz.LT);
       case "<=" -> output.token(TokenOz.LE);
+      default -> interStatement
+          .reportSemanticError(line(), "Invalid boolean operator : " + operator);
     }
     output.space();
     rhs.codegen(output);

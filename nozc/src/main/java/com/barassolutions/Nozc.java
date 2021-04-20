@@ -23,7 +23,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /* Read the Picocli documentation at https://picocli.info/ */
-@Command(name = "nozc",//name = "main/java/nozc",
+@Command(name = "nozc", //name = "main/java/nozc",
     synopsisHeading = "@|bold,underline Usage:|@%n%n",
     descriptionHeading = "%n@|bold,underline Description:|@%n%n",
     description = "Compiles a NewOz program file, or translate it to a valid equivalent Oz program file.",
@@ -262,7 +262,7 @@ public class Nozc implements Callable<Integer> {
 
     // Part of this code has been found on https://stackabuse.com/executing-shell-commands-with-java/
     if (false) {
-    //if (!dontRunOzc) {
+      //if (!dontRunOzc) {
       Logger.info("We will now run the Mozart Oz compiler.");
       for (File file : ozFiles) {
         String fileName = file.toString();

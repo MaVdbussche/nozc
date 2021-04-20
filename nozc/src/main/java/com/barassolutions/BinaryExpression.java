@@ -87,9 +87,9 @@ class OperationPlus extends BinaryExpression {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
-    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY) {
       type = Type.ANY;
-    } else{
+    } else {
       type = Type.ANY;
       interStatement.reportSemanticError(line(),
           "Invalid operand types for addition : " + lhs.type() + " and " + rhs.type());
@@ -110,20 +110,17 @@ class OperationPlus extends BinaryExpression {
     }
   }
 }
+
 class OperationStringConcatenation extends OperationPlus {
 
   /**
-   * Construct an AST node for a string concatenation expression given its
-   * line number, and the lhs and rhs operands. An expression of this sort is
-   * created during the analysis of a (overloaded) + operation (and not by the
-   * Parser).
+   * Construct an AST node for a string concatenation expression given its line number, and the lhs
+   * and rhs operands. An expression of this sort is created during the analysis of a (overloaded) +
+   * operation (and not by the Parser).
    *
-   * @param line
-   *            line in which the expression occurs in the source file.
-   * @param lhs
-   *            lhs operand.
-   * @param rhs
-   *            rhs operand.
+   * @param line line in which the expression occurs in the source file.
+   * @param lhs  lhs operand.
+   * @param rhs  rhs operand.
    */
   public OperationStringConcatenation(int line, Expression lhs, Expression rhs) {
     super(line, lhs, rhs);
@@ -133,8 +130,7 @@ class OperationStringConcatenation extends OperationPlus {
    * Analysis is simple here. The operands have already been analyzed (in
    * <code>OperationPlus</code>) so we simply set the result type.
    *
-   * @param context
-   *            context in which names are resolved.
+   * @param context context in which names are resolved.
    * @return the analyzed (and possibly rewritten) AST subtree.
    */
   @Override
@@ -175,7 +171,7 @@ class OperationMinus extends BinaryExpression {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
-    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY) {
       type = Type.ANY;
     } else {
       type = Type.ANY;
@@ -218,7 +214,7 @@ class OperationMultiplication extends BinaryExpression {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
-    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY) {
       type = Type.ANY;
     } else {
       type = Type.ANY;
@@ -259,7 +255,7 @@ class OperationModulo extends BinaryExpression {
     rhs = rhs.analyze(context);
     if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
       type = Type.INT;
-    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY) {
       type = Type.ANY;
     } else {
       type = Type.ANY;
@@ -302,7 +298,7 @@ class OperationDivision extends BinaryExpression {
       type = Type.INT;
     } else if (lhs.type() == Type.FLOAT && rhs.type() == Type.FLOAT) {
       type = Type.FLOAT;
-    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY){
+    } else if (lhs.type == Type.ANY || rhs.type() == Type.ANY) {
       type = Type.ANY;
     } else {
       type = Type.ANY;

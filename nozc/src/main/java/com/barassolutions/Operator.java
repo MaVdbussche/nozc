@@ -10,7 +10,9 @@ public enum Operator {
 
   private final String image;
 
-  Operator(String image) { this.image = image; }
+  Operator(String image) {
+    this.image = image;
+  }
 
   public String image() {
     return this.image;

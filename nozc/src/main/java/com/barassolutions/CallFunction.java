@@ -10,7 +10,7 @@ public class CallFunction extends
     Expression {
 
   /**
-   * The name of the function being called
+   * The name of the function being called.
    */
   private final String name;
 
@@ -70,7 +70,7 @@ public class CallFunction extends
     Logger.debug("Generating code for a function call <name:" + name + ">");
     output.token(TokenOz.LCURLY);
     BuiltIns builtIn = Utils.findBuiltIn(name, BuiltInType.FUNCTION);
-    output.literal(builtIn!=null ? builtIn.ozString() : Utils.ozFriendlyName(name));
+    output.literal(builtIn != null ? builtIn.ozString() : Utils.ozFriendlyName(name));
     args.forEach(a -> {
       output.space();
       a.codegen(output);

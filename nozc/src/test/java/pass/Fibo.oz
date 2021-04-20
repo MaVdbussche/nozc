@@ -1,6 +1,6 @@
 declare
-Out
 Fibo
+Out
 in
 Fibo = fun{$ N}
 if ((N < 2)) then

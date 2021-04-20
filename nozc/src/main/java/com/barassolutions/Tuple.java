@@ -28,7 +28,7 @@ public class Tuple extends Pattern {
 
   @Override
   public Expression analyze(Context context) {
-    if(!usedAsPattern) {
+    if (!usedAsPattern) {
       args.forEach(a -> a = (Expression) a.analyze(context));
     } else {
       patterns.forEach(p -> p = (Pattern) p.analyze(context));
@@ -39,9 +39,9 @@ public class Tuple extends Pattern {
 
   @Override
   public void codegen(Emitter output) {
-    for (int i=0; i<args.size(); i++) {
+    for (int i = 0; i < args.size(); i++) {
       args.get(i).codegen(output);
-      if(i!=args.size()-1) {
+      if (i != args.size() - 1) {
         output.token(TokenOz.HASHTAG);
       }
     }

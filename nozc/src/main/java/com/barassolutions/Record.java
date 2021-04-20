@@ -13,7 +13,8 @@ public class Record extends Pattern {
 
   private final boolean usedAsPattern;
 
-  public Record(int line, String name, Map<Feature, Pattern> map, boolean hasMore, boolean isAPattern) {
+  public Record(int line, String name, Map<Feature, Pattern> map, boolean hasMore,
+      boolean isAPattern) {
     super(line);
     this.name = name;
     this.patterns = map;
@@ -42,11 +43,11 @@ public class Record extends Pattern {
 
   @Override
   public Expression analyze(Context context) {
-    if(!usedAsPattern) {
+    if (!usedAsPattern) {
       Record var = context.recordFor(name);
-      if(var==null) {
+      if (var == null) {
         interStatement.reportSemanticError(line(),
-            "Could not find record for: <name:"+name+">");
+            "Could not find record for: <name:" + name + ">");
       } else {
         members.values().forEach(v -> v = v.analyze(context));
       }
@@ -61,13 +62,13 @@ public class Record extends Pattern {
   public void codegen(Emitter output) {
     output.literal(name);
     output.token(TokenOz.LPAREN);
-    members.forEach((k,v) -> {
+    members.forEach((k, v) -> {
       k.codegen(output);
       output.token(TokenOz.COLON);
       v.codegen(output);
       output.space();
     });
-    if(hasMoreFeatures) {
+    if (hasMoreFeatures) {
       output.token(TokenOz.ELLIPSIS);
     }
     output.token(TokenOz.RPAREN);
@@ -77,12 +78,12 @@ public class Record extends Pattern {
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<Record>\n");
     p.indentRight();
-    members.forEach((k,v) -> {
+    members.forEach((k, v) -> {
       k.writeToStdOut(p);
       v.writeToStdOut(p);
       p.println();
     });
-    if(hasMoreFeatures) {
+    if (hasMoreFeatures) {
       p.println("...");
     }
     p.indentLeft();

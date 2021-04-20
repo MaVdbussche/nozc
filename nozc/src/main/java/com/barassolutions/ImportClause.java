@@ -38,7 +38,7 @@ public class ImportClause extends Statement {
   public AST analyze(Context context) {
     // Imported values are added to the context in FunctorDef#analyze()
     map.forEach((k, v) -> {
-      if (v!=null) {
+      if (v != null) {
         map.put(k, (Variable) v.analyze(context));
       }
     });
@@ -54,8 +54,8 @@ public class ImportClause extends Statement {
       map.forEach((s, v) -> {
         output.space();
         output.literal(s);
-        if(v!=null) {
-        output.token(TokenOz.COLON);
+        if (v != null) {
+          output.token(TokenOz.COLON);
           output.literal(Utils.ozFriendlyName(v.name()));
         }
       });
@@ -74,7 +74,7 @@ public class ImportClause extends Statement {
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<Import name=\"%s\"/>\n", name);
     p.indentRight();
-    map.forEach((k,v) -> {
+    map.forEach((k, v) -> {
       p.println(k);
       p.println(v.name());
       p.println();

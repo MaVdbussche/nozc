@@ -13,7 +13,7 @@ This compiler was developed in the context of my master thesis, which can be fou
 ## Table of Contents
 
 - [Background](#background)
-- [Want to help ?](#want-to-help-)
+- [We are looking for feeback !](#we-are-looking-for-feedback-)
 - [Project structure](#project-structure)
 - [Install](#install)
 - [Requirements](#requirements)
@@ -42,10 +42,19 @@ The **objective behind NewOz**, launched by Prof. Peter Van Roy at [UCLouvain](h
 giving access to a plethora of programming paradigms in a single, unique environment. This process has started in 2020, with the [master thesis](https://dial.uclouvain.be/memoire/ucl/object/thesis:25311) of Jean-Pacifique Mbonyincungu, who created a first design for the **NewOz** syntax, heavily inspired by *Scala*.
 The 2021 [thesis]() (_coming soon_) of Martin Vandenbussche continues this work by making more refinements to the syntax, as well as creating a fully fletched compiler around it.
 
-## Want to help ?
+## We are looking for feedback !
 We are actively looking for people who can help us in the design of this new syntax.
 We believe involving more people with different backgrounds is important to make this syntax the best it can be.
-All your help is welcome and greatly appreciated. Please visit the [CONTRIBUTING](CONTRIBUTING.md) file to get in touch !
+All your help is welcome and greatly appreciated, even if you don't have much experience in programming, or if you don't have a lot of time to give us.
+Both positive and negative comments are appreciated and will be taken into account.
+
+You can take a look at the [docs](docs) and [examples](examples) folder to see what the current version of the syntax looks like.
+
+You can use the [GitHub issues](https://github.com/MaVdbussche/nozc/issues) to post your comments, thoughts, and ideas.
+If you don't have a GitHub account, you could also send me an email at *vandenbusschemartin`[insert @ here]`gmail.com*.\
+You can visit the [CONTRIBUTING](CONTRIBUTING.md) file for more info.
+
+Thank you for your help !
 
 ## Project structure
 

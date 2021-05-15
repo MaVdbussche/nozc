@@ -32,7 +32,7 @@ import picocli.CommandLine.Parameters;
     exitCodeListHeading = "%n@|bold,underline Exit codes:|@%n",
     exitCodeList = {"0:Successful program execution",
         "1:Exception occurred during program execution", "2:Invalid input (usage)"},
-    mixinStandardHelpOptions = true,
+    mixinStandardHelpOptions = true, //things like -V and --help
     versionProvider = Nozc.VersionProvider.class,
     sortOptions = false,
     usageHelpAutoWidth = true)
@@ -63,10 +63,11 @@ public class Nozc implements Callable<Integer> {
       "--analyze"}, description = "Analyze the NewOz input, print the AST to STDOUT, and then stop the compilation")
   boolean stopAtAnalysis;
   @Option(names = {"-v",
-      "--verbosity"}, description = "The verbosity you want to see in output.\nAvailable levels : [OFF, FATAL, ERROR, WARN, INFO, DEBUG, ALL] (default: INFO)", arity = "1", defaultValue = "INFO")
+      "--verbosity"}, description = "The verbosity you want to see in output.\nAvailable levels : [OFF, FATAL, ERROR, WARN, INFO, DEBUG, TRACE, ALL] (default: INFO)", arity = "1", defaultValue = "INFO")
   String verbosity;
   @Parameters(description = "The .noz file(s) to compile or translate.", paramLabel = "FILE", arity = "1..*")
   private String[] inputFilesNames;
+  // TODO multi-thread this if multiple files ?
   @Option(names = {"-o",
       "--out"}, description = "Name of the output file (WITHOUT ANY EXTENSION !). This option will be ignored if you pass more than one input file.")
   //TODO enforce non-extension
@@ -348,7 +349,7 @@ public class Nozc implements Callable<Integer> {
 
       return new String[]{"@|yellow ${COMMAND-FULL-NAME} " + version + "|@",
           "(c) Martin \"Barasingha\" Vandenbussche 2021",
-          "Run via Picocli " + CommandLine.VERSION,
+          "Running via Picocli " + CommandLine.VERSION,
           "JVM: ${java.version} (${java.vendor} ${java.vm.name} ${java.vm.version})",
           "OS: ${os.name} ${os.version} ${os.arch}",
           "This software is distributed under the BSD license, available at https://github.com/MaVdbussche/nozc/blob/master/LICENSE"};

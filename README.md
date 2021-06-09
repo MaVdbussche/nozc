@@ -13,7 +13,7 @@ This compiler was developed in the context of my master thesis, which can be fou
 ## Table of Contents
 
 - [Background](#background)
-- [We are looking for feeback !](#we-are-looking-for-feedback-)
+- [We are looking for feedback !](#we-are-looking-for-feedback-)
 - [Project structure](#project-structure)
 - [Install](#install)
 - [Requirements](#requirements)

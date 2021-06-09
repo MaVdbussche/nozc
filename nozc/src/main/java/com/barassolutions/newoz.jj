@@ -125,26 +125,17 @@ TOKEN : {
 | < BREAK: "break" >
 | < CASE: "case" >
 | < CATCH: "catch" >
-//| < CHOICE: "choice" > //TODO What's this ?
 | < CLASS: "class" >
-//| < COLLECT: "collect" > //TODO What's this ?
-//| < COND: "cond" > //TODO What's this ?
 | < CONTINUE: "continue" >
 | < DECLARE: "declare" >
 | < DEF: "def" >
 | < DEFPROC: "defproc" >
-| < DEFLT: "default" >
-//| < DEFINE: "define" >
-//| < DIS: "dis" > //TODO What's dis ?
 | < DO: "do" >
 | < ELSE: "else" >
-//| < ELSECASE: "elsecase" >
-//| < ELSEOF: "elseof" >
 | < EXPORT: "export" >
 | < EXTENDS: "extends" >
-//| < FAIL: "fail" > //TODO What's this ?
 | < FALSE: "false" >
-//| < FEAT: "feat" > //TODO What's this ?
+//| < FEAT: "feat" >
 | < FINALLY: "finally" >
 | < FOR: "for" >
 | < FROM: "from" >
@@ -155,15 +146,11 @@ TOKEN : {
 | < LAZY: "lazy" >
 | < LOCK: "lock" >
 | < MATCH: "match" >
-| < METH: "meth" >
+//| < METH: "meth" >
 | < NIL: "nil" >
-//| < NOT: "not" > //TODO What's this ?
-//| < OF: "of" >
 | < OR: "or" >
-//| < PREPARE: "prepare" > //TODO What's this ?
 | < PROP: "prop" >
 | < RAISE: "raise" >
-//| < REQUIRE: "require" > //TODO What's this ?
 | < RETURN: "return" >
 | < SKP: "skip" >
 | < SUPER: "super" >
@@ -186,47 +173,34 @@ TOKEN : {
 | <NE: "\\=">
 | <LT: "<">
 | <GT: ">">
-| <LE: "=<">
+| <LE: "<=">
 | <GE: ">=">
-| <LBARROW: "<=">
+//| <LBARROW: "<=">
 | <IMPL: "=>">
-//| <AND: "&"> //TODO DELETED
+//| <AND: "&">
 | <LAND: "&&">
-//| <PIPE: "|"> //TODO DELETED
+//| <PIPE: "|">
 | <LOR: "||">
 | <LNOT: "!">
-//| <LNOTNOT: "!!">
 | <MINUS: "-">
 | <PLUS: "+">
 | <STAR: "*">
-//| <STARSTAR: "**">
 | <SLASH: "/">
 //| <INC: "++">
 //| <DEC: "--">
-| <BACKSLASH: "\\">
+//| <BACKSLASH: "\\">
 | <MODULO: "%">
 | <HASHTAG: "#">
 | <UNDERSCORE: "_">
 | <DOLLAR: "$">
 | <APOSTROPHE: "'">
 | <QUOTE: "\"">
-| <LACCENT: "`">
-| <RACCENT: "´">
-| <HAT: "^">
-| <BOX: "[]">
-//| <TILDE: "~">
-| <DEGREE: "°"> //TODO attention pas présent sur un clavier ISO ?
-//| <COMMERCAT: "@">
-//| <LARROW: "<-">
-//| <RARROW: "->">
-//| <FDASSIGN: "=:">
-//| <FDNE: "\\=:">
-//| <FDLT: "<:">
-//| <FDLE: "=<:">
-//| <FDGT: ">:">
-//| <FDGE: ">=:">
+//| <LACCENT: "`">
+//| <RACCENT: "´">
+//| <HAT: "^">
+//| <BOX: "[]">
+| <DEGREE: "°"> //TODO Not present on ISO keyboards apprently : we should maybe find another token for this
 | <COLCOL: "::">
-//| <COLCOLCOL: ":::">
 }
 
 // Separators
@@ -247,9 +221,8 @@ TOKEN : {
 
 // Identifiers & literals
 TOKEN : {
-  < VARIABLESTRICT: ((<UPPERCASE>(<ALPHANUM>)*) | "`"(<ESC> | <PSEUDO_CHAR> | ~["`","\\","\n","\r"])"`") > //Used only in imports
-|
-< VARIABLE: <LOWERCASE> (<ALPHANUM>)* >//((<UPPERCASE>(<ALPHANUM>)*) | (<LOWERCASE> (<ALPHANUM>)*)) >TODO allow uppercase ?
+  < VARIABLESTRICT: ((<UPPERCASE>(<ALPHANUM>)*) | "`"(<ESC> | <PSEUDO_CHAR> | ~["`","\\","\n","\r"])"`") >
+| < VARIABLE: <LOWERCASE> (<ALPHANUM>)* >//((<UPPERCASE>(<ALPHANUM>)*) | (<LOWERCASE> (<ALPHANUM>)*)) >
 | < ATOM: (<ATOMLISP> | "´" (<ESC>| <PSEUDO_CHAR> | ~["\\","\n","\r"]) "´") >
 | < ATOMLISP: "'" (<LETTER>)* >
 //| < LABEL: (<VARIABLE>|<ATOM>|<BOOLEAN>|<UNIT>) >
@@ -435,7 +408,7 @@ private Expression parExpression(): {
 }
 
 /**
- * Parse an tement, that is a/multiple statement/s included in a block.
+ * Parse an inStatement, that is a/multiple statement/s included in a block.
  *
  * <pre>
  *   inStatement ::= LCURLY {declarationPart} {statement} RCURLY
@@ -1362,7 +1335,7 @@ private Expression equalityExpression(): {
  * Parse a relational expression.
  *
  * <pre>
- *   relationalExpression ::= additiveExpression {(GT|GE|LT|LE) additiveExpression}
+ *   relationalExpression ::= additiveExpression [(GT|GE|LT|LE) additiveExpression]
  * </pre>
  *
  * @return an AST for a relationalExpression.
@@ -1679,7 +1652,7 @@ private Expression primary(): {
  *
  * <pre>
  *   term ::= assignmentExpression
- *            | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN //TODO enforce atomLisp for records
+ *            | atomLisp LPAREN [[feature COLON]pattern {COMMA [feature COLON]pattern} [COMMA ELLIPSIS]] RPAREN //atomLisp for records
  *            | LPAREN expression {HASHTAG expression}+ RPAREN
  *            | LPAREN expression {COLCOL expression}+ RPAREN
  *            | LBRACK [expression {COMMA expression}] RBRACK

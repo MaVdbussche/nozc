@@ -211,7 +211,7 @@ public class Variable extends Pattern implements Lhs {
   public void writeToStdOut(PrettyPrinter p) {
     p.printf("<Variable>\n");
     p.indentRight();
-    p.println("<name:" + name + " constant:" + constant + "assigned:" + isAssigned + ">");
+    p.println("<name:" + name + " constant:" + constant + ">");
     p.indentLeft();
     p.printf("</Variable>\n");
   }

@@ -98,7 +98,7 @@ public class FunctionDef extends Declaration {
 
     expression.codegen(output);
 
-    //output.newLine();
+    output.newLine();
     output.indentLeft();
     output.token(TokenOz.END);
     output.newLine();

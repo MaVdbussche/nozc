@@ -13,7 +13,8 @@ public abstract class Pattern extends Expression {
 
   /**
    * Returns an <code>Iterable</code> of the patterns constituting this <code>Pattern</code>.
-   * This mostly makes sense for structures like tuples, lists, etc., subclasses are allowed to throw an {@link UnsupportedOperationException}.
+   * This mostly makes sense for structures like tuples, lists, etc.
+   * When it doesn't make sense, subclasses may return null.
    */
   public abstract Iterable<Pattern> patterns();
 }

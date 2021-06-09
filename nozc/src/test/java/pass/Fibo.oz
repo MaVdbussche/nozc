@@ -1,7 +1,11 @@
 declare
-Fibo
 Out
+Fibo
+Show
 in
+Show = proc{$ S}
+{Browse S} 
+end 
 Fibo = fun{$ N}
 if ((N < 2)) then
 1
@@ -10,4 +14,4 @@ else
 end
 end 
 Out = {Fibo 30}  
-{Browse Out} 
+{Show Out} 

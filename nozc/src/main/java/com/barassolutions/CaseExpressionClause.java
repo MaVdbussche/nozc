@@ -69,7 +69,10 @@ public class CaseExpressionClause extends Expression {
     Context innerContext = new Context(context);
 
     pattern = (Pattern) pattern.analyze(context);
-    pattern.patterns().forEach(innerContext::addVariable);
+    Iterable<Pattern> patterns = pattern.patterns();
+    if(patterns!=null) {
+      patterns.forEach(innerContext::addVariable);
+    }
 
     operators.forEach(o -> {
       if (!(o == Operator.LAND || o == Operator.LOR)) {

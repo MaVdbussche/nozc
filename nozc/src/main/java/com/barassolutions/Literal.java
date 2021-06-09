@@ -1,6 +1,7 @@
 package com.barassolutions;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Literal extends Pattern {
 
@@ -47,8 +48,9 @@ public class Literal extends Pattern {
   }
 
   @Override
-  public Iterable<Pattern> patterns() throws UnsupportedOperationException {
-    throw new UnsupportedOperationException();
+  @Nullable
+  public Iterable<Pattern> patterns() {
+    return null;
   }
 
   @Override

@@ -63,13 +63,17 @@ public class OperationAssignment extends Expression {
     p.printf("<OperationAssignment>\n");
     p.indentRight();
 
-    p.printf("<Left side>");
+    p.printf("<Left side>\n");
+    p.indentRight();
     lhs.writeToStdOut(p);
-    p.printf("</Left side>");
-    p.printf("=");
-    p.printf("<Right side>");
+    p.indentLeft();
+    p.printf("</Left side>\n");
+    p.printf("=\n");
+    p.printf("<Right side>\n");
+    p.indentRight();
     rhs.writeToStdOut(p);
-    p.printf("</Right side>");
+    p.indentLeft();
+    p.printf("</Right side>\n");
 
     p.indentLeft();
     p.printf("</OperationAssignment>\n");

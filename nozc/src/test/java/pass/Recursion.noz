@@ -5,6 +5,7 @@ declare {
       case (l1::nil) && l1==true => { // You can place boolean evaluations after the pattern being matched. These won't be evaluated if the pattern doesn't match.
         n+l1
       }
+      case (1::l2) => {n}
       case (l1::l2) => {
         val a=0 //You can of course declare variables in all inner scopes
         acc(l2, n+l1)

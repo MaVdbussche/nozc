@@ -33,209 +33,193 @@ public interface JavaCCParserConstants {
   /** RegularExpression Id. */
   int DEFPROC = 20;
   /** RegularExpression Id. */
-  int DEFLT = 21;
+  int DO = 21;
   /** RegularExpression Id. */
-  int DO = 22;
+  int ELSE = 22;
   /** RegularExpression Id. */
-  int ELSE = 23;
+  int EXPORT = 23;
   /** RegularExpression Id. */
-  int EXPORT = 24;
+  int EXTENDS = 24;
   /** RegularExpression Id. */
-  int EXTENDS = 25;
+  int FALSE = 25;
   /** RegularExpression Id. */
-  int FALSE = 26;
+  int FINALLY = 26;
   /** RegularExpression Id. */
-  int FINALLY = 27;
+  int FOR = 27;
   /** RegularExpression Id. */
-  int FOR = 28;
+  int FROM = 28;
   /** RegularExpression Id. */
-  int FROM = 29;
+  int FUNCTOR = 29;
   /** RegularExpression Id. */
-  int FUNCTOR = 30;
+  int IF = 30;
   /** RegularExpression Id. */
-  int IF = 31;
+  int IMPORT = 31;
   /** RegularExpression Id. */
-  int IMPORT = 32;
+  int IN = 32;
   /** RegularExpression Id. */
-  int IN = 33;
+  int LAZY = 33;
   /** RegularExpression Id. */
-  int LAZY = 34;
+  int LOCK = 34;
   /** RegularExpression Id. */
-  int LOCK = 35;
+  int MATCH = 35;
   /** RegularExpression Id. */
-  int MATCH = 36;
+  int NIL = 36;
   /** RegularExpression Id. */
-  int METH = 37;
+  int OR = 37;
   /** RegularExpression Id. */
-  int NIL = 38;
+  int PROP = 38;
   /** RegularExpression Id. */
-  int OR = 39;
+  int RAISE = 39;
   /** RegularExpression Id. */
-  int PROP = 40;
+  int RETURN = 40;
   /** RegularExpression Id. */
-  int RAISE = 41;
+  int SKP = 41;
   /** RegularExpression Id. */
-  int RETURN = 42;
+  int SUPER = 42;
   /** RegularExpression Id. */
-  int SKP = 43;
+  int THIS = 43;
   /** RegularExpression Id. */
-  int SUPER = 44;
+  int THREAD = 44;
   /** RegularExpression Id. */
-  int THIS = 45;
+  int TRUE = 45;
   /** RegularExpression Id. */
-  int THREAD = 46;
+  int TRY = 46;
   /** RegularExpression Id. */
-  int TRUE = 47;
+  int UNIT = 47;
   /** RegularExpression Id. */
-  int TRY = 48;
+  int VAL = 48;
   /** RegularExpression Id. */
-  int UNIT = 49;
+  int VAR = 49;
   /** RegularExpression Id. */
-  int VAL = 50;
+  int ASSIGN = 50;
   /** RegularExpression Id. */
-  int VAR = 51;
+  int PLUSASS = 51;
   /** RegularExpression Id. */
-  int ASSIGN = 52;
+  int MINUSASS = 52;
   /** RegularExpression Id. */
-  int PLUSASS = 53;
+  int DEFINE = 53;
   /** RegularExpression Id. */
-  int MINUSASS = 54;
+  int EQUAL = 54;
   /** RegularExpression Id. */
-  int DEFINE = 55;
+  int NE = 55;
   /** RegularExpression Id. */
-  int EQUAL = 56;
+  int LT = 56;
   /** RegularExpression Id. */
-  int NE = 57;
+  int GT = 57;
   /** RegularExpression Id. */
-  int LT = 58;
+  int LE = 58;
   /** RegularExpression Id. */
-  int GT = 59;
+  int GE = 59;
   /** RegularExpression Id. */
-  int LE = 60;
+  int IMPL = 60;
   /** RegularExpression Id. */
-  int GE = 61;
+  int LAND = 61;
   /** RegularExpression Id. */
-  int LBARROW = 62;
+  int LOR = 62;
   /** RegularExpression Id. */
-  int IMPL = 63;
+  int LNOT = 63;
   /** RegularExpression Id. */
-  int LAND = 64;
+  int MINUS = 64;
   /** RegularExpression Id. */
-  int LOR = 65;
+  int PLUS = 65;
   /** RegularExpression Id. */
-  int LNOT = 66;
+  int STAR = 66;
   /** RegularExpression Id. */
-  int MINUS = 67;
+  int SLASH = 67;
   /** RegularExpression Id. */
-  int PLUS = 68;
+  int MODULO = 68;
   /** RegularExpression Id. */
-  int STAR = 69;
+  int HASHTAG = 69;
   /** RegularExpression Id. */
-  int SLASH = 70;
+  int UNDERSCORE = 70;
   /** RegularExpression Id. */
-  int BACKSLASH = 71;
+  int DOLLAR = 71;
   /** RegularExpression Id. */
-  int MODULO = 72;
+  int APOSTROPHE = 72;
   /** RegularExpression Id. */
-  int HASHTAG = 73;
+  int QUOTE = 73;
   /** RegularExpression Id. */
-  int UNDERSCORE = 74;
+  int DEGREE = 74;
   /** RegularExpression Id. */
-  int DOLLAR = 75;
+  int COLCOL = 75;
   /** RegularExpression Id. */
-  int APOSTROPHE = 76;
+  int COMMA = 76;
   /** RegularExpression Id. */
-  int QUOTE = 77;
+  int LBRACK = 77;
   /** RegularExpression Id. */
-  int LACCENT = 78;
+  int LCURLY = 78;
   /** RegularExpression Id. */
-  int RACCENT = 79;
+  int LPAREN = 79;
   /** RegularExpression Id. */
-  int HAT = 80;
+  int RBRACK = 80;
   /** RegularExpression Id. */
-  int BOX = 81;
+  int RCURLY = 81;
   /** RegularExpression Id. */
-  int DEGREE = 82;
+  int RPAREN = 82;
   /** RegularExpression Id. */
-  int COLCOL = 83;
+  int SEMI = 83;
   /** RegularExpression Id. */
-  int COMMA = 84;
+  int COLON = 84;
   /** RegularExpression Id. */
-  int LBRACK = 85;
+  int DOT = 85;
   /** RegularExpression Id. */
-  int LCURLY = 86;
+  int DOTDOT = 86;
   /** RegularExpression Id. */
-  int LPAREN = 87;
+  int ELLIPSIS = 87;
   /** RegularExpression Id. */
-  int RBRACK = 88;
+  int VARIABLESTRICT = 88;
   /** RegularExpression Id. */
-  int RCURLY = 89;
+  int VARIABLE = 89;
   /** RegularExpression Id. */
-  int RPAREN = 90;
+  int ATOM = 90;
   /** RegularExpression Id. */
-  int SEMI = 91;
+  int ATOMLISP = 91;
   /** RegularExpression Id. */
-  int COLON = 92;
+  int STRING = 92;
   /** RegularExpression Id. */
-  int DOT = 93;
+  int CHARACTER = 93;
   /** RegularExpression Id. */
-  int DOTDOT = 94;
+  int INT = 94;
   /** RegularExpression Id. */
-  int ELLIPSIS = 95;
+  int FLOAT = 95;
   /** RegularExpression Id. */
-  int VARIABLESTRICT = 96;
+  int UPPERCASE = 96;
   /** RegularExpression Id. */
-  int VARIABLE = 97;
+  int LOWERCASE = 97;
   /** RegularExpression Id. */
-  int ATOM = 98;
+  int LETTER = 98;
   /** RegularExpression Id. */
-  int ATOMLISP = 99;
+  int DIGIT = 99;
   /** RegularExpression Id. */
-  int STRING = 100;
+  int NON_ZERO_DIGIT = 100;
   /** RegularExpression Id. */
-  int CHARACTER = 101;
+  int CHARINT = 101;
   /** RegularExpression Id. */
-  int INT = 102;
+  int ALPHANUM = 102;
   /** RegularExpression Id. */
-  int FLOAT = 103;
+  int DECINT = 103;
   /** RegularExpression Id. */
-  int UPPERCASE = 104;
+  int HEXINT = 104;
   /** RegularExpression Id. */
-  int LOWERCASE = 105;
+  int OCTINT = 105;
   /** RegularExpression Id. */
-  int LETTER = 106;
+  int BININT = 106;
   /** RegularExpression Id. */
-  int DIGIT = 107;
+  int OCTDIGIT = 107;
   /** RegularExpression Id. */
-  int NON_ZERO_DIGIT = 108;
+  int HEXDIGIT = 108;
   /** RegularExpression Id. */
-  int CHARINT = 109;
+  int BINDIGIT = 109;
   /** RegularExpression Id. */
-  int ALPHANUM = 110;
+  int ESCAPE_CHAR = 110;
   /** RegularExpression Id. */
-  int DECINT = 111;
+  int ESC = 111;
   /** RegularExpression Id. */
-  int HEXINT = 112;
+  int CHARCHAR = 112;
   /** RegularExpression Id. */
-  int OCTINT = 113;
+  int PSEUDO_CHAR = 113;
   /** RegularExpression Id. */
-  int BININT = 114;
-  /** RegularExpression Id. */
-  int OCTDIGIT = 115;
-  /** RegularExpression Id. */
-  int HEXDIGIT = 116;
-  /** RegularExpression Id. */
-  int BINDIGIT = 117;
-  /** RegularExpression Id. */
-  int ESCAPE_CHAR = 118;
-  /** RegularExpression Id. */
-  int ESC = 119;
-  /** RegularExpression Id. */
-  int CHARCHAR = 120;
-  /** RegularExpression Id. */
-  int PSEUDO_CHAR = 121;
-  /** RegularExpression Id. */
-  int ERROR = 122;
+  int ERROR = 114;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -265,7 +249,6 @@ public interface JavaCCParserConstants {
     "\"declare\"",
     "\"def\"",
     "\"defproc\"",
-    "\"default\"",
     "\"do\"",
     "\"else\"",
     "\"export\"",
@@ -281,7 +264,6 @@ public interface JavaCCParserConstants {
     "\"lazy\"",
     "\"lock\"",
     "\"match\"",
-    "\"meth\"",
     "\"nil\"",
     "\"or\"",
     "\"prop\"",
@@ -304,9 +286,8 @@ public interface JavaCCParserConstants {
     "\"\\\\=\"",
     "\"<\"",
     "\">\"",
-    "\"=<\"",
-    "\">=\"",
     "\"<=\"",
+    "\">=\"",
     "\"=>\"",
     "\"&&\"",
     "\"||\"",
@@ -315,17 +296,12 @@ public interface JavaCCParserConstants {
     "\"+\"",
     "\"*\"",
     "\"/\"",
-    "\"\\\\\"",
     "\"%\"",
     "\"#\"",
     "\"_\"",
     "\"$\"",
     "\"\\\'\"",
     "\"\\\"\"",
-    "\"`\"",
-    "\"\\u00b4\"",
-    "\"^\"",
-    "\"[]\"",
     "\"\\u00b0\"",
     "\"::\"",
     "\",\"",

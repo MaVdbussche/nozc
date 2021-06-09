@@ -178,6 +178,7 @@ public class Nozc implements Callable<Integer> {
                 token.image);
           }
         } while (token.kind != JavaCCParserConstants.EOF);
+        Logger.info("==========Scanning done in %s==========", getTimeString(time));
         return 0;
       }
       Logger.info("==========Scanning done in %s==========", getTimeString(time));
@@ -206,6 +207,7 @@ public class Nozc implements Callable<Integer> {
       // Scan/parse the NewOz input, print the AST to STDOUT, and then stop the compilation
       if (stopAtParser) {
         ast.writeToStdOut(new PrettyPrinter());
+        Logger.info("==========Parsing done in %s==========", getTimeString(time));
         return 0;
       }
       if (errorHasOccurred) {
@@ -222,6 +224,7 @@ public class Nozc implements Callable<Integer> {
 
       if (stopAtPreAnalysis) {
         ast.writeToStdOut(new PrettyPrinter());
+        Logger.info("==========Pre-analyzing done in %s==========", getTimeString(time));
         return 0;
       }
       if (errorHasOccurred) {
@@ -237,6 +240,7 @@ public class Nozc implements Callable<Integer> {
 
       if (stopAtAnalysis) {
         ast.writeToStdOut(new PrettyPrinter());
+        Logger.info("==========Analyzing done in %s==========", getTimeString(time));
         return 0;
       }
       if (errorHasOccurred) {

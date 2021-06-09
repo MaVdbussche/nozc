@@ -1,7 +1,7 @@
 declare
+E={NewCell _}
 B={NewCell _}
 Maximum={NewCell _}
-E={NewCell _}
 A={NewCell 0}
 D={NewCell _}
 C={Sin @B} 
